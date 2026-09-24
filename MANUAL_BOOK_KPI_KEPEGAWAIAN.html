@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manual Book KPI Kepegawaian</title>
+    <style>
+        @font-face {
+            font-family: Inter;
+            font-style: normal;
+            font-weight: 100 900;
+            src: url("public/build/assets/inter-latin-wght-normal-Dx4kXJAl.woff2") format("woff2");
+        }
+        :root {
+            --green: #16a34a;
+            --green-dark: #166534;
+            --green-soft: #dcfce7;
+            --ink: #0f172a;
+            --muted: #64748b;
+            --line: #e2e8f0;
+            --paper: #ffffff;
+            --canvas: #f8fafc;
+            --amber: #b45309;
+            --amber-soft: #fffbeb;
+            --red: #b91c1c;
+            --red-soft: #fef2f2;
+            --blue: #1d4ed8;
+            --blue-soft: #eff6ff;
+        }
+        * { box-sizing: border-box; }
+        html { font-family: Inter, Arial, sans-serif; color: var(--ink); background: #dbe2ea; }
+        body { margin: 0; font-size: 10.2pt; line-height: 1.55; }
+        @page { size: A4; margin: 14mm 14mm 15mm; }
+        @media print {
+            html, body { background: white; }
+            .page { box-shadow: none !important; margin: 0 !important; min-height: 268mm !important; }
+            .page + .page { break-before: page; }
+            a { color: inherit; text-decoration: none; }
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 12mm auto;
+            padding: 14mm;
+            background: var(--paper);
+            box-shadow: 0 12px 40px rgb(15 23 42 / 14%);
+            position: relative;
+            overflow: hidden;
+        }
+        .page-number { position: absolute; right: 14mm; bottom: 8mm; color: #94a3b8; font-size: 8.5pt; }
+        .footer-note { position: absolute; left: 14mm; bottom: 8mm; color: #94a3b8; font-size: 8.5pt; }
+        .cover { background: linear-gradient(135deg, #15803d, #16a34a 58%, #22c55e); color: white; padding: 24mm; }
+        .cover::after { content: ""; position: absolute; width: 150mm; height: 150mm; border: 1px solid rgb(255 255 255 / 18%); border-radius: 50%; right: -60mm; bottom: -55mm; }
+        .cover-mark { width: 19mm; height: 19mm; border: 1px solid rgb(255 255 255 / 42%); border-radius: 5mm; display: grid; place-items: center; font-size: 20pt; font-weight: 800; background: rgb(255 255 255 / 13%); }
+        .eyebrow { margin: 30mm 0 4mm; text-transform: uppercase; letter-spacing: .15em; font-size: 9pt; font-weight: 750; opacity: .9; }
+        .cover h1 { margin: 0; font-size: 33pt; line-height: 1.08; letter-spacing: -.035em; max-width: 145mm; }
+        .cover .lead { margin-top: 8mm; max-width: 125mm; font-size: 13pt; line-height: 1.65; color: rgb(255 255 255 / 88%); }
+        .cover-meta { position: absolute; bottom: 24mm; left: 24mm; right: 24mm; display: flex; justify-content: space-between; border-top: 1px solid rgb(255 255 255 / 28%); padding-top: 6mm; font-size: 9pt; }
+        h1, h2, h3 { page-break-after: avoid; }
+        h2 { margin: 0 0 5mm; font-size: 22pt; line-height: 1.15; letter-spacing: -.025em; }
+        h3 { margin: 6mm 0 2.5mm; font-size: 13pt; }
+        h4 { margin: 4mm 0 1.5mm; font-size: 10.5pt; }
+        p { margin: 0 0 3mm; }
+        ul, ol { margin: 2mm 0 4mm; padding-left: 6mm; }
+        li { margin: 1.2mm 0; }
+        .section-kicker { color: var(--green); font-size: 8.5pt; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 2mm; }
+        .lead-dark { color: #334155; font-size: 11.5pt; max-width: 165mm; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
+        .card { border: 1px solid var(--line); border-radius: 3mm; padding: 4mm; break-inside: avoid; }
+        .card h3, .card h4 { margin-top: 0; }
+        .card-accent { border-left: 1.5mm solid var(--green); }
+        .callout { border-radius: 2.5mm; padding: 3.5mm 4mm; margin: 4mm 0; break-inside: avoid; }
+        .callout strong { display: block; margin-bottom: 1mm; }
+        .info { background: var(--blue-soft); border: 1px solid #bfdbfe; color: #1e3a8a; }
+        .warn { background: var(--amber-soft); border: 1px solid #fde68a; color: #78350f; }
+        .danger { background: var(--red-soft); border: 1px solid #fecaca; color: #7f1d1d; }
+        .success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #14532d; }
+        table { width: 100%; border-collapse: collapse; margin: 3mm 0 5mm; font-size: 8.7pt; break-inside: auto; }
+        th { background: #f1f5f9; color: #334155; text-align: left; font-weight: 750; }
+        th, td { padding: 2.3mm 2.5mm; border: 1px solid var(--line); vertical-align: top; }
+        tr { break-inside: avoid; }
+        code { font-family: ui-monospace, Consolas, monospace; font-size: .92em; background: #f1f5f9; padding: .3mm 1mm; border-radius: 1mm; }
+        .flow { display: flex; gap: 2mm; align-items: stretch; margin: 5mm 0; break-inside: avoid; }
+        .flow-step { flex: 1; min-width: 0; background: #f8fafc; border: 1px solid var(--line); border-radius: 2mm; padding: 3mm; text-align: center; }
+        .flow-step b { display: block; color: var(--green-dark); font-size: 9pt; }
+        .flow-arrow { align-self: center; color: var(--green); font-weight: 900; }
+        .formula { padding: 4mm; background: #0f172a; color: white; border-radius: 3mm; font: 10pt/1.6 ui-monospace, Consolas, monospace; break-inside: avoid; }
+        .toc { columns: 2; column-gap: 12mm; padding: 0; list-style: none; counter-reset: toc; }
+        .toc li { display: flex; gap: 2mm; border-bottom: 1px dotted #cbd5e1; padding: 2mm 0; break-inside: avoid; }
+        .toc li::before { counter-increment: toc; content: counter(toc, decimal-leading-zero); color: var(--green); font-weight: 800; }
+        .badge { display: inline-block; border-radius: 20mm; padding: .8mm 2.4mm; font-size: 8pt; font-weight: 700; background: var(--green-soft); color: var(--green-dark); }
+        .muted { color: var(--muted); }
+        .checklist { list-style: none; padding: 0; }
+        .checklist li { padding-left: 6mm; position: relative; }
+        .checklist li::before { content: ""; position: absolute; left: 0; top: 1.6mm; width: 3mm; height: 3mm; border: 1px solid #94a3b8; border-radius: .6mm; }
+        .small { font-size: 8.5pt; }
+        .no-break { break-inside: avoid; }
+    </style>
+</head>
+<body>
+    <section class="page cover">
+        <div class="cover-mark">K</div>
+        <p class="eyebrow">Manual Book · Versi 1.0</p>
+        <h1>KPI Kepegawaian</h1>
+        <p class="lead">Panduan operasional sistem penilaian karyawan, pembatasan akses organisasi, alur persetujuan, laporan, dan UAT lokal.</p>
+        <div class="cover-meta"><span>Sistem Penilaian Karyawan</span><span>18 September 2026</span></div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">Tentang dokumen</p>
+        <h2>Tujuan dan batas panduan</h2>
+        <p class="lead-dark">Manual ini menjelaskan perilaku aplikasi berdasarkan implementasi yang tersedia pada tanggal dokumen, bukan rancangan yang belum dibuat.</p>
+        <div class="grid-2" style="margin-top:7mm">
+            <div class="card card-accent"><h3>Ditujukan untuk</h3><ul><li>Super Admin dan administrator HR.</li><li>HR Manager.</li><li>Kepala Cabang, Kepala Divisi, dan Kepala Sub Divisi.</li><li>Auditor dan tim UAT.</li></ul></div>
+            <div class="card"><h3>Cakupan</h3><ul><li>Data organisasi dan karyawan.</li><li>Konfigurasi serta pengisian penilaian.</li><li>Workflow persetujuan dan finalisasi.</li><li>Laporan, ekspor, notifikasi, dan keamanan scope.</li></ul></div>
+        </div>
+        <div class="callout warn"><strong>Status implementasi penting</strong>Menu <b>Penilaian</b> saat ini membuka halaman konfigurasi. Tombol “Mulai Penilaian” belum tersedia pada daftar/detail karyawan. Form input sudah tersedia dan aman di route <code>/penilaian/{id-karyawan}/{id-periode}</code>, tetapi belum memiliki navigasi operasional dari UI. Batasan ini dicatat agar manual tidak memberi langkah yang belum dapat dilakukan lewat tombol.</div>
+        <h3>Daftar isi</h3>
+        <ol class="toc"><li>Konsep inti</li><li>Role dan scope</li><li>Persiapan data</li><li>Konfigurasi KPI</li><li>Mengisi performa</li><li>Perhitungan nilai</li><li>Workflow status</li><li>Operasi per divisi</li><li>Laporan dan ekspor</li><li>Catatan masalah</li><li>UAT lokal</li><li>Pemecahan masalah</li></ol>
+        <div class="footer-note">KPI Kepegawaian · Manual Book</div><div class="page-number">2</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">01 · Konsep inti</p>
+        <h2>Bagaimana data penilaian disimpan</h2>
+        <p>Satu hasil penilaian tidak hanya menempel ke nama karyawan. Sistem menyimpan konteks lengkap agar histori tetap dapat ditelusuri.</p>
+        <div class="flow">
+            <div class="flow-step"><b>Karyawan</b>Identitas permanen</div><div class="flow-arrow">→</div>
+            <div class="flow-step"><b>Penempatan</b>Cabang, divisi, subdivisi</div><div class="flow-arrow">→</div>
+            <div class="flow-step"><b>Periode</b>Rentang penilaian</div><div class="flow-arrow">→</div>
+            <div class="flow-step"><b>Penilai</b>Akun pembuat draf</div><div class="flow-arrow">→</div>
+            <div class="flow-step"><b>Hasil</b>Nilai, kriteria, status</div>
+        </div>
+        <h3>Kunci logika saat ini</h3>
+        <div class="grid-2">
+            <div class="card"><h4>Satu karyawan, satu identitas</h4><p>Mutasi, resign, atau terminasi tidak menghapus identitas. Riwayat organisasi disimpan pada penempatan karyawan.</p></div>
+            <div class="card"><h4>Penilaian per penilai</h4><p>Kombinasi uniknya adalah <b>karyawan + periode + penilai</b>. Dua penilai dapat menghasilkan dua penilaian terpisah untuk orang dan periode yang sama.</p></div>
+            <div class="card"><h4>Snapshot penempatan</h4><p>Saat draf disimpan, ID penempatan aktif ikut disimpan. Ini mempertahankan konteks organisasi pada waktu penilaian.</p></div>
+            <div class="card"><h4>Komponen berbasis data</h4><p>Nama, bobot, metode, dan aturan nilai tidak ditanam langsung di kolom karyawan; semuanya berasal dari konfigurasi komponen.</p></div>
+        </div>
+        <div class="callout info"><strong>Apa arti “per divisi”?</strong>Karyawan masuk ke divisi melalui penempatan aktif. Kepala Divisi hanya dapat melihat dan memproses karyawan yang penempatan aktifnya cocok dengan scope cabang dan divisi akun tersebut. Akses URL langsung di luar scope menghasilkan 403.</div>
+        <div class="footer-note">KPI Kepegawaian · Konsep inti</div><div class="page-number">3</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">02 · Role dan scope</p>
+        <h2>Siapa melakukan apa</h2>
+        <table>
+            <thead><tr><th>Role</th><th>Cakupan</th><th>Tindakan penilaian utama</th><th>Tindakan lain</th></tr></thead>
+            <tbody>
+                <tr><td><b>Super Admin</b></td><td>Seluruh organisasi</td><td>Buat, ubah, ajukan, setujui, finalisasi</td><td>Semua konfigurasi, pengguna, audit, impersonasi</td></tr>
+                <tr><td><b>HR Admin</b></td><td>Menurut scope; akun UAT global</td><td>Buat, ubah, ajukan</td><td>Kelola karyawan, organisasi, dokumen, laporan</td></tr>
+                <tr><td><b>HR Manager</b></td><td>Menurut scope; akun UAT global</td><td>Setujui dan finalisasi</td><td>Laporan, ekspor, audit baca</td></tr>
+                <tr><td><b>Kepala Cabang</b></td><td>Satu cabang</td><td>Setujui</td><td>Lihat/ubah karyawan, insiden, laporan dan ekspor</td></tr>
+                <tr><td><b>Kepala Divisi</b></td><td>Satu cabang + satu divisi</td><td>Buat, ubah, ajukan, setujui</td><td>Insiden, laporan baca</td></tr>
+                <tr><td><b>Kepala Sub Divisi</b></td><td>Satu cabang + divisi + subdivisi</td><td>Buat, ubah, ajukan</td><td>Insiden dan organisasi baca</td></tr>
+                <tr><td><b>Auditor</b></td><td>Menurut scope; akun UAT global</td><td>Lihat saja</td><td>Laporan, ekspor, audit baca</td></tr>
+                <tr><td><b>Karyawan</b></td><td>Belum tersedia</td><td>Tidak memiliki izin portal</td><td>Akun login UAT tidak dibuat</td></tr>
+            </tbody>
+        </table>
+        <div class="callout success"><strong>Urutan pemeriksaan keamanan</strong>Autentikasi → permission → policy → organizational scope → validasi → aturan bisnis → audit log.</div>
+        <h3>Scope lebih kuat daripada filter</h3>
+        <p>Filter cabang/divisi membantu mencari data, tetapi bukan batas keamanan. Server lebih dulu membatasi dataset sesuai scope akun. Karena itu, Kepala Divisi SDM Jakarta tidak dapat membuka karyawan Operasional Jakarta atau Surabaya meskipun mengganti URL atau parameter filter.</p>
+        <div class="callout warn"><strong>Catatan tata kelola</strong>Secara izin teknis, Kepala Divisi dapat mengajukan sekaligus menyetujui penilaian dalam scope sendiri. Jika organisasi mensyaratkan prinsip empat mata, gunakan SOP: Kepala Sub Divisi mengisi/mengajukan, Kepala Divisi menyetujui, lalu HR Manager memfinalisasi.</div>
+        <div class="footer-note">KPI Kepegawaian · Role dan scope</div><div class="page-number">4</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">03 · Persiapan data</p>
+        <h2>Urutan sebelum mulai menilai</h2>
+        <ol>
+            <li><b>Masuk</b> menggunakan akun aktif dan terverifikasi.</li>
+            <li>Periksa badge <b>role</b> dan <b>cakupan</b> pada bagian kanan atas.</li>
+            <li>Pastikan struktur pada menu <b>Organisasi</b> sudah berisi cabang, divisi, subdivisi, dan jabatan.</li>
+            <li>Pastikan karyawan mempunyai <b>penempatan aktif</b>. Tanpa penempatan aktif, penilaian tidak dapat disimpan.</li>
+            <li>Pastikan periode dan komponen penilaian sudah disiapkan.</li>
+        </ol>
+        <h3>Membuat atau memeriksa karyawan</h3>
+        <div class="grid-2">
+            <div class="card card-accent"><h4>Tambah karyawan</h4><p>Menu <b>Karyawan → Tambah Karyawan</b>. Isi nomor karyawan, identitas, tanggal bergabung, cabang, divisi, subdivisi, jabatan, dan status awal.</p></div>
+            <div class="card"><h4>Cari per divisi</h4><p>Di menu <b>Karyawan</b>, pilih Cabang → Divisi → Sub Divisi bila diperlukan, lalu tekan <b>Terapkan</b>.</p></div>
+        </div>
+        <h3>Aturan penempatan</h3>
+        <ul>
+            <li>Nilai <b>Masa Kerja</b> memakai tanggal bergabung karyawan, bukan tanggal pembuatan akun.</li>
+            <li>Scope memakai penempatan aktif; untuk karyawan nonaktif tanpa penempatan aktif, daftar dan laporan dapat memakai penempatan terakhir.</li>
+            <li>Mutasi harus dilakukan melalui fungsi mutasi agar riwayat penempatan lama tetap tersimpan.</li>
+            <li>Kepala Divisi/Sub Divisi tidak dapat memilih atau melihat data organisasi di luar scope efektifnya.</li>
+        </ul>
+        <div class="callout danger"><strong>Jangan mulai penilaian bila penempatan salah</strong>Penilaian menyimpan snapshot ID penempatan aktif. Perbaiki penempatan terlebih dahulu agar histori divisi pada hasil penilaian benar.</div>
+        <div class="footer-note">KPI Kepegawaian · Persiapan data</div><div class="page-number">5</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">04 · Konfigurasi KPI</p>
+        <h2>Periode, komponen, dan kriteria</h2>
+        <h3>Periode penilaian</h3>
+        <div class="flow"><div class="flow-step"><b>Draf</b>Dapat diubah</div><div class="flow-arrow">→</div><div class="flow-step"><b>Aktif</b>Pengisian tersedia</div><div class="flow-arrow">→</div><div class="flow-step"><b>Ditinjau</b>Pengisian baru berhenti</div><div class="flow-arrow">→</div><div class="flow-step"><b>Final</b>Periode selesai</div><div class="flow-arrow">→</div><div class="flow-step"><b>Ditutup</b>Arsip</div></div>
+        <p>Periode dikelola dari <b>Penilaian → Konfigurasi Penilaian</b> oleh role yang mempunyai kewenangan organisasi. Status hanya dapat maju satu tahap.</p>
+        <div class="callout warn"><strong>Persyaratan aktivasi</strong>Total bobot semua komponen aktif wajib tepat 100%. Draf penilaian hanya dapat disimpan ketika periode berstatus Aktif dan aktif secara sistem. Kode juga menerima Draf yang ditandai aktif, tetapi UI normal membuat Draf dalam keadaan tidak aktif.</div>
+        <h3>Komponen bawaan</h3>
+        <table><thead><tr><th>Komponen</th><th>Bobot</th><th>Sumber nilai</th></tr></thead><tbody>
+            <tr><td>Masa Kerja</td><td>10%</td><td>Otomatis dari tanggal bergabung</td></tr>
+            <tr><td>Tanggung Jawab</td><td>20%</td><td>Manual 0–100</td></tr>
+            <tr><td>Absensi</td><td>20%</td><td>Manual 0–100</td></tr>
+            <tr><td>Inisiatif</td><td>10%</td><td>Manual 0–100</td></tr>
+            <tr><td>Sikap</td><td>15%</td><td>Manual 0–100</td></tr>
+            <tr><td>Komunikasi</td><td>10%</td><td>Manual 0–100</td></tr>
+            <tr><td>Kerjasama Tim</td><td>15%</td><td>Manual 0–100</td></tr>
+        </tbody></table>
+        <h3>Kriteria bawaan</h3>
+        <p><span class="badge">0–64,99 Perlu Perhatian</span> <span class="badge">65–79,99 Baik</span> <span class="badge">80–89,99 Sangat Baik</span> <span class="badge">90–100 Istimewa</span></p>
+        <div class="footer-note">KPI Kepegawaian · Konfigurasi</div><div class="page-number">6</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">05 · Mengisi performa</p>
+        <h2>Langkah pengisian nilai karyawan</h2>
+        <div class="callout info"><strong>Syarat akun</strong>Gunakan HR Admin, Kepala Divisi, atau Kepala Sub Divisi yang memiliki permission membuat penilaian. Karyawan target harus berada dalam scope akun.</div>
+        <ol>
+            <li>Buka menu <b>Karyawan</b>.</li>
+            <li>Pilih filter Cabang dan Divisi untuk membentuk daftar kerja per divisi.</li>
+            <li>Catat ID karyawan dari URL halaman detail, misalnya <code>/karyawan/12</code>.</li>
+            <li>Buka menu <b>Penilaian</b>, tentukan periode berstatus <b>Aktif</b>, dan catat ID periodenya dari data/route yang tersedia.</li>
+            <li>Sampai tombol navigasi dibuat, buka <code>/penilaian/12/3</code> dengan format <code>/penilaian/{id-karyawan}/{id-periode}</code>.</li>
+            <li>Isi semua komponen manual dengan nilai 0–100. Komponen Masa Kerja akan dihitung oleh server.</li>
+            <li>Isi catatan penilaian bila diperlukan.</li>
+            <li>Tekan <b>Simpan Draf</b>. Server menghitung ulang total dan kriteria.</li>
+            <li>Periksa ringkasan, lalu tekan <b>Ajukan Penilaian</b> jika data sudah benar.</li>
+        </ol>
+        <div class="callout danger"><strong>Batasan navigasi build saat ini</strong>ID periode belum ditampilkan sebagai alat operasional di UI dan tidak ada tombol Mulai Penilaian. Penggunaan URL manual cocok untuk UAT teknis, belum ideal untuk operator produksi. Pengembangan berikutnya sebaiknya menambahkan daftar periode aktif serta tombol Mulai/Lanjutkan Penilaian pada detail karyawan.</div>
+        <h3>Validasi yang dilakukan server</h3>
+        <ul>
+            <li>Karyawan harus berada dalam scope penilai dan memiliki penempatan aktif.</li>
+            <li>Periode harus dapat digunakan dan komponen aktif harus berbobot total 100%.</li>
+            <li>Semua komponen manual wajib dinilai; nilai harus 0–100.</li>
+            <li>Draf yang sudah diajukan tidak dapat diedit.</li>
+            <li>Setiap penyimpanan dan perubahan status dicatat di audit log.</li>
+        </ul>
+        <div class="footer-note">KPI Kepegawaian · Pengisian nilai</div><div class="page-number">7</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">06 · Perhitungan</p>
+        <h2>Cara total nilai dihitung</h2>
+        <p>Setiap komponen menghasilkan nilai mentah 0–100. Nilai tertimbang adalah nilai mentah dikalikan bobot. Total akhir merupakan jumlah seluruh nilai tertimbang.</p>
+        <div class="formula">nilai_tertimbang = nilai_mentah × (bobot / 100)<br>total_akhir = Σ seluruh nilai_tertimbang</div>
+        <h3>Contoh</h3>
+        <table><thead><tr><th>Komponen</th><th>Nilai</th><th>Bobot</th><th>Hasil tertimbang</th></tr></thead><tbody>
+            <tr><td>Masa Kerja</td><td>85</td><td>10%</td><td>8,50</td></tr>
+            <tr><td>Tanggung Jawab</td><td>90</td><td>20%</td><td>18,00</td></tr>
+            <tr><td>Absensi</td><td>80</td><td>20%</td><td>16,00</td></tr>
+            <tr><td>Inisiatif</td><td>75</td><td>10%</td><td>7,50</td></tr>
+            <tr><td>Sikap</td><td>88</td><td>15%</td><td>13,20</td></tr>
+            <tr><td>Komunikasi</td><td>82</td><td>10%</td><td>8,20</td></tr>
+            <tr><td>Kerjasama Tim</td><td>86</td><td>15%</td><td>12,90</td></tr>
+            <tr><td colspan="3"><b>Total</b></td><td><b>84,30</b></td></tr>
+        </tbody></table>
+        <p>Total 84,30 masuk kriteria <b>Sangat Baik</b>.</p>
+        <h3>Nilai Masa Kerja bawaan</h3>
+        <table><thead><tr><th>Masa kerja</th><th>Nilai otomatis</th></tr></thead><tbody><tr><td>0–2 bulan</td><td>40</td></tr><tr><td>3–5 bulan</td><td>60</td></tr><tr><td>6–11 bulan</td><td>75</td></tr><tr><td>12–24 bulan</td><td>85</td></tr><tr><td>25 bulan atau lebih</td><td>100</td></tr></tbody></table>
+        <div class="callout success"><strong>Server adalah sumber kebenaran</strong>Total sementara di browser hanya membantu operator. Ketika draf disimpan, server menghitung ulang nilai otomatis, bobot, total, dan kriteria.</div>
+        <div class="footer-note">KPI Kepegawaian · Perhitungan</div><div class="page-number">8</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">07 · Workflow</p>
+        <h2>Dari draf sampai ditutup</h2>
+        <div class="flow"><div class="flow-step"><b>Draf</b>Dapat diubah pembuat</div><div class="flow-arrow">→</div><div class="flow-step"><b>Diajukan</b>Terkunci</div><div class="flow-arrow">→</div><div class="flow-step"><b>Disetujui</b>Menunggu final</div><div class="flow-arrow">→</div><div class="flow-step"><b>Final</b>Masuk Beranda</div><div class="flow-arrow">→</div><div class="flow-step"><b>Ditutup</b>Arsip akhir</div></div>
+        <table><thead><tr><th>Status</th><th>Yang dapat dilakukan</th><th>Role umum</th></tr></thead><tbody>
+            <tr><td>Draf</td><td>Ubah nilai dan catatan, simpan kembali, ajukan</td><td>HR Admin / Kepala Divisi / Kepala Sub Divisi</td></tr>
+            <tr><td>Diajukan</td><td>Setujui; nilai tidak dapat diedit</td><td>Kepala Cabang / Kepala Divisi / HR Manager</td></tr>
+            <tr><td>Disetujui</td><td>Finalisasi dengan konfirmasi</td><td>HR Manager / Super Admin</td></tr>
+            <tr><td>Final</td><td>Tutup dengan konfirmasi; tampil pada tren Beranda</td><td>HR Manager / Super Admin</td></tr>
+            <tr><td>Ditutup</td><td>Lihat sebagai arsip</td><td>Role dengan izin lihat</td></tr>
+        </tbody></table>
+        <h3>SOP yang disarankan</h3>
+        <ol>
+            <li>Kepala Sub Divisi mengisi data berdasarkan bukti kerja, absensi, dan observasi periode.</li>
+            <li>Kepala Sub Divisi mengajukan draf.</li>
+            <li>Kepala Divisi meninjau keselarasan antar tim dan menyetujui.</li>
+            <li>HR Manager memeriksa kepatuhan kebijakan serta memfinalisasi.</li>
+            <li>Setelah periode selesai dan koreksi administratif tuntas, HR Manager menutup penilaian.</li>
+        </ol>
+        <div class="callout warn"><strong>Tidak ada alur mundur</strong>Implementasi saat ini hanya mengizinkan status maju satu tahap. Belum ada fungsi “Kembalikan ke Draf” atau “Tolak”. Koreksi harus dilakukan sebelum pengajuan.</div>
+        <div class="footer-note">KPI Kepegawaian · Workflow</div><div class="page-number">9</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">08 · Operasi per divisi</p>
+        <h2>Menjalankan satu siklus penilaian</h2>
+        <h3>A. Administrator HR</h3>
+        <ul class="checklist"><li>Pastikan semua karyawan mempunyai penempatan aktif dan tanggal bergabung benar.</li><li>Periksa total bobot komponen 100%.</li><li>Buat periode, lalu aktifkan.</li><li>Pastikan role dan scope kepala unit sudah benar.</li></ul>
+        <h3>B. Kepala unit</h3>
+        <ul class="checklist"><li>Periksa badge cakupan saat login.</li><li>Filter daftar Karyawan berdasarkan divisi/subdivisi.</li><li>Isi satu draf per karyawan yang menjadi tanggung jawabnya.</li><li>Verifikasi total dan catatan sebelum mengajukan.</li></ul>
+        <h3>C. Penyetuju</h3>
+        <ul class="checklist"><li>Pastikan hasil yang dibuka masih dalam scope.</li><li>Bandingkan hasil antar karyawan dengan bukti objektif.</li><li>Setujui hanya setelah semua komponen diperiksa.</li></ul>
+        <h3>D. HR Manager</h3>
+        <ul class="checklist"><li>Finalisasi penilaian yang sudah disetujui.</li><li>Periksa tren dan kriteria di Beranda.</li><li>Filter Laporan per cabang/divisi dan ekspor bila dibutuhkan.</li><li>Tutup penilaian setelah siklus administrasi berakhir.</li></ul>
+        <div class="callout info"><strong>Jika karyawan dimutasi di tengah periode</strong>Penilaian memakai penempatan aktif saat draf disimpan. Tentukan kebijakan internal apakah penilai berasal dari unit lama atau unit baru sebelum menyimpan draf. Sistem belum membagi satu periode secara prorata antar penempatan.</div>
+        <div class="callout warn"><strong>Hindari penilaian ganda yang tidak disengaja</strong>Karena setiap penilai dapat membuat rekornya sendiri, tetapkan satu penilai utama per karyawan/periode. Sistem belum menggabungkan atau merata-ratakan beberapa penilai secara otomatis.</div>
+        <div class="footer-note">KPI Kepegawaian · Operasi divisi</div><div class="page-number">10</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">09 · Laporan</p>
+        <h2>Melihat hasil dan mengekspor data</h2>
+        <h3>Beranda</h3>
+        <p>Ringkasan, rata-rata, tren, dan aktivitas penilaian di Beranda hanya memakai status <b>Final</b> dan <b>Ditutup</b>. Filter periode/cabang/divisi/subdivisi tetap tunduk pada scope pengguna.</p>
+        <h3>Menu Laporan</h3>
+        <p>Filter tersedia untuk tanggal, cabang, divisi, subdivisi, status karyawan, kriteria hasil, dan status masalah. Tabel menampilkan hasil penilaian terbaru yang cocok pada relasi karyawan.</p>
+        <div class="callout warn"><strong>Perbedaan Beranda dan Laporan</strong>Beranda secara eksplisit membatasi penilaian Final/Ditutup. Query Laporan saat ini tidak memfilter status penilaian, sehingga penilaian terbaru yang tampil dapat masih Draf/Diajukan/Disetujui. Periksa status dari detail/audit sebelum menjadikan laporan sebagai hasil resmi.</div>
+        <h3>Ekspor XLSX</h3>
+        <ol><li>Terapkan filter laporan.</li><li>Tekan <b>Ekspor XLSX</b>.</li><li>Job masuk ke queue dengan status Menunggu Antrean.</li><li>Queue worker membuat file privat.</li><li>Unduh dari Riwayat Ekspor ketika status Siap Diunduh.</li></ol>
+        <div class="callout info"><strong>Prasyarat operasional</strong>Queue worker harus berjalan. File ekspor disimpan privat dan kedaluwarsa setelah 24 jam. Pengguna hanya dapat mengunduh ekspor miliknya sendiri dan scope pada saat permintaan disimpan sebagai snapshot.</div>
+        <div class="footer-note">KPI Kepegawaian · Laporan</div><div class="page-number">11</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">10 · Tindak lanjut</p>
+        <h2>Karyawan bermasalah dan perhatian</h2>
+        <p>Catatan masalah dan hasil KPI saling melengkapi. Penilaian menunjukkan performa periodik, sedangkan insiden merekam kejadian yang perlu ditindaklanjuti.</p>
+        <h3>Aturan perhatian bawaan</h3>
+        <table><thead><tr><th>Kondisi</th><th>Ambang</th></tr></thead><tbody><tr><td>Nilai Absensi rendah</td><td>Kurang dari 70</td></tr><tr><td>Total penilaian rendah</td><td>Kurang dari 65</td></tr><tr><td>Insiden tinggi</td><td>Minimal 1 insiden terbuka/ditinjau</td></tr><tr><td>Insiden sedang</td><td>Minimal 3 insiden terbuka/ditinjau</td></tr></tbody></table>
+        <h3>Alur insiden</h3>
+        <div class="flow"><div class="flow-step"><b>Terbuka</b>Insiden dicatat</div><div class="flow-arrow">→</div><div class="flow-step"><b>Ditinjau</b>Proses tindak lanjut</div><div class="flow-arrow">→</div><div class="flow-step"><b>Selesai</b>Resolusi dicatat</div><div class="flow-arrow">→</div><div class="flow-step"><b>Ditutup</b>Arsip</div></div>
+        <ul><li>Catatan masalah mengikuti scope organisasi yang sama dengan data karyawan.</li><li>Role tanpa izin membuat atau memperbarui hanya dapat melihat.</li><li>Pelapor menerima notifikasi bila insiden diselesaikan oleh pengguna lain.</li><li>Gunakan kategori dan tingkat keparahan yang sesuai; hindari memasukkan informasi di luar kebutuhan pekerjaan.</li></ul>
+        <div class="callout danger"><strong>Data sensitif</strong>Jangan unggah atau tulis data pribadi yang tidak diperlukan. Dokumen karyawan disimpan privat dan hanya boleh diunduh melalui endpoint yang menjalankan authorization.</div>
+        <div class="footer-note">KPI Kepegawaian · Tindak lanjut</div><div class="page-number">12</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">11 · UAT lokal</p>
+        <h2>Akun dan data demonstrasi</h2>
+        <p>Seeder lokal membuat akun portal untuk semua role kecuali Karyawan. Gunakan hanya pada lingkungan <code>local</code> atau <code>testing</code>.</p>
+        <table><thead><tr><th>Role</th><th>Email lokal</th><th>Scope bawaan UAT</th></tr></thead><tbody>
+            <tr><td>Super Admin</td><td>super.admin@kpi.local.test</td><td>Global</td></tr>
+            <tr><td>HR Admin</td><td>hr.admin@kpi.local.test</td><td>Organisasi/global</td></tr>
+            <tr><td>HR Manager</td><td>hr.manager@kpi.local.test</td><td>Organisasi/global</td></tr>
+            <tr><td>Kepala Cabang</td><td>branch.head@kpi.local.test</td><td>Cabang UAT Jakarta</td></tr>
+            <tr><td>Kepala Divisi</td><td>division.head@kpi.local.test</td><td>SDM Jakarta</td></tr>
+            <tr><td>Kepala Sub Divisi</td><td>sub.division.head@kpi.local.test</td><td>Administrasi SDM</td></tr>
+            <tr><td>Auditor</td><td>auditor@kpi.local.test</td><td>Organisasi/global</td></tr>
+        </tbody></table>
+        <p>Password berasal dari <code>LOCAL_ROLE_SEED_PASSWORD</code>. Bila variabel tidak diatur, fallback lokal seeder adalah <code>KpiLokal2026!</code>. Jangan gunakan kredensial ini pada production.</p>
+        <h3>Data organisasi UAT</h3>
+        <ul><li>Cabang UAT Jakarta: SDM Jakarta dan Operasional Jakarta.</li><li>Cabang UAT Surabaya: Operasional Surabaya.</li><li>Karyawan UAT ditempatkan pada Administrasi SDM, Rekrutmen, Lapangan Jakarta, dan Lapangan Surabaya.</li></ul>
+        <h3>Skenario pengecekan scope</h3>
+        <ol><li>Login sebagai Kepala Divisi; pastikan hanya karyawan SDM Jakarta yang terlihat.</li><li>Coba membuka URL karyawan Operasional/Surabaya; hasil wajib 403.</li><li>Login sebagai Kepala Sub Divisi; pastikan hanya Administrasi SDM yang terlihat.</li><li>Login sebagai Kepala Cabang; pastikan seluruh divisi Jakarta terlihat, tetapi Surabaya tidak.</li></ol>
+        <div class="footer-note">KPI Kepegawaian · UAT lokal</div><div class="page-number">13</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">12 · Pemecahan masalah</p>
+        <h2>Masalah yang paling sering ditemui</h2>
+        <table><thead><tr><th>Gejala</th><th>Penyebab yang mungkin</th><th>Tindakan</th></tr></thead><tbody>
+            <tr><td>Karyawan tidak muncul</td><td>Di luar scope, filter aktif, atau penempatan tidak cocok</td><td>Periksa badge scope, reset filter, lalu periksa riwayat penempatan</td></tr>
+            <tr><td>403 saat membuka detail</td><td>Permission atau scope tidak mengizinkan</td><td>Jangan mengganti URL; minta Super Admin/HR Admin memeriksa role dan scope</td></tr>
+            <tr><td>Draf tidak dapat disimpan</td><td>Periode tidak aktif, komponen belum lengkap, bobot bukan 100%, atau tidak ada penempatan aktif</td><td>Periksa Konfigurasi Penilaian dan penempatan karyawan</td></tr>
+            <tr><td>Nilai Masa Kerja kosong/gagal</td><td>Tanggal bergabung atau aturan masa kerja tidak lengkap</td><td>Perbaiki tanggal bergabung dan aturan TENURE_MONTHS</td></tr>
+            <tr><td>Nilai tidak dapat diubah</td><td>Status sudah bukan Draf</td><td>Periksa sebelum Ajukan; saat ini tidak ada alur kembali</td></tr>
+            <tr><td>Ekspor terus Menunggu Antrean</td><td>Queue worker tidak berjalan</td><td>Jalankan <code>php artisan queue:work --tries=3</code></td></tr>
+            <tr><td>Data Beranda kosong</td><td>Belum ada nilai Final/Ditutup dalam scope</td><td>Finalisasi penilaian atau ubah filter periode/scope</td></tr>
+        </tbody></table>
+        <h3>Checklist sebelum periode ditutup</h3>
+        <ul class="checklist"><li>Tidak ada draf yang tertinggal.</li><li>Semua penilaian resmi sudah Final.</li><li>Scope penyetuju sudah diverifikasi.</li><li>Laporan per cabang/divisi sudah diperiksa.</li><li>Ekspor final sudah selesai dan dapat dibuka.</li><li>Catatan koreksi administratif sudah ditutup.</li></ul>
+        <div class="callout success"><strong>Rangkuman satu kalimat</strong>Siapkan organisasi dan periode → filter karyawan sesuai divisi → isi semua nilai manual → simpan draf → ajukan → setujui → finalisasi → periksa Beranda/Laporan → tutup.</div>
+        <div class="footer-note">KPI Kepegawaian · Pemecahan masalah</div><div class="page-number">14</div>
+    </section>
+
+    <section class="page">
+        <p class="section-kicker">Lampiran</p>
+        <h2>Temuan operasional dan rekomendasi</h2>
+        <p>Bagian ini membantu pemilik sistem memisahkan fungsi yang sudah tersedia dari penyempurnaan yang masih diperlukan.</p>
+        <table><thead><tr><th>Area</th><th>Status saat ini</th><th>Rekomendasi</th></tr></thead><tbody>
+            <tr><td>Input nilai dan perhitungan</td><td>Tersedia dan divalidasi server</td><td>Pertahankan</td></tr>
+            <tr><td>Scope per divisi</td><td>Diterapkan di policy/query/direct URL</td><td>Lanjutkan UAT regresi tiap role</td></tr>
+            <tr><td>Tombol mulai/lanjut penilaian</td><td>Belum tersedia di UI</td><td>Tambahkan pada detail karyawan dengan periode aktif</td></tr>
+            <tr><td>Daftar pekerjaan penilaian</td><td>Belum tersedia</td><td>Buat inbox berdasarkan status dan scope</td></tr>
+            <tr><td>Penilaian multi-penilai</td><td>Membuat hasil terpisah; tidak diagregasi</td><td>Tentukan satu penilai utama atau desain agregasi eksplisit</td></tr>
+            <tr><td>Penolakan/revisi</td><td>Tidak ada alur mundur</td><td>Tambahkan Return to Draft dengan alasan dan audit</td></tr>
+            <tr><td>Laporan resmi</td><td>Dapat memuat status nonfinal terbaru</td><td>Tambahkan filter status dan default Final/Ditutup</td></tr>
+            <tr><td>Self-service Karyawan</td><td>Belum ada relasi login aman</td><td>Jangan aktifkan akun Karyawan sebelum modul khusus tersedia</td></tr>
+        </tbody></table>
+        <div class="callout info"><strong>Dasar dokumen</strong>Manual disusun dari route, controller, action/service, policy, seeder RBAC/domain, query laporan, dan halaman React yang tersedia pada workspace lokal tanggal 18 September 2026.</div>
+        <h3>Dokumen terkait di project</h3>
+        <ul><li><code>panduan.md</code> — menjalankan dan menguji aplikasi lokal.</li><li><code>RBAC_MATRIX.md</code> — matriks akses role.</li><li><code>SCORING_RULES.md</code> — aturan perhitungan KPI.</li><li><code>REPORTING.md</code> — laporan dan ekspor.</li><li><code>SECURITY.md</code> — prinsip keamanan aplikasi.</li></ul>
+        <p class="muted small" style="margin-top:14mm">Akhir dokumen · KPI Kepegawaian — Sistem Penilaian Karyawan</p>
+        <div class="footer-note">KPI Kepegawaian · Lampiran</div><div class="page-number">15</div>
+    </section>
+</body>
+</html>
