@@ -1,0 +1,27 @@
+{
+  "project": "KPI Kepegawaian",
+  "generated": "2026-09-16",
+  "figma": "https://www.figma.com/design/EmIOtdlEaEnJR1f4PryW4m",
+  "documents": [
+    "README.md",
+    "AGENTS.md",
+    "PRD.md",
+    "DESIGN.md",
+    "ARCHITECTURE.md",
+    "DATABASE.md",
+    "BUSINESS_RULES.md",
+    "SCORING_RULES.md",
+    "PERMISSIONS.md",
+    "SECURITY.md",
+    "PWA.md",
+    "REPORTING.md",
+    "MVP.md",
+    "TESTING.md",
+    "DEPLOYMENT.md",
+    "CODE_STANDARDS.md",
+    "IMPLEMENTATION_PLAN.md",
+    "GOALS.md",
+    "CHANGELOG.md",
+    "MCP_FIGMA.md"
+  ]
+}

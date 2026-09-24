@@ -1,0 +1,35 @@
+{
+  "name": "Sistem Penilaian Karyawan",
+  "short_name": "KPI Karyawan",
+  "description": "Aplikasi internal untuk penilaian karyawan.",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#16A34A",
+  "background_color": "#F8FAFC",
+  "icons": [
+    {
+      "src": "/icons/kpi-64.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/kpi-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/kpi-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/kpi-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
