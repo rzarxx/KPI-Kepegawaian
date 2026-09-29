@@ -2,6 +2,127 @@
 
 ## Unreleased
 
+### Phase 11 — Implementasi — 29 September 2026
+
+#### 11.1 Penilaian Ad-Hoc (Selesai sebelumnya)
+
+- Migration `period_id` nullable sudah tersedia.
+- Route, action, dan form penilaian mendukung evaluasi tanpa periode.
+- Test ad-hoc evaluation lulus.
+
+#### 11.2 Dashboard Pie Chart
+
+- Menambahkan tiga `PieChart` (Recharts) pada dashboard: distribusi karyawan
+  per divisi, per cabang, dan per status.
+- Data mengikuti organizational scope dan filter aktif pengguna.
+- Warna mengikuti palet status di DESIGN.md.
+- Empty state ditampilkan bila tidak ada data.
+- Backend mengirim `distributions` prop berisi `byDivision`, `byBranch`,
+  dan `byStatus`.
+
+#### 11.3 Riwayat Kerja Hanya HRD/SDM
+
+- Menambahkan permission `employee.manage_track_record`.
+- Hanya HR Admin dan HR Manager mendapat permission ini.
+- Policy `EmployeePolicy` pada method `transfer`, `changeStatus`, dan `rehire`
+  sekarang memerlukan `employee.manage_track_record` selain permission aslinya.
+- Kepala Divisi/Sub Divisi/Cabang hanya dapat melihat riwayat, tidak mengubah.
+- Test regresi memverifikasi Division Head ditolak (403) dan HR Admin berhasil.
+
+#### 11.4 Perbaikan Sistem Impersonasi
+
+- Verifikasi: session regeneration, blocking aksi sensitif, auto-end timeout,
+  audit log, dan impersonasi berantai sudah ditangani.
+- Route branding/settings menggunakan middleware `not-impersonating`.
+- Test memverifikasi branding tidak dapat diakses saat impersonasi.
+
+#### 11.5 Perbaikan Copywriting Seluruh Halaman
+
+- Audit seluruh halaman frontend terhadap standar AGENTS.md bagian 4.
+- Seluruh teks UI sudah konsisten berbahasa Indonesia.
+- Tidak ditemukan teks bahasa Inggris yang terekspos ke pengguna.
+
+#### 11.6 Branding dan Tampilan Sistem
+
+- Migration: tabel `app_settings` (key, value, type, group).
+- Model `AppSetting` dengan cache TTL 1 jam.
+- Seeder default: `app_name`, `app_logo`, `primary_color`, `footer_text`.
+- Controller `AppSettingsController` (index + update, hanya `settings.manage`).
+- Route `GET/PUT /pengaturan/tampilan` dengan middleware `not-impersonating`.
+- Halaman frontend `Settings/Appearance.tsx` untuk kelola branding.
+- Logo upload ke storage public dengan validasi PNG/SVG/WebP max 512KB.
+- Preview warna real-time dan preset warna.
+- CSS custom property `--brand-color` untuk aksen warna dinamis.
+- Sidebar menampilkan nama aplikasi, logo kustom, dan footer dari settings.
+- Navigasi menambahkan menu "Tampilan Sistem" untuk role dengan `settings.manage`.
+- Perubahan branding dicatat di audit log.
+- Branding data di-share ke seluruh halaman melalui Inertia middleware.
+
+### Hasil Verifikasi
+
+- Full test suite: **100 passed (584 assertions)**.
+- TypeScript: lulus tanpa error.
+- Pint: lulus.
+- Route terdaftar: settings.appearance dan settings.appearance.update.
+
+### Phase 11 — Update Besar — 28 September 2026
+
+Enam perubahan besar didokumentasikan pada PRD, BUSINESS_RULES,
+IMPLEMENTATION_PLAN, GOALS, DESIGN, SECURITY, PERMISSIONS, SCORING_RULES,
+RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
+
+#### 11.1 Penilaian Ad-Hoc (Tanpa Periode Wajib)
+
+- Mengubah aturan penilaian: evaluator dapat mengisi penilaian kapan saja
+  tanpa wajib memilih periode. Periode tetap opsional untuk pengelompokan.
+- `period_id` pada `employee_evaluations` akan menjadi nullable.
+- Route, action, dan form penilaian akan diperbarui.
+- Masa kerja otomatis dihitung berdasarkan tanggal penilaian bila tanpa periode.
+
+#### 11.2 Dashboard Pie Chart
+
+- Menambahkan tiga pie chart pada dashboard:
+  distribusi karyawan per divisi, per cabang, dan per status.
+- Data mengikuti organizational scope dan filter aktif pengguna.
+- Menggunakan Recharts PieChart.
+
+#### 11.3 Riwayat Kerja Hanya HRD/SDM
+
+- Membatasi pengelolaan riwayat kerja (track record) hanya untuk role
+  HR Admin dan HR Manager.
+- Kepala Divisi, Kepala Sub Divisi, dan Kepala Cabang hanya dapat melihat.
+- Menambahkan permission `employee.manage_track_record`.
+
+#### 11.4 Perbaikan Sistem Impersonasi Super Admin
+
+- Audit dan perbaikan menyeluruh sistem impersonasi.
+- Menambahkan blocking untuk route branding/settings saat impersonasi.
+- Memverifikasi session regeneration, timeout, dan auto-end.
+- Memverifikasi audit log lengkap untuk setiap event impersonasi.
+
+#### 11.5 Perbaikan Copywriting Seluruh Halaman
+
+- Audit copywriting seluruh halaman frontend.
+- Memperbaiki istilah, heading, label, tombol, placeholder, pesan error,
+  pesan sukses, empty state, dan tooltip agar konsisten Bahasa Indonesia.
+
+#### 11.6 Branding dan Tampilan Sistem
+
+- Super Admin dapat mengelola logo, aksen warna, footer, dan nama aplikasi.
+- Menambahkan tabel `app_settings` untuk menyimpan konfigurasi branding.
+- Menambahkan halaman pengaturan tampilan.
+- Perubahan branding berlaku global dan dicatat di audit log.
+
+### Flowchart Sistem dan Penggunaan — 28 September 2026
+
+- Menambahkan `FLOWCHART.md` berisi 12 diagram Mermaid yang mencakup:
+  flowchart sistem high-level, alur autentikasi, otorisasi RBAC + scope,
+  manajemen karyawan, status karyawan (state diagram), penilaian kinerja
+  (workflow dan detail), periode penilaian, catatan masalah/incident,
+  laporan dan ekspor, impersonasi, notifikasi, serta flow penggunaan
+  per role (Super Admin, HR Admin, HR Manager, Branch Head, Division Head,
+  Sub Division Head, Auditor).
+
 ### Panduan Instalasi Production — 24 September 2026
 
 - Mengganti README bootstrap dengan dokumentasi repository yang mencakup fitur,

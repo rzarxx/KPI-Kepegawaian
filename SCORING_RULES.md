@@ -84,7 +84,9 @@ Default mapping:
 - >=12 dan <24 → 85
 - >=24 → 100
 
-Perhitungan berdasarkan evaluation period end date agar historis konsisten.
+Perhitungan berdasarkan evaluation period end date (bila ada) atau tanggal
+penilaian dilakukan (bila penilaian ad-hoc tanpa periode) agar historis
+konsisten.
 
 ## 9. Attendance
 
@@ -134,3 +136,17 @@ Jika calibration diaktifkan:
 - timestamp
 
 Original score tidak boleh ditimpa.
+
+## 13. Penilaian Ad-Hoc
+
+Penilaian bersifat ad-hoc: evaluator dapat mengisi penilaian kapan saja
+tanpa wajib memilih periode.
+
+Periode tetap tersedia sebagai opsi opsional untuk pengelompokan dan
+pelaporan. `period_id` pada `employee_evaluations` menjadi nullable.
+
+Bila penilaian tanpa periode:
+- Masa kerja dihitung berdasarkan tanggal penilaian dibuat.
+- Filter periode pada dashboard/laporan tidak menampilkan penilaian ini
+  kecuali filter periode kosong (semua).
+- Penilaian tetap memiliki semua komponen, bobot, dan kriteria yang sama.

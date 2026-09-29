@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppSettingsController;
 use App\Http\Controllers\AttentionRuleController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\DashboardController;
@@ -44,12 +45,14 @@ Route::middleware(['auth', 'active-user', 'impersonation-valid'])->group(functio
         Route::post('/penilaian/konfigurasi/periode/{period}/status', [EvaluationConfigurationController::class, 'transitionPeriod'])->name('evaluation-periods.transition');
         Route::post('/penilaian/konfigurasi/aturan-perhatian', [AttentionRuleController::class, 'store'])->name('attention-rules.store');
         Route::put('/penilaian/konfigurasi/aturan-perhatian/{rule}', [AttentionRuleController::class, 'update'])->name('attention-rules.update');
+        Route::get('/pengaturan/tampilan', [AppSettingsController::class, 'index'])->name('settings.appearance');
+        Route::put('/pengaturan/tampilan', [AppSettingsController::class, 'update'])->name('settings.appearance.update');
     });
     Route::get('/penilaian/konfigurasi', [EvaluationConfigurationController::class, 'index'])->name('evaluations.configuration');
     Route::get('/penilaian/hasil/{evaluation}', [EmployeeEvaluationController::class, 'show'])->name('evaluations.show');
     Route::post('/penilaian/hasil/{evaluation}/status', [EmployeeEvaluationController::class, 'transition'])->name('evaluations.transition');
-    Route::get('/penilaian/{employee}/{period}', [EmployeeEvaluationController::class, 'create'])->name('evaluations.create');
-    Route::post('/penilaian/{employee}/{period}', [EmployeeEvaluationController::class, 'store'])->name('evaluations.store');
+    Route::get('/penilaian/{employee}', [EmployeeEvaluationController::class, 'create'])->name('evaluations.create');
+    Route::post('/penilaian/{employee}', [EmployeeEvaluationController::class, 'store'])->name('evaluations.store');
     Route::resource('karyawan', EmployeeController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update'])->parameters(['karyawan' => 'employee'])->names('employees');
     Route::post('/karyawan/{employee}/mutasi', [EmployeeController::class, 'transfer'])->name('employees.transfer');
     Route::post('/karyawan/{employee}/status', [EmployeeController::class, 'changeStatus'])->name('employees.status');

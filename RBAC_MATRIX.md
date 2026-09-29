@@ -6,7 +6,7 @@ aturan bisnis, dan audit; menu hanya mencerminkan akses yang sudah diberikan.
 
 | Role | Menu utama | Tindakan khusus | Cakupan |
 | --- | --- | --- | --- |
-| Super Admin | Semua menu | Seluruh tindakan, role, pengaturan, audit, dan impersonasi | Seluruh organisasi |
+| Super Admin | Semua menu | Seluruh tindakan, role, pengaturan, branding/tampilan, audit, dan impersonasi | Seluruh organisasi |
 | HR Admin | Beranda, Karyawan, Karyawan Bermasalah, Penilaian, Laporan, Notifikasi, Organisasi, Pengguna dan Akses | Kelola identitas/status/mutasi karyawan, catatan masalah, draf penilaian, dokumen, laporan, konfigurasi, organisasi, dan akun non-Super Admin | Seluruh organisasi atau scope yang ditetapkan |
 | HR Manager | Beranda, Karyawan, Karyawan Bermasalah, Penilaian, Laporan, Audit Aktivitas, Notifikasi, Organisasi | Tinjau data, selesaikan masalah, setujui/finalisasi penilaian, ekspor laporan, audit hanya-baca | Seluruh organisasi; audit hanya tersedia untuk scope organisasi penuh |
 | Branch Head | Beranda, Karyawan, Karyawan Bermasalah, Penilaian, Laporan, Notifikasi, Organisasi | Perbarui data terbatas, kelola/selesaikan masalah, setujui penilaian, ekspor laporan | Cabang yang ditetapkan |
@@ -40,3 +40,24 @@ Scope kepala organisasi divalidasi saat provisioning dan kembali disaring saat
 otorisasi dibaca: Branch Head wajib memiliki tepat satu scope cabang, Division
 Head tepat satu scope divisi, dan Sub Division Head tepat satu scope sub divisi.
 Record scope global yang keliru tidak dapat memperluas akses ketiga role ini.
+
+## Pembatasan Riwayat Kerja
+
+Riwayat kerja (track record) hanya dapat diisi dan dikelola oleh pengguna
+dengan role **HR Admin** atau **HR Manager**. Kepala Divisi, Kepala Sub Divisi,
+dan Kepala Cabang hanya dapat melihat riwayat kerja karyawan dalam scope-nya.
+
+| Role | Lihat Riwayat Kerja | Kelola Riwayat Kerja |
+| --- | --- | --- |
+| Super Admin | Ya (semua) | Ya |
+| HR Admin | Ya (semua/scope) | Ya |
+| HR Manager | Ya (semua/scope) | Ya |
+| Branch Head | Ya (scope) | Tidak |
+| Division Head | Ya (scope) | Tidak |
+| Sub Division Head | Ya (scope) | Tidak |
+| Auditor | Ya (scope) | Tidak |
+
+## Pengelolaan Branding
+
+Branding (logo, aksen warna, footer, nama aplikasi) hanya dapat dikelola
+oleh **Super Admin**. Fitur ini diblokir selama impersonasi.

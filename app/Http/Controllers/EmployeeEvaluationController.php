@@ -15,20 +15,40 @@ use Inertia\Inertia;
 
 class EmployeeEvaluationController extends Controller
 {
-    public function create(Employee $employee, PerformancePeriod $period, Request $request)
+    public function create(Employee $employee, Request $request)
     {
         $this->authorize('evaluate', $employee);
-        $this->authorize('view', $period);
 
-        $evaluation = EmployeeEvaluation::query()->where(['employee_id' => $employee->id, 'period_id' => $period->id, 'evaluator_id' => $request->user()->id])->with('scores')->first();
+        $periodId = $request->query('period_id');
+        $period = $periodId ? PerformancePeriod::findOrFail($periodId) : null;
+
+        if ($period) {
+            $this->authorize('view', $period);
+        }
+
+        $lookupAttributes = ['employee_id' => $employee->id, 'evaluator_id' => $request->user()->id];
+        if ($period) {
+            $lookupAttributes['period_id'] = $period->id;
+        } else {
+            $lookupAttributes['period_id'] = null;
+        }
+
+        $evaluation = EmployeeEvaluation::query()->where($lookupAttributes)->with('scores')->first();
 
         return Inertia::render('Evaluations/Form', $this->formData($request, $employee, $period, $evaluation));
     }
 
-    public function store(Employee $employee, PerformancePeriod $period, StoreEmployeeEvaluationRequest $request, SaveEmployeeEvaluationAction $action)
+    public function store(Employee $employee, StoreEmployeeEvaluationRequest $request, SaveEmployeeEvaluationAction $action)
     {
         $this->authorize('evaluate', $employee);
-        $this->authorize('view', $period);
+
+        $periodId = $request->input('period_id');
+        $period = $periodId ? PerformancePeriod::findOrFail($periodId) : null;
+
+        if ($period) {
+            $this->authorize('view', $period);
+        }
+
         $data = $request->validated();
         $evaluation = $action->execute($request->user(), $employee, $period, $data);
 
@@ -49,11 +69,18 @@ class EmployeeEvaluationController extends Controller
         return back()->with('success', 'Status penilaian berhasil diperbarui.');
     }
 
-    private function formData(Request $request, Employee $employee, PerformancePeriod $period, ?EmployeeEvaluation $evaluation): array
+    private function formData(Request $request, Employee $employee, ?PerformancePeriod $period, ?EmployeeEvaluation $evaluation): array
     {
+        $periods = PerformancePeriod::query()
+            ->where('is_active', true)
+            ->whereIn('status', ['DRAFT', 'ACTIVE'])
+            ->orderByDesc('start_date')
+            ->get(['id', 'name', 'start_date', 'end_date']);
+
         return [
             'employee' => $employee->only('id', 'full_name', 'employee_number'),
-            'period' => $period->only('id', 'name', 'start_date', 'end_date'),
+            'period' => $period ? $period->only('id', 'name', 'start_date', 'end_date') : null,
+            'periods' => $periods->map(fn (PerformancePeriod $p) => $p->only('id', 'name', 'start_date', 'end_date')),
             'components' => EvaluationComponent::query()->where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'default_weight', 'is_auto_calculated']),
             'evaluation' => $evaluation ? [
                 'id' => $evaluation->id,

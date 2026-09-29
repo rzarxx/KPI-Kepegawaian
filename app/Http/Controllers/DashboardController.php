@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\Division;
+use App\Models\Employee;
 use App\Models\EmployeeAttentionRule;
 use App\Models\EmployeeEvaluation;
 use App\Models\PerformancePeriod;
@@ -59,12 +60,40 @@ class DashboardController extends Controller
             ->where(fn ($query) => $query->whereNull('branch_id')->orWhereIn('branch_id', $branches->pluck('id')))
             ->orderBy('name')->get(['id', 'branch_id', 'name']);
 
+        $distributionBase = (clone $query)->with(['currentAssignment.branch', 'currentAssignment.division', 'latestAssignment.branch', 'latestAssignment.division'])->get();
+        $byDivision = $distributionBase->groupBy(function (Employee $employee): string {
+            $assignment = $employee->currentAssignment ?? $employee->latestAssignment;
+
+            return $assignment?->division?->name ?? 'Tidak ada';
+        })->map(fn ($group, $name) => ['name' => $name, 'value' => $group->count()])->sortByDesc('value')->values();
+        $byBranch = $distributionBase->groupBy(function (Employee $employee): string {
+            $assignment = $employee->currentAssignment ?? $employee->latestAssignment;
+
+            return $assignment?->branch?->name ?? 'Tidak ada';
+        })->map(fn ($group, $name) => ['name' => $name, 'value' => $group->count()])->sortByDesc('value')->values();
+        $statusLabels = [
+            'ACTIVE' => 'Aktif',
+            'PROBATION' => 'Masa Percobaan',
+            'MUTATED' => 'Mutasi',
+            'RESIGNED' => 'Resign',
+            'TERMINATED' => 'Terminasi',
+            'INACTIVE' => 'Tidak Aktif',
+        ];
+        $byStatus = $distributionBase->groupBy(fn (Employee $employee): string => $employee->current_status->value)
+            ->map(fn ($group, $status) => ['name' => $statusLabels[$status] ?? $status, 'value' => $group->count()])
+            ->sortByDesc('value')->values();
+
         return Inertia::render('Dashboard', [
             'metrics' => [
                 'total' => (clone $query)->count(),
                 'active' => (clone $query)->where('current_status', 'ACTIVE')->count(),
                 'attention' => $attentionEmployees->count(),
                 'average' => $canViewEvaluations ? round((float) (clone $evaluationQuery)->avg('total_score'), 2) : 0,
+            ],
+            'distributions' => [
+                'byDivision' => $byDivision,
+                'byBranch' => $byBranch,
+                'byStatus' => $byStatus,
             ],
             'trend' => $canViewEvaluations ? (clone $evaluationQuery)->join('performance_periods', 'employee_evaluations.period_id', '=', 'performance_periods.id')
                 ->selectRaw('performance_periods.name as name, ROUND(AVG(employee_evaluations.total_score), 2) as score')

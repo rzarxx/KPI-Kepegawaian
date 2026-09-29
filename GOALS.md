@@ -25,6 +25,25 @@ User dapat membuka aplikasi seperti aplikasi native tanpa bolak-balik browser.
 ## Goal 7 — Maintainability
 Modular monolith, testable, documented, deployable di aaPanel.
 
+## Goal 8 — Ad-Hoc Evaluation
+Penilaian dapat dilakukan kapan saja tanpa wajib memilih periode.
+
+## Goal 9 — Dashboard Pie Chart
+Dashboard menampilkan visualisasi pie chart distribusi karyawan per divisi,
+per cabang, dan per status.
+
+## Goal 10 — Track Record HRD Only
+Riwayat kerja hanya dapat diisi oleh HRD/SDM, bukan kepala divisi/sub divisi.
+
+## Goal 11 — Impersonation Fix
+Sistem impersonasi Super Admin berfungsi aman dan lengkap sesuai AGENTS.md.
+
+## Goal 12 — Copywriting Consistency
+Seluruh teks UI konsisten berbahasa Indonesia di semua halaman.
+
+## Goal 13 — System Branding
+Super Admin dapat mengelola logo, aksen warna, footer, dan nama aplikasi.
+
 ## Success Indicators
 
 - critical permission tests pass 100%
@@ -33,3 +52,9 @@ Modular monolith, testable, documented, deployable di aaPanel.
 - report export reliable
 - PWA install works
 - all production UI assets self-hosted
+- penilaian ad-hoc berhasil tanpa periode
+- dashboard pie chart menampilkan data benar
+- riwayat kerja hanya dapat diisi HRD/SDM
+- impersonasi aman dan audit tercatat
+- copywriting konsisten Bahasa Indonesia
+- branding dapat dikelola Super Admin

@@ -63,9 +63,16 @@ Initial:
 ### Audit
 - audit.view
 
+### Track Record
+- employee.manage_track_record
+
 ### Settings
 - settings.view
 - settings.manage
+
+### Branding
+- branding.view
+- branding.manage
 
 ## 4. Scope
 
@@ -86,12 +93,14 @@ Maka seluruh query harus intersect dengan scope tersebut.
 | Action | Super Admin | HR | Branch Head | Division Head | Sub Division Head | Auditor |
 |---|---|---|---|---|---|---|
 | View employee | All | All | Scope | Scope | Scope | Allowed scope |
+| Manage track record | Yes | Yes | No | No | No | No |
 | Create employee | Yes | Yes | Optional | Scope | Scope | No |
 | Edit employee | Yes | Yes | Scope | Scope | Scope | No |
 | Transfer | Yes | Yes | Scope | Request/limited | Request/limited | No |
 | Incident create | Yes | Yes | Scope | Scope | Scope | No |
 | Evaluate | Yes | Yes | Scope | Scope | Scope | No |
 | Export | Yes | Yes | Scope | Scope | Scope | Limited |
+| Manage branding | Yes | No | No | No | No | No |
 | Manage role | Yes | Limited/No | No | No | No | No |
 | Audit view | Yes | Limited | No | No | No | Yes/limited |
 

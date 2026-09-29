@@ -25,6 +25,7 @@ class AccessControlSeeder extends Seeder
             'audit.view',
             'settings.view', 'settings.manage',
             'impersonation.start',
+            'employee.manage_track_record',
         ];
 
         foreach ($permissions as $permission) {
@@ -38,7 +39,7 @@ class AccessControlSeeder extends Seeder
         $roles = [
             'Super Admin' => $allPermissions,
             'HR Admin' => [
-                'employee.view', 'employee.create', 'employee.update', 'employee.change_status', 'employee.transfer', 'employee.export',
+                'employee.view', 'employee.create', 'employee.update', 'employee.change_status', 'employee.transfer', 'employee.export', 'employee.manage_track_record',
                 'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'employee_incident.resolve',
                 'evaluation.view', 'evaluation.create', 'evaluation.update', 'evaluation.submit',
                 'employee_document.view', 'employee_document.create', 'employee_document.delete',
@@ -47,7 +48,7 @@ class AccessControlSeeder extends Seeder
                 'settings.view', 'settings.manage',
             ],
             'HR Manager' => [
-                'employee.view', 'employee.export',
+                'employee.view', 'employee.export', 'employee.manage_track_record',
                 'employee_incident.view', 'employee_incident.resolve',
                 'evaluation.view', 'evaluation.approve', 'evaluation.finalize',
                 'employee_document.view',

@@ -23,8 +23,15 @@ export type PageProps<
             auditView?: boolean;
             organizationView?: boolean;
             userView?: boolean;
+            settingsManage?: boolean;
         };
         unreadNotifications: number;
+    };
+    branding: {
+        app_name: string;
+        app_logo: string | null;
+        primary_color: string;
+        footer_text: string;
     };
     flash: {
         success?: string | null;

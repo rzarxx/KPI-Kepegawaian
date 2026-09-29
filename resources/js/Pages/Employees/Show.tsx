@@ -94,6 +94,7 @@ export default function Show({
     canUploadDocument,
     canEvaluate,
     evaluationPeriods,
+    adHocEvaluationId,
     canRehire,
     canTransfer,
     canChangeStatus,
@@ -113,6 +114,7 @@ export default function Show({
     canUploadDocument: boolean;
     canEvaluate: boolean;
     evaluationPeriods: EvaluationPeriod[];
+    adHocEvaluationId?: number | null;
     canRehire: boolean;
     canTransfer: boolean;
     canChangeStatus: boolean;
@@ -211,6 +213,7 @@ export default function Show({
                     <EvaluationCard
                         employeeId={employee.id}
                         periods={evaluationPeriods}
+                        adHocEvaluationId={adHocEvaluationId}
                     />
                 )}
                 {(canTransfer || canChangeStatus || canRehire) && (
@@ -302,9 +305,11 @@ export default function Show({
 function EvaluationCard({
     employeeId,
     periods,
+    adHocEvaluationId,
 }: {
     employeeId: number;
     periods: EvaluationPeriod[];
+    adHocEvaluationId?: number | null;
 }) {
     return (
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -313,51 +318,69 @@ function EvaluationCard({
                 Penilaian Karyawan
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-                Mulai penilaian pada periode aktif atau lanjutkan draf yang
-                sudah tersimpan.
+                Mulai penilaian langsung atau pilih periode tertentu.
             </p>
-            {periods.length ? (
-                <div className="mt-4 divide-y divide-slate-100 rounded-lg border border-slate-200">
-                    {periods.map((period) => (
-                        <div
-                            className="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center"
-                            key={period.id}
+            <div className="mt-4 space-y-3">
+                <div className="flex flex-col justify-between gap-3 rounded-lg border border-green-200 bg-green-50 p-4 sm:flex-row sm:items-center">
+                    <div>
+                        <p className="text-sm font-semibold text-green-900">
+                            Penilaian Langsung
+                        </p>
+                        <p className="mt-1 text-xs text-green-700">
+                            Tanpa periode tertentu
+                        </p>
+                    </div>
+                    <Button asChild>
+                        <Link
+                            href={
+                                adHocEvaluationId
+                                    ? route("evaluations.show", adHocEvaluationId)
+                                    : route("evaluations.create", employeeId)
+                            }
                         >
-                            <div>
-                                <p className="text-sm font-semibold text-slate-900">
-                                    {period.name}
-                                </p>
-                                <p className="mt-1 text-xs text-slate-500">
-                                    {period.start_date} sampai {period.end_date}
-                                </p>
-                            </div>
-                            <Button asChild>
-                                <Link
-                                    href={
-                                        period.evaluation_id
-                                            ? route(
-                                                  "evaluations.show",
-                                                  period.evaluation_id,
-                                              )
-                                            : route("evaluations.create", [
-                                                  employeeId,
-                                                  period.id,
-                                              ])
-                                    }
-                                >
-                                    {period.evaluation_id
-                                        ? "Lanjutkan Penilaian"
-                                        : "Mulai Penilaian"}
-                                </Link>
-                            </Button>
-                        </div>
-                    ))}
+                            {adHocEvaluationId
+                                ? "Lanjutkan Penilaian"
+                                : "Mulai Penilaian"}
+                        </Link>
+                    </Button>
                 </div>
-            ) : (
-                <p className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
-                    Belum ada periode penilaian aktif yang dapat digunakan.
-                </p>
-            )}
+                {periods.length > 0 && (
+                    <div className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+                        {periods.map((period) => (
+                            <div
+                                className="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center"
+                                key={period.id}
+                            >
+                                <div>
+                                    <p className="text-sm font-semibold text-slate-900">
+                                        {period.name}
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-500">
+                                        {period.start_date} sampai{" "}
+                                        {period.end_date}
+                                    </p>
+                                </div>
+                                <Button asChild variant="secondary">
+                                    <Link
+                                        href={
+                                            period.evaluation_id
+                                                ? route(
+                                                      "evaluations.show",
+                                                      period.evaluation_id,
+                                                  )
+                                                : route("evaluations.create", employeeId) + "?period_id=" + period.id
+                                        }
+                                    >
+                                        {period.evaluation_id
+                                            ? "Lanjutkan Penilaian"
+                                            : "Mulai Penilaian"}
+                                    </Link>
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </section>
     );
 }

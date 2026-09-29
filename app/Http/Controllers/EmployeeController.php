@@ -114,7 +114,7 @@ class EmployeeController extends Controller
                 'id' => 'evaluation-'.$evaluation->id,
                 'date' => $evaluation->updated_at->toDateString(),
                 'type' => 'EVALUATION',
-                'title' => 'Penilaian '.$evaluation->period->name,
+                'title' => 'Penilaian '.($evaluation->period?->name ?? 'Langsung'),
                 'description' => 'Nilai '.number_format((float) $evaluation->total_score, 2, ',', '.').' - '.$this->evaluationStatusLabel($evaluation->status),
             ]));
         }
@@ -182,6 +182,7 @@ class EmployeeController extends Controller
             'canRehire' => $user->can('rehire', $employee),
             'canTransfer' => $user->can('transfer', $employee) && $employee->currentAssignment !== null,
             'canChangeStatus' => $user->can('changeStatus', $employee) && $employee->currentAssignment !== null,
+            'canManageTrackRecord' => $user->can('manageTrackRecord', $employee),
             'canUpdate' => $user->can('update', $employee),
         ]);
     }

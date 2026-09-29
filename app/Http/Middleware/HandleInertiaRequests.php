@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\AppSetting;
 use App\Services\OrganizationalScopeResolver;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -62,6 +63,7 @@ class HandleInertiaRequests extends Middleware
                     'auditView' => $user->can('audit.view') && $scopeResolver->allowedBranchIds($user) === null,
                     'organizationView' => $user->can('organization.view'),
                     'userView' => $user->can('user.view'),
+                    'settingsManage' => $user->can('settings.manage'),
                 ] : [],
                 'unreadNotifications' => $user?->unreadNotifications()->count() ?? 0,
             ],
@@ -69,6 +71,7 @@ class HandleInertiaRequests extends Middleware
                 'active' => true,
                 'target_name' => $request->user()?->name,
             ] : null,
+            'branding' => AppSetting::branding(),
             'flash' => [
                 'success' => fn (): ?string => $request->session()->get('success'),
                 'error' => fn (): ?string => $request->session()->get('error'),

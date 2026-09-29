@@ -272,13 +272,20 @@ Password:
 
 Urutan:
 1. heading + filter
-2. summary
-3. trend
-4. perlu perhatian
-5. list/table karyawan relevan
-6. recent activity
+2. summary cards
+3. pie charts (distribusi per divisi, per cabang, per status karyawan)
+4. trend line chart
+5. perlu perhatian
+6. aktivitas penilaian terbaru
 
-Jangan menampilkan terlalu banyak chart.
+Pie chart:
+- Gunakan Recharts `PieChart` + `Pie` + `Cell` + `Legend` + `Tooltip`.
+- Tampilkan tiga pie chart berdampingan (grid 3 kolom desktop, stack mobile).
+- Warna mengikuti palet status di DESIGN.md bagian 4.
+- Label di dalam chart atau legend di bawah.
+- Empty state bila tidak ada data.
+
+Jangan menampilkan terlalu banyak chart selain yang sudah ditentukan.
 
 ## 21. Detail Karyawan
 
@@ -367,3 +374,23 @@ Submit:
 
 Update PWA:
 - jangan force reload saat form aktif.
+
+## 27. Branding dan Tampilan Sistem
+
+Super Admin dapat mengelola:
+- **Logo**: ditampilkan di sidebar, halaman login, dan PWA manifest.
+  Format: PNG/SVG, max 512KB, rekomendasi 256x256px.
+- **Aksen warna**: primary color yang diterapkan pada sidebar active state,
+  tombol primary, badge, focus ring, dan elemen aksen lainnya.
+  Default: hijau `#16A34A`.
+- **Footer**: teks pendek yang ditampilkan di bagian bawah sidebar atau
+  halaman login. Default: kosong.
+- **Nama aplikasi**: ditampilkan di sidebar dan halaman login.
+  Default: `KPI Kepegawaian`.
+
+Halaman pengaturan tampilan menggunakan layout yang sama dengan halaman
+pengaturan lainnya. Preview warna ditampilkan secara real-time sebelum
+disimpan.
+
+Perubahan berlaku global setelah halaman dimuat ulang. CSS custom properties
+digunakan untuk menerapkan warna aksen secara dinamis.
