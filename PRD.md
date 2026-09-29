@@ -217,8 +217,10 @@ Jika identifier sudah ada, sistem mendeteksi kemungkinan employee lama/rehire.
 
 ### Evaluation
 
-**FR-EVAL-001**
-Periode memiliki start/end date custom.
+**FR-EVAL-001** *(diperbarui)*
+Penilaian bersifat ad-hoc: evaluator dapat membuat penilaian kapan saja tanpa
+wajib memilih periode. Periode tetap tersedia sebagai opsional untuk
+pengelompokan dan pelaporan.
 
 **FR-EVAL-002**
 Komponen penilaian configurable.
@@ -238,6 +240,60 @@ Masa kerja dapat dihitung otomatis.
 **FR-EVAL-007**
 Evaluation memiliki Draft/Submitted/Approved/Finalized/Closed sesuai workflow.
 
+### Riwayat Kerja
+
+**FR-RK-001**
+Hanya role HR Admin dan HR Manager yang dapat menambah atau mengubah riwayat
+kerja karyawan.
+
+**FR-RK-002**
+Kepala Divisi, Kepala Sub Divisi, dan Kepala Cabang hanya dapat melihat
+riwayat kerja karyawan dalam scope organisasi mereka.
+
+### Impersonasi
+
+**FR-IMP-001**
+Impersonasi hanya tersedia untuk Super Admin dengan permission
+`impersonation.start`.
+
+**FR-IMP-002**
+Selama impersonasi, seluruh authorization menggunakan role, permission, dan
+scope pengguna target. Hak Super Admin asal tidak terbawa.
+
+**FR-IMP-003**
+Aksi terlarang selama impersonasi: ubah password/MFA, ubah role/permission/
+scope, pengaturan sistem, buat pengguna, impersonasi berantai, dan kelola
+branding/tampilan sistem.
+
+**FR-IMP-004**
+Timeout, pencabutan izin, dan nonaktifnya akun asal atau target harus
+mengakhiri sesi impersonasi secara otomatis.
+
+**FR-IMP-005**
+Setiap mulai, selesai, timeout, dan pencabutan wajib menghasilkan audit log.
+
+### Branding dan Tampilan Sistem
+
+**FR-BRD-001**
+Super Admin dapat mengelola logo aplikasi (sidebar, login, PWA).
+
+**FR-BRD-002**
+Super Admin dapat mengubah aksen warna utama (primary color) yang diterapkan
+pada sidebar, tombol, badge, dan elemen aksen lainnya.
+
+**FR-BRD-003**
+Super Admin dapat mengelola teks footer aplikasi.
+
+**FR-BRD-004**
+Super Admin dapat mengelola nama aplikasi yang ditampilkan di sidebar dan
+halaman login.
+
+**FR-BRD-005**
+Perubahan branding tersimpan di database dan berlaku secara global untuk semua
+pengguna setelah halaman dimuat ulang.
+
+**FR-BRD-006**
+Perubahan branding dicatat pada audit log.
 ### Incident
 
 **FR-INC-001**
@@ -294,7 +350,8 @@ Data employee sensitif tidak dicache offline secara agresif.
 ### UI
 
 **FR-UI-001**
-Bahasa Indonesia penuh.
+Bahasa Indonesia penuh. Seluruh copy/teks UI harus menggunakan Bahasa Indonesia
+yang konsisten, singkat, dan operasional di semua halaman.
 
 **FR-UI-002**
 Emoji dilarang sebagai icon.
@@ -350,6 +407,12 @@ MVP dianggap layak apabila:
 - user hanya melihat data sesuai scope,
 - employee history bertahan saat mutasi/resign,
 - penilaian menghasilkan total dan criteria benar,
+- penilaian dapat dilakukan tanpa wajib memilih periode,
+- dashboard menampilkan pie chart per divisi, per cabang, dan per status karyawan,
+- riwayat kerja hanya dapat diisi oleh HRD/SDM,
+- impersonasi Super Admin berfungsi dengan benar dan aman,
+- copy/teks UI konsisten berbahasa Indonesia di semua halaman,
+- branding (logo, warna aksen, footer, nama aplikasi) dapat dikelola Super Admin,
 - laporan XLSX sesuai filter,
 - PWA dapat di-install,
 - tidak ada CDN runtime,

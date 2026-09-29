@@ -176,3 +176,103 @@ Harus confirmation:
 - deactivate user
 - finalize evaluation
 - change role/permission
+
+## 14. Riwayat Kerja
+
+BR-RK-001:
+Riwayat kerja (track record) hanya dapat diisi dan dikelola oleh pengguna
+dengan role HR Admin atau HR Manager (SDM).
+
+BR-RK-002:
+Kepala Divisi, Kepala Sub Divisi, dan Kepala Cabang hanya dapat melihat
+riwayat kerja karyawan dalam scope organisasi mereka, tidak dapat mengubah.
+
+BR-RK-003:
+Riwayat kerja mencakup timeline masuk, perubahan jabatan, mutasi, incident,
+penilaian, resign, terminasi, dan rehire.
+
+## 15. Impersonasi Super Admin
+
+BR-IMP-001:
+Impersonasi hanya tersedia untuk Super Admin dengan permission
+`impersonation.start`.
+
+BR-IMP-002:
+Selama impersonasi, authorization sepenuhnya menggunakan role, permission,
+dan scope pengguna target. Hak Super Admin asal tidak boleh terbawa.
+
+BR-IMP-003:
+Aksi terlarang selama impersonasi:
+- ubah password/MFA
+- ubah role/permission/scope
+- pengaturan sistem dan branding
+- buat pengguna
+- impersonasi berantai
+
+BR-IMP-004:
+Sesi impersonasi otomatis berakhir bila:
+- timeout tercapai (default 30 menit)
+- akun asal atau target menjadi tidak aktif
+- permission impersonation.start dicabut
+
+BR-IMP-005:
+Setiap event impersonasi (mulai, selesai, timeout, pencabutan) wajib
+menghasilkan audit log berisi pelaku asal, target, alasan, waktu, IP,
+dan user agent.
+
+## 16. Branding dan Tampilan Sistem
+
+BR-BRD-001:
+Super Admin dapat mengelola branding aplikasi melalui halaman pengaturan:
+- Logo (sidebar, login, PWA)
+- Aksen warna utama (primary color)
+- Teks footer
+- Nama aplikasi
+
+BR-BRD-002:
+Branding disimpan di tabel `app_settings` dan berlaku global untuk semua
+pengguna setelah halaman dimuat ulang.
+
+BR-BRD-003:
+Perubahan branding dicatat pada audit log.
+
+BR-BRD-004:
+Jika branding belum dikonfigurasi, aplikasi menggunakan default:
+- Logo: logo bawaan aplikasi
+- Warna: hijau (#16A34A)
+- Footer: kosong
+- Nama: KPI Kepegawaian
+
+## 17. Copywriting UI
+
+BR-CPW-001:
+Seluruh teks yang dilihat pengguna wajib Bahasa Indonesia yang konsisten,
+singkat, dan operasional.
+
+BR-CPW-002:
+Heading, label, tombol, placeholder, pesan error, pesan sukses, empty state,
+dan tooltip harus diaudit untuk konsistensi bahasa dan istilah.
+
+BR-CPW-003:
+Istilah yang wajib digunakan (lihat AGENTS.md bagian 4. Bahasa UI):
+- Beranda (bukan Dashboard)
+- Karyawan (bukan Employee)
+- Penilaian (bukan Performance/Review)
+- Riwayat Kerja (bukan Track Record)
+- Karyawan Bermasalah (bukan Problem Employee)
+- Laporan (bukan Report)
+- Pengaturan (bukan Settings)
+
+## 18. Dashboard Pie Chart
+
+BR-PIE-001:
+Dashboard menampilkan pie chart untuk visualisasi distribusi karyawan:
+- Distribusi per divisi
+- Distribusi per cabang
+- Distribusi per status karyawan (aktif, percobaan, resign, dll.)
+
+BR-PIE-002:
+Data pie chart mengikuti organizational scope dan filter aktif pengguna.
+
+BR-PIE-003:
+Pie chart menggunakan Recharts (sudah menjadi dependency project).

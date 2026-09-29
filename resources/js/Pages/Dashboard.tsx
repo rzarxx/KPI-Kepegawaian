@@ -4,11 +4,13 @@ import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { AlertTriangle, ArrowRight, ChartNoAxesCombined, ClipboardCheck, UsersRound } from 'lucide-react';
 import { useState } from 'react';
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 type Option = { id: number; name: string; branch_id?: number; division_id?: number };
+type DistributionItem = { name: string; value: number };
 type Props = {
     metrics: { total: number; active: number; attention: number; average: number };
+    distributions: { byDivision: DistributionItem[]; byBranch: DistributionItem[]; byStatus: DistributionItem[] };
     trend: { name: string; score: number | string }[];
     priorities: { id: number; name: string; number: string; reasons: { rule: string; value: number; type: string }[] }[];
     activities: { id: number; employee: string; score: number | string; criteria?: string; date: string }[];
@@ -16,7 +18,9 @@ type Props = {
     filterOptions: { periods: Option[]; branches: Option[]; divisions: Option[]; subDivisions: Option[] };
 };
 
-export default function Dashboard({ metrics, trend, priorities, activities, filters, filterOptions }: Props) {
+const PIE_COLORS = ['#16A34A', '#2563EB', '#D97706', '#64748B', '#DC2626', '#7C3AED', '#0891B2', '#CA8A04'];
+
+export default function Dashboard({ metrics, distributions, trend, priorities, activities, filters, filterOptions }: Props) {
     const [values, setValues] = useState({
         period_id: String(filters.period_id ?? ''),
         branch_id: String(filters.branch_id ?? ''),
@@ -28,7 +32,7 @@ export default function Dashboard({ metrics, trend, priorities, activities, filt
     const applyFilters = () => router.get(route('dashboard'), values, { preserveState: true, replace: true });
 
     return (
-        <AuthenticatedLayout header={<div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-end"><div><p className="text-sm text-slate-500">Beranda</p><h1 className="text-[26px] font-bold text-slate-900">Ringkasan Sistem</h1></div><div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5"><Select ariaLabel="Periode" value={values.period_id} options={filterOptions.periods} placeholder="Semua periode" onChange={(value) => setValues({ ...values, period_id: value })} /><Select ariaLabel="Cabang" value={values.branch_id} options={filterOptions.branches} placeholder="Semua cabang" onChange={(value) => setValues({ ...values, branch_id: value, division_id: '', sub_division_id: '' })} /><Select ariaLabel="Divisi" value={values.division_id} options={divisions} placeholder="Semua divisi" onChange={(value) => setValues({ ...values, division_id: value, sub_division_id: '' })} /><Select ariaLabel="Sub Divisi" value={values.sub_division_id} options={subDivisions} placeholder="Semua sub divisi" onChange={(value) => setValues({ ...values, sub_division_id: value })} /><button className="min-h-10 rounded-lg bg-green-600 px-4 text-sm font-semibold text-white hover:bg-green-700" onClick={applyFilters} type="button">Terapkan</button></div></div>}>
+        <AuthenticatedLayout header={<div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-end"><div><p className="text-sm text-slate-500">Beranda</p><h1 className="text-[26px] font-bold text-slate-900">Ringkasan Sistem</h1></div><div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5"><FilterSelect ariaLabel="Periode" value={values.period_id} options={filterOptions.periods} placeholder="Semua periode" onChange={(value) => setValues({ ...values, period_id: value })} /><FilterSelect ariaLabel="Cabang" value={values.branch_id} options={filterOptions.branches} placeholder="Semua cabang" onChange={(value) => setValues({ ...values, branch_id: value, division_id: '', sub_division_id: '' })} /><FilterSelect ariaLabel="Divisi" value={values.division_id} options={divisions} placeholder="Semua divisi" onChange={(value) => setValues({ ...values, division_id: value, sub_division_id: '' })} /><FilterSelect ariaLabel="Sub Divisi" value={values.sub_division_id} options={subDivisions} placeholder="Semua sub divisi" onChange={(value) => setValues({ ...values, sub_division_id: value })} /><button className="min-h-10 rounded-lg bg-green-600 px-4 text-sm font-semibold text-white hover:bg-green-700" onClick={applyFilters} type="button">Terapkan</button></div></div>}>
             <Head title="Beranda" />
             <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8">
                 <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -36,6 +40,11 @@ export default function Dashboard({ metrics, trend, priorities, activities, filt
                     <Metric icon={<ClipboardCheck size={20} />} label="Karyawan aktif" value={metrics.active} tone="blue" />
                     <Metric icon={<AlertTriangle size={20} />} label="Perlu perhatian" value={metrics.attention} tone="amber" />
                     <Metric icon={<ChartNoAxesCombined size={20} />} label="Rata-rata nilai" value={Number(metrics.average).toFixed(2)} tone="slate" />
+                </section>
+                <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                    <DistributionChart title="Distribusi per Divisi" data={distributions.byDivision} />
+                    <DistributionChart title="Distribusi per Cabang" data={distributions.byBranch} />
+                    <DistributionChart title="Distribusi per Status" data={distributions.byStatus} />
                 </section>
                 <section className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -59,9 +68,35 @@ export default function Dashboard({ metrics, trend, priorities, activities, filt
     );
 }
 
+function DistributionChart({ title, data }: { title: string; data: DistributionItem[] }) {
+    const hasData = data.length > 0 && data.some((item) => item.value > 0);
+    return (
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 className="font-semibold text-slate-900">{title}</h2>
+            <div className="mt-4 h-64">
+                {hasData ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
+                                {data.map((_entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip formatter={(value) => [String(value), 'Jumlah']} contentStyle={{ borderColor: '#E2E8F0', borderRadius: 10 }} />
+                            <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <Empty text="Belum ada data untuk ditampilkan." />
+                )}
+            </div>
+        </div>
+    );
+}
+
 function Metric({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: string | number; tone: 'green' | 'blue' | 'amber' | 'slate' }) {
     const colors = { green: 'bg-green-50 text-green-700', blue: 'bg-blue-50 text-blue-700', amber: 'bg-amber-50 text-amber-700', slate: 'bg-slate-100 text-slate-700' };
     return <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><span className={'flex size-10 items-center justify-center rounded-lg ' + colors[tone]}>{icon}</span><p className="mt-4 text-sm text-slate-500">{label}</p><p className="mt-1 text-2xl font-bold text-slate-900">{value}</p></article>;
 }
-function Select({ ariaLabel, value, options, placeholder, onChange }: { ariaLabel: string; value: string; options: Option[]; placeholder: string; onChange: (value: string) => void }) { return <select aria-label={ariaLabel} className="min-h-10 rounded-lg border-slate-300 text-sm focus:border-green-600 focus:ring-green-600" value={value} onChange={(event) => onChange(event.target.value)}><option value="">{placeholder}</option>{options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}</select>; }
+function FilterSelect({ ariaLabel, value, options, placeholder, onChange }: { ariaLabel: string; value: string; options: Option[]; placeholder: string; onChange: (value: string) => void }) { return <select aria-label={ariaLabel} className="min-h-10 rounded-lg border-slate-300 text-sm focus:border-green-600 focus:ring-green-600" value={value} onChange={(event) => onChange(event.target.value)}><option value="">{placeholder}</option>{options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}</select>; }
 function Empty({ text }: { text: string }) { return <div className="flex h-full min-h-28 items-center justify-center rounded-lg border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">{text}</div>; }

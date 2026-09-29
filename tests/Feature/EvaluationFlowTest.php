@@ -19,13 +19,13 @@ class EvaluationFlowTest extends TestCase
     public function test_evaluation_follows_draft_submit_approve_finalize_and_close_workflow(): void
     {
         [$actor, $employee, $period, $component] = $this->context();
-        $payload = ['scores' => [['component_id' => $component->id, 'raw_score' => 77, 'note' => 'Baik']], 'notes' => 'Draf'];
-        $this->actingAs($actor)->post(route('evaluations.store', [$employee, $period]), $payload)->assertSessionHasNoErrors();
+        $payload = ['period_id' => $period->id, 'scores' => [['component_id' => $component->id, 'raw_score' => 77, 'note' => 'Baik']], 'notes' => 'Draf'];
+        $this->actingAs($actor)->post(route('evaluations.store', $employee), $payload)->assertSessionHasNoErrors();
         $this->assertDatabaseHas('employee_evaluations', ['employee_id' => $employee->id, 'status' => 'DRAFT']);
         $evaluation = $employee->evaluations()->sole();
 
         $payload['finalize'] = true;
-        $this->actingAs($actor)->post(route('evaluations.store', [$employee, $period]), $payload)->assertSessionHasErrors('finalize');
+        $this->actingAs($actor)->post(route('evaluations.store', $employee), $payload)->assertSessionHasErrors('finalize');
 
         foreach (['SUBMITTED', 'APPROVED', 'FINALIZED', 'CLOSED'] as $status) {
             $this->actingAs($actor)->post(route('evaluations.transition', $evaluation), ['status' => $status])->assertSessionHasNoErrors();

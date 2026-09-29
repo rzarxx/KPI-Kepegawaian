@@ -92,6 +92,122 @@ scope tests pass.
 - backup
 - smoke test
 
+
+## Phase 11 — Update Besar (28 September 2026)
+
+Enam perubahan besar yang harus diimplementasikan secara berurutan:
+
+### 11.1 Penilaian Ad-Hoc (Tanpa Periode Wajib)
+
+Perubahan:
+- `period_id` pada `employee_evaluations` menjadi nullable.
+- Route penilaian tidak lagi mewajibkan parameter `{period}`.
+- Form penilaian menampilkan dropdown periode opsional (nullable).
+- `SaveEmployeeEvaluationAction` tidak menolak penilaian tanpa periode.
+- Dashboard dan laporan tetap dapat memfilter berdasarkan periode.
+- Migration: alter `period_id` nullable, buat index baru.
+
+Test:
+- Penilaian berhasil disimpan tanpa periode.
+- Penilaian dengan periode tetap berfungsi.
+- Filter dashboard/laporan tetap benar.
+
+### 11.2 Dashboard Pie Chart
+
+Perubahan:
+- `DashboardController` mengirim data distribusi per divisi, per cabang, dan
+  per status karyawan.
+- Data mengikuti organizational scope dan filter aktif.
+- Frontend `Dashboard.tsx` menampilkan tiga `PieChart` (Recharts) di bawah
+  summary cards.
+- Warna konsisten dengan DESIGN.md (hijau, biru, amber, slate).
+- Empty state bila data nol.
+
+Test:
+- Distribusi per divisi cocok dengan data.
+- Distribusi per cabang cocok dengan scope.
+- Distribusi per status cocok.
+
+### 11.3 Riwayat Kerja Hanya HRD/SDM
+
+Perubahan:
+- Tambah permission baru: `employee.manage_track_record`.
+- Hanya HR Admin dan HR Manager mendapat permission ini.
+- Policy `EmployeePolicy` menambah method `manageTrackRecord`.
+- Controller riwayat kerja memeriksa permission sebelum create/update.
+- Kepala Divisi/Sub Divisi/Cabang hanya melihat, tidak mengubah.
+- UI menyembunyikan tombol tambah/ubah riwayat untuk role non-HRD.
+
+Test:
+- HR Admin dapat menambah riwayat kerja.
+- Division Head tidak dapat menambah riwayat kerja (403).
+- Division Head dapat melihat riwayat kerja dalam scope.
+
+### 11.4 Perbaikan Sistem Impersonasi Super Admin
+
+Audit dan perbaikan:
+- Verifikasi session regeneration saat mulai dan selesai.
+- Verifikasi blocking aksi sensitif (password, role, permission, scope,
+  pengaturan sistem, branding, buat pengguna, impersonasi berantai).
+- Verifikasi auto-end saat timeout, akun nonaktif, izin dicabut.
+- Verifikasi audit log lengkap untuk setiap event.
+- Perbaiki bug atau gap yang ditemukan.
+- Tambah middleware block untuk route branding/settings saat impersonasi.
+
+Test:
+- Impersonasi mulai: session regenerated, audit tercatat.
+- Aksi terlarang menghasilkan 403 saat impersonasi.
+- Timeout mengakhiri sesi dan memulihkan akun asal.
+- Impersonasi berantai ditolak.
+
+### 11.5 Perbaikan Copywriting Seluruh Halaman
+
+Audit dan perbaikan:
+- Audit seluruh halaman frontend terhadap standar AGENTS.md bagian 4.
+- Perbaiki istilah yang tidak konsisten.
+- Perbaiki heading, label, tombol, placeholder, pesan error, pesan sukses,
+  empty state, dan tooltip.
+- Pastikan tidak ada teks bahasa Inggris yang terekspos ke pengguna.
+- Perbaiki typo dan kalimat yang kurang jelas.
+
+Cakupan halaman:
+- Login, Beranda, Karyawan (Index, Create, Edit, Show, Incidents, ProblemIndex),
+  Penilaian (Configuration, Form), Laporan (Index), Notifikasi (Index),
+  Organisasi (Index), Pengguna (Index), Profil (Edit), Audit (Index),
+  Welcome, Layout (AuthenticatedLayout, GuestLayout).
+
+### 11.6 Branding dan Tampilan Sistem oleh Super Admin
+
+Perubahan:
+- Migration: buat tabel `app_settings` (key, value, type, group).
+- Seeder: default settings (app_name, app_logo, primary_color, footer_text).
+- Model `AppSetting` dengan cache.
+- Controller `AppSettingsController` (CRUD, hanya Super Admin).
+- Route: GET/PUT `/pengaturan/tampilan` dengan middleware `not-impersonating`.
+- Halaman frontend `Settings/Appearance.tsx` untuk kelola branding.
+- `HandleInertiaRequests` menyebarkan branding settings ke semua halaman.
+- Layout menggunakan dynamic logo, warna, footer, dan nama dari settings.
+- Upload logo ke `storage/app/private/branding/` dengan validasi.
+- Endpoint publik untuk serve logo (tanpa auth, karena dipakai di login).
+- Audit log untuk setiap perubahan branding.
+
+Test:
+- Super Admin dapat mengubah logo, warna, footer, nama.
+- Perubahan berlaku di semua halaman.
+- Non-Super Admin tidak dapat mengakses pengaturan tampilan (403).
+- Perubahan branding tercatat di audit log.
+
+### Exit Criteria Phase 11
+
+- Penilaian ad-hoc berfungsi (dengan dan tanpa periode).
+- Dashboard menampilkan 3 pie chart yang benar.
+- Riwayat kerja hanya dapat dikelola HRD/SDM.
+- Impersonasi aman dan lengkap.
+- Copywriting konsisten Bahasa Indonesia di semua halaman.
+- Branding dapat dikelola Super Admin.
+- Seluruh test terkait lulus.
+- Dokumentasi tersinkronisasi.
+
 ---
 
 ## Checkpoint Lanjutan — 18 September 2026

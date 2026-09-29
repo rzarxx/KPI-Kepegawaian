@@ -182,7 +182,7 @@ Status:
 - id
 - employee_id
 - assignment_id
-- period_id
+- period_id **nullable** *(diperbarui: penilaian ad-hoc tanpa periode)*
 - evaluator_id
 - total_score
 - criteria_id nullable
@@ -195,6 +195,9 @@ Status:
 
 Unique suggestion:
 (employee_id, period_id, evaluator_id) depending workflow.
+Catatan: karena period_id nullable, unique constraint harus memperhitungkan
+null. Untuk penilaian ad-hoc, uniqueness berdasarkan (employee_id, evaluator_id,
+created_at::date) atau dikelola di application layer.
 
 ### employee_evaluation_scores
 - id
@@ -248,6 +251,32 @@ Laravel standard notifications table.
 - created_at
 - completed_at nullable
 
+### app_settings
+- id
+- key unique
+- value text nullable
+- type (string, text, color, image)
+- group (branding, system)
+- timestamps
+
+Default keys:
+- `app_name` (string, branding) = "KPI Kepegawaian"
+- `app_logo` (image, branding) = null (gunakan logo default)
+- `primary_color` (color, branding) = "#16A34A"
+- `footer_text` (text, branding) = null
+
+### impersonation_sessions
+- id
+- impersonator_id
+- target_id
+- reason
+- started_at
+- expires_at
+- ended_at nullable
+- ended_reason nullable
+- ip_address nullable
+- user_agent nullable
+- timestamps
 ## 4. Incident Categories
 
 Configurable, initial:

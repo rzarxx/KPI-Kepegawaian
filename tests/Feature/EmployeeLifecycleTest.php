@@ -17,7 +17,7 @@ class EmployeeLifecycleTest extends TestCase
 
     public function test_transfer_keeps_previous_assignment_and_audits_the_change(): void
     {
-        [$actor, $employee, $branch, $division] = $this->employeeWithAccess(['employee.transfer', 'employee.view']);
+        [$actor, $employee, $branch, $division] = $this->employeeWithAccess(['employee.transfer', 'employee.view', 'employee.manage_track_record']);
         $position = Position::query()->create(['code' => 'MGR', 'name' => 'Manajer', 'level' => 'Manajerial']);
 
         $this->actingAs($actor)->post(route('employees.transfer', $employee), [
@@ -32,7 +32,7 @@ class EmployeeLifecycleTest extends TestCase
 
     public function test_resigned_employee_remains_visible_in_final_assignment_scope_with_history(): void
     {
-        [$actor, $employee] = $this->employeeWithAccess(['employee.change_status', 'employee.view']);
+        [$actor, $employee] = $this->employeeWithAccess(['employee.change_status', 'employee.view', 'employee.manage_track_record']);
 
         $this->actingAs($actor)->post(route('employees.status', $employee), [
             'status' => 'RESIGNED', 'effective_date' => now()->subDay()->toDateString(), 'reason' => 'Mengundurkan diri',
@@ -69,7 +69,7 @@ class EmployeeLifecycleTest extends TestCase
 
     public function test_inactive_employee_can_be_rehired_without_losing_history(): void
     {
-        [$actor, $employee, $branch, $division] = $this->employeeWithAccess(['employee.change_status', 'employee.view']);
+        [$actor, $employee, $branch, $division] = $this->employeeWithAccess(['employee.change_status', 'employee.view', 'employee.manage_track_record']);
         $this->actingAs($actor)->post(route('employees.status', $employee), [
             'status' => 'RESIGNED',
             'effective_date' => now()->subMonth()->toDateString(),

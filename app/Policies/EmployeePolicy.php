@@ -37,18 +37,24 @@ class EmployeePolicy
 
     public function transfer(User $user, Employee $employee): bool
     {
-        return $user->can('employee.transfer') && $this->view($user, $employee);
+        return $user->can('employee.transfer') && $user->can('employee.manage_track_record') && $this->view($user, $employee);
     }
 
     public function changeStatus(User $user, Employee $employee): bool
     {
-        return $user->can('employee.change_status') && $this->view($user, $employee);
+        return $user->can('employee.change_status') && $user->can('employee.manage_track_record') && $this->view($user, $employee);
     }
 
     public function rehire(User $user, Employee $employee): bool
     {
         return $user->can('employee.change_status')
+            && $user->can('employee.manage_track_record')
             && $this->view($user, $employee)
             && in_array($employee->current_status->value, ['RESIGNED', 'TERMINATED', 'INACTIVE'], true);
+    }
+
+    public function manageTrackRecord(User $user, Employee $employee): bool
+    {
+        return $user->can('employee.manage_track_record') && $this->view($user, $employee);
     }
 }

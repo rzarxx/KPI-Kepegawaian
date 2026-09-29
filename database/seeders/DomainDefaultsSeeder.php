@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AppSetting;
 use App\Models\EmployeeAttentionRule;
 use App\Models\EvaluationComponent;
 use App\Models\EvaluationCriterion;
@@ -66,6 +67,18 @@ class DomainDefaultsSeeder extends Seeder
             EmployeeAttentionRule::query()->updateOrCreate(
                 ['name' => $rule['name']],
                 [...$rule, 'config' => ['statuses' => ['OPEN', 'UNDER_REVIEW']], 'is_active' => true],
+            );
+        }
+
+        foreach ([
+            ['key' => 'app_name', 'value' => 'KPI Kepegawaian', 'type' => 'string', 'group' => 'branding'],
+            ['key' => 'app_logo', 'value' => null, 'type' => 'string', 'group' => 'branding'],
+            ['key' => 'primary_color', 'value' => '#16A34A', 'type' => 'string', 'group' => 'branding'],
+            ['key' => 'footer_text', 'value' => '', 'type' => 'string', 'group' => 'branding'],
+        ] as $setting) {
+            AppSetting::query()->firstOrCreate(
+                ['key' => $setting['key']],
+                $setting,
             );
         }
     }

@@ -18,6 +18,7 @@ class StoreEmployeeEvaluationRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'period_id' => ['nullable', 'integer', 'exists:performance_periods,id'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'finalize' => ['prohibited'],
             'scores' => ['required', 'array', 'min:1'],

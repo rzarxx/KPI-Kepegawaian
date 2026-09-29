@@ -11,6 +11,7 @@ import {
     LogOut,
     Menu,
     Network,
+    Palette,
     ScrollText,
     TriangleAlert,
     UserCog,
@@ -26,12 +27,13 @@ export default function AuthenticatedLayout({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const { auth, flash, impersonation } = usePage().props;
+    const { auth, flash, impersonation, branding } = usePage().props;
     const { user, access, abilities, unreadNotifications } = auth;
     const activeImpersonation = impersonation as {
         active: boolean;
         target_name: string;
     } | null;
+    const brand = branding as { app_name: string; app_logo: string | null; primary_color: string; footer_text: string };
     const [menuOpen, setMenuOpen] = useState(false);
     const [accountOpen, setAccountOpen] = useState(false);
     const nav: NavItem[] = [
@@ -74,16 +76,28 @@ export default function AuthenticatedLayout({
         ...(abilities.userView
             ? [{ label: 'Pengguna dan Akses', href: route('users.index'), active: route().current('users.*'), icon: <UserCog size={18} /> }]
             : []),
+        ...(abilities.settingsManage
+            ? [{ label: 'Tampilan Sistem', href: route('settings.appearance'), active: route().current('settings.*'), icon: <Palette size={18} /> }]
+            : []),
     ] as NavItem[];
 
+    const accentStyle = brand.primary_color && brand.primary_color !== '#16A34A'
+        ? { '--brand-color': brand.primary_color } as React.CSSProperties
+        : undefined;
+
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800">
-            <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r border-slate-200 bg-white lg:block">
-                <Brand />
-                <nav className="px-3 py-4">
+        <div className="min-h-screen bg-slate-50 text-slate-800" style={accentStyle}>
+            <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-slate-200 bg-white lg:flex">
+                <BrandHeader appName={brand.app_name} appLogo={brand.app_logo} />
+                <nav className="flex-1 overflow-y-auto px-3 py-4">
                     <p className="px-3 pb-2 text-xs font-semibold tracking-wide text-slate-400">MENU UTAMA</p>
                     {nav.map((item) => <NavigationLink item={item} key={item.href} />)}
                 </nav>
+                {brand.footer_text && (
+                    <div className="border-t border-slate-100 px-5 py-3">
+                        <p className="text-xs text-slate-400">{brand.footer_text}</p>
+                    </div>
+                )}
             </aside>
             <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between border-b border-slate-200 bg-white px-4 py-2 lg:pl-[17rem] lg:pr-8">
                 <Button variant="ghost" className="lg:hidden" aria-label="Buka menu" onClick={() => setMenuOpen(true)}>
@@ -101,13 +115,10 @@ export default function AuthenticatedLayout({
                         <span className="hidden text-left sm:block">
                             <span className="block">{user.name}</span>
                             {access && (
-                                <span className="mt-0.5 flex max-w-[420px] items-center gap-1.5">
-                                    <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-800">{access.role}</span>
-                                    <span className="truncate rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">{access.scopeLabels.join('; ')}</span>
-                                </span>
+                                <span className="block text-xs text-slate-400">{access.role}</span>
                             )}
                         </span>
-                        <ChevronDown size={16} />
+                        <ChevronDown className="hidden text-slate-400 sm:block" size={16} />
                     </button>
                     {accountOpen && (
                         <div className="absolute right-0 mt-2 w-72 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
@@ -139,7 +150,7 @@ export default function AuthenticatedLayout({
                 <div className="fixed inset-0 z-40 bg-slate-950/30 lg:hidden" onClick={() => setMenuOpen(false)}>
                     <aside className="h-full w-72 bg-white shadow-xl" onClick={(event) => event.stopPropagation()}>
                         <div className="flex items-center justify-between">
-                            <Brand />
+                            <BrandHeader appName={brand.app_name} appLogo={brand.app_logo} />
                             <Button variant="ghost" aria-label="Tutup menu" onClick={() => setMenuOpen(false)}><X size={20} /></Button>
                         </div>
                         {access && (
@@ -173,12 +184,16 @@ function FlashBanner({ type, message }: { type: 'success' | 'error'; message: st
     );
 }
 
-function Brand() {
+function BrandHeader({ appName, appLogo }: { appName: string; appLogo: string | null }) {
     return (
         <Link href={route('dashboard')} className="flex h-16 items-center gap-3 px-5">
-            <ApplicationLogo className="size-8 shrink-0" />
+            {appLogo ? (
+                <img src={`/storage/${appLogo}`} alt={appName} className="size-8 shrink-0 rounded-lg object-contain" />
+            ) : (
+                <ApplicationLogo className="size-8 shrink-0" />
+            )}
             <span>
-                <span className="block text-sm font-bold text-slate-900">KPI Kepegawaian</span>
+                <span className="block text-sm font-bold text-slate-900">{appName}</span>
                 <span className="block text-xs text-slate-500">Sistem Penilaian</span>
             </span>
         </Link>

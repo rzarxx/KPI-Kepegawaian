@@ -273,8 +273,8 @@ Optional/Recommended untuk:
 
 ## 29. Impersonasi dan Perubahan Akun
 
-- Profil, kata sandi, logout, pengelolaan pengguna, role, permission, scope, dan
-  konfigurasi sistem diblokir selama impersonasi.
+- Profil, kata sandi, logout, pengelolaan pengguna, role, permission, scope,
+  konfigurasi sistem, dan branding/tampilan sistem diblokir selama impersonasi.
 - Middleware validasi impersonasi dijalankan sebelum middleware pemblokiran agar
   timeout atau pencabutan memulihkan akun Super Admin asal dengan aman.
 - Perubahan profil, pembaruan kata sandi, dan penghapusan akun dicatat pada audit
@@ -295,3 +295,14 @@ Test:
 - cache leakage
 - authorization missing
 - mass assignment
+
+## 31. Branding dan Pengaturan Tampilan
+
+- Hanya Super Admin yang dapat mengelola branding (logo, warna, footer, nama).
+- Upload logo divalidasi: ukuran, format (PNG/SVG), MIME type.
+- Logo disimpan di `storage/app/private/branding/` dengan nama random/UUID.
+- Endpoint serve logo tidak memerlukan auth (karena dipakai di login) tetapi
+  hanya menyajikan file dari path branding yang dikontrol aplikasi.
+- Perubahan branding dicatat di audit log.
+- Warna aksen divalidasi sebagai hex color valid.
+- Branding diblokir selama impersonasi.
