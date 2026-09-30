@@ -47,8 +47,8 @@ export default function Form({
     };
 
     return (
-        <AuthenticatedLayout header={<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-sm text-slate-500">Penilaian</p><h1 className="text-[26px] font-bold text-slate-900">Penilaian Karyawan</h1></div>{evaluation && <span className={'w-fit rounded-full px-3 py-1.5 text-sm font-semibold ' + statusStyles[evaluation.status]}>{statusLabels[evaluation.status]}</span>}</div>}>
-            <Head title="Penilaian Karyawan" />
+        <AuthenticatedLayout header={<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-sm text-slate-500">Penilaian</p><h1 className="text-[26px] font-bold text-slate-900">Penilaian Anggota</h1></div>{evaluation && <span className={'w-fit rounded-full px-3 py-1.5 text-sm font-semibold ' + statusStyles[evaluation.status]}>{statusLabels[evaluation.status]}</span>}</div>}>
+            <Head title="Penilaian Anggota" />
             <div className="mx-auto grid max-w-[1200px] gap-6 p-4 sm:p-6 lg:grid-cols-[1fr_280px] lg:p-8">
                 <form className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" onSubmit={(event) => { event.preventDefault(); save(); }}>
                     <h2 className="font-semibold text-slate-900">{employee.full_name}</h2>
@@ -73,17 +73,17 @@ export default function Form({
                         </div>
                     )}
 
-                    {!editable && <div className="mt-5 flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600"><LockKeyhole className="mt-0.5 shrink-0" size={17} /><p>Nilai tidak dapat diubah setelah penilaian diajukan. Gunakan tindakan workflow yang tersedia untuk melanjutkan proses.</p></div>}
-                    <div className="mt-6 space-y-4">{components.map((component, index) => <div className="grid gap-3 border-b border-slate-100 pb-4 sm:grid-cols-[1fr_150px]" key={component.id}><div><p className="font-medium text-slate-800">{component.name}</p><p className="text-xs text-slate-500">Bobot {component.default_weight}% {component.is_auto_calculated ? '&middot; dihitung otomatis' : ''}</p></div><input aria-label={'Nilai ' + component.name} className="h-10 rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600 disabled:bg-slate-50 disabled:text-slate-500" disabled={!editable || component.is_auto_calculated} max="100" min="0" onChange={(event) => { const scores = [...form.data.scores]; scores[index] = { ...scores[index], raw_score: event.target.value }; form.setData('scores', scores); }} placeholder={component.is_auto_calculated ? 'Otomatis' : '0-100'} type="number" value={form.data.scores[index].raw_score} />{scoreError(index) && <p className="text-xs text-red-600 sm:col-start-2">{scoreError(index)}</p>}</div>)}</div>
+                    {!editable && <div className="mt-5 flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600"><LockKeyhole className="mt-0.5 shrink-0" size={17} /><p>Penilaian ini sudah diajukan dan tidak dapat diubah. Silakan gunakan opsi yang tersedia untuk melanjutkan proses.</p></div>}
+                    <div className="mt-6 space-y-4">{components.map((component, index) => <div className="grid gap-3 border-b border-slate-100 pb-4 sm:grid-cols-[1fr_150px]" key={component.id}><div><p className="font-medium text-slate-800">{component.name}</p><p className="text-xs text-slate-500">Bobot {component.default_weight}% {component.is_auto_calculated ? '· dihitung otomatis' : ''}</p></div><input aria-label={'Nilai ' + component.name} className="h-10 rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600 disabled:bg-slate-50 disabled:text-slate-500" disabled={!editable || component.is_auto_calculated} max="100" min="0" onChange={(event) => { const scores = [...form.data.scores]; scores[index] = { ...scores[index], raw_score: event.target.value }; form.setData('scores', scores); }} placeholder={component.is_auto_calculated ? 'Otomatis' : '0-100'} type="number" value={form.data.scores[index].raw_score} />{scoreError(index) && <p className="text-xs text-red-600 sm:col-start-2">{scoreError(index)}</p>}</div>)}</div>
                     {form.errors.scores && <p className="mt-3 text-sm text-red-600">{form.errors.scores}</p>}
-                    <textarea className="mt-5 min-h-24 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600 disabled:bg-slate-50" disabled={!editable} onChange={(event) => form.setData('notes', event.target.value)} placeholder="Catatan penilaian (opsional)" value={form.data.notes} />
+                    <textarea className="mt-5 min-h-24 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600 disabled:bg-slate-50" disabled={!editable} onChange={(event) => form.setData('notes', event.target.value)} placeholder="Catatan tambahan (opsional)" value={form.data.notes} />
                     <div className="mt-5 flex flex-wrap justify-end gap-3">{editable && <Button disabled={form.processing} type="submit" variant="secondary">Simpan Draf</Button>}{transition && <Button disabled={form.processing} onClick={move} type="button">{transition.icon}{transition.label}</Button>}</div>
                 </form>
                 <aside className="h-fit rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 className="flex items-center gap-2 font-semibold text-slate-900"><Calculator size={18} />Ringkasan</h2>
-                    <p className="mt-5 text-sm text-slate-500">{evaluation ? 'Total tersimpan' : 'Total sementara manual'}</p>
+                    <h2 className="flex items-center gap-2 font-semibold text-slate-900"><Calculator size={18} />Ringkasan Nilai</h2>
+                    <p className="mt-5 text-sm text-slate-500">{evaluation ? 'Total tersimpan' : 'Perkiraan sementara'}</p>
                     <p className="mt-1 text-3xl font-bold text-slate-900">{evaluation ? Number(evaluation.total_score).toFixed(2) : total.toFixed(2)}</p>
-                    <p className="mt-4 text-xs leading-5 text-slate-500">Total akhir, aturan otomatis, dan kriteria selalu dihitung ulang oleh server saat draf disimpan.</p>
+                    <p className="mt-4 text-xs leading-5 text-slate-500">Nilai akhir dihitung ulang secara otomatis oleh sistem setiap kali draf disimpan.</p>
                 </aside>
             </div>
         </AuthenticatedLayout>
@@ -94,8 +94,8 @@ function transitionFor(evaluation: Evaluation | null, abilities: Abilities) {
     if (!evaluation) return null;
     if (evaluation.status === 'DRAFT' && abilities.submit) return { status: 'SUBMITTED', label: 'Ajukan Penilaian', confirmation: '', icon: <Send size={16} /> };
     if (evaluation.status === 'SUBMITTED' && abilities.approve) return { status: 'APPROVED', label: 'Setujui Penilaian', confirmation: '', icon: <CheckCircle2 size={16} /> };
-    if (evaluation.status === 'APPROVED' && abilities.finalize) return { status: 'FINALIZED', label: 'Finalisasi Penilaian', confirmation: 'Finalisasi akan mengunci hasil penilaian. Lanjutkan?', icon: <CheckCircle2 size={16} /> };
-    if (evaluation.status === 'FINALIZED' && abilities.close) return { status: 'CLOSED', label: 'Tutup Penilaian', confirmation: 'Penilaian yang ditutup tidak dapat diproses kembali. Lanjutkan?', icon: <LockKeyhole size={16} /> };
+    if (evaluation.status === 'APPROVED' && abilities.finalize) return { status: 'FINALIZED', label: 'Finalisasi', confirmation: 'Setelah difinalisasi, nilai tidak dapat diubah lagi. Lanjutkan?', icon: <CheckCircle2 size={16} /> };
+    if (evaluation.status === 'FINALIZED' && abilities.close) return { status: 'CLOSED', label: 'Tutup Penilaian', confirmation: 'Penilaian yang ditutup tidak dapat dibuka kembali. Lanjutkan?', icon: <LockKeyhole size={16} /> };
     return null;
 }
 const statusLabels = { DRAFT: 'Draf', SUBMITTED: 'Diajukan', APPROVED: 'Disetujui', FINALIZED: 'Final', CLOSED: 'Ditutup' };

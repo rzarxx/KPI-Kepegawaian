@@ -57,6 +57,6 @@ class AppSettingsController extends Controller
         $after = AppSetting::branding();
         $audit->log('settings.branding.update', $request->user(), null, $before, $after);
 
-        return back()->with('success', 'Pengaturan tampilan berhasil disimpan.');
+        return back()->with('success', 'Tampilan sistem berhasil diperbarui.');
     }
 }

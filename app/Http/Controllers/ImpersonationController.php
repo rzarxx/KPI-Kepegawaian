@@ -13,7 +13,7 @@ class ImpersonationController extends Controller
         $data = $request->validate(['reason' => ['required', 'string', 'min:10', 'max:500']]);
         $service->start($request, $user, $data['reason']);
 
-        return redirect()->route('dashboard')->with('success', 'Impersonasi dimulai.');
+        return redirect()->route('dashboard')->with('success', 'Anda sekarang melihat sistem dari akun '.$user->name.'.');
     }
 
     public function end(Request $request, ImpersonationService $service)
@@ -21,6 +21,6 @@ class ImpersonationController extends Controller
         abort_unless($request->session()->has('impersonation.original_user_id'), 403);
         $service->end($request);
 
-        return redirect()->route('dashboard')->with('success', 'Kembali ke akun Super Admin.');
+        return redirect()->route('dashboard')->with('success', 'Anda telah kembali ke akun Anda sendiri.');
     }
 }

@@ -1,8 +1,61 @@
-# CHANGELOG — KPI Kepegawaian
+# CHANGELOG â€” KPI Kepegawaian
 
 ## Unreleased
 
-### Perbaikan Deploy — 30 September 2026
+### Update UX & Copywriting â€” 30 September 2026
+
+#### 1. Toast Notification (Baru)
+
+- Mengganti `FlashBanner` statis yang menempel di bawah header dengan toast
+  notification yang muncul di pojok kanan bawah dan hilang otomatis setelah
+  4,5 detik.
+- Komponen `Toaster` dan fungsi `toast()` dibuat di `Components/ui/toast.tsx`.
+- Mendukung tiga tipe: `success`, `error`, dan `info` dengan animasi masuk.
+- Setiap toast memiliki tombol dismiss manual.
+- `AuthenticatedLayout` secara otomatis menampilkan toast dari flash session
+  backend tanpa perubahan di controller.
+
+#### 2. Tabel Pengguna Diperbaiki (/pengaturan/pengguna)
+
+- Mengganti button horizontal yang berjajar (Nonaktifkan, Ubah Akses, Masuk
+  Sementara) dengan dropdown menu melalui ikon tiga titik (MoreHorizontal).
+- Setiap baris pengguna menampilkan badge status Aktif/Nonaktif.
+- Dropdown menu lebih rapi dan responsif, dengan warna kontekstual per aksi.
+- Informasi scope label ditampilkan lebih ringkas.
+
+#### 3. Copywriting Lebih Halus untuk Yayasan
+
+- Menyesuaikan seluruh label dan pesan agar lebih ramah untuk konteks yayasan.
+- Perubahan istilah utama:
+  - "Karyawan Bermasalah" â†’ "Catatan Khusus"
+  - "Audit Aktivitas" â†’ "Riwayat Aktivitas"
+  - "Pengguna dan Akses" â†’ "Pengguna"
+  - "Tampilan Sistem" â†’ "Tampilan"
+  - "Total karyawan" â†’ "Total anggota"
+  - "Karyawan aktif" â†’ "Anggota aktif"
+  - "Distribusi per ..." â†’ "Sebaran per ..."
+  - "Ringkasan Sistem" â†’ "Ringkasan"
+  - "Impersonasi dimulai" â†’ "Anda sekarang melihat sistem dari akun ..."
+  - "Kembali ke akun Super Admin" â†’ "Kembali ke akun saya"
+  - "Penilaian Karyawan" â†’ "Penilaian Anggota"
+  - "Catatan penilaian" â†’ "Catatan tambahan"
+  - "Total sementara manual" â†’ "Perkiraan sementara"
+- Flash message di seluruh controller tetap konsisten Bahasa Indonesia.
+- Pesan middleware impersonasi dihaluskan.
+
+#### 4. Perbaikan BOM pada File PHP
+
+- Menghapus UTF-8 BOM pada `app/Models/AppSetting.php` dan migration
+  `2026_09_28_100000_make_evaluation_period_nullable.php` yang menyebabkan
+  PHP fatal error.
+
+### Verifikasi
+
+- Full test suite: **100 passed (584 assertions)**. 
+- TypeScript: lulus tanpa error.
+
+
+### Perbaikan Deploy Ã¢â‚¬â€ 30 September 2026
 
 #### Migration Fix: Drop Foreign Key Sebelum Unique Index
 
@@ -37,7 +90,7 @@
   migration selesai dijalankan).
 
 
-### Phase 11 — Implementasi — 29 September 2026
+### Phase 11 Ã¢â‚¬â€ Implementasi Ã¢â‚¬â€ 29 September 2026
 
 #### 11.1 Penilaian Ad-Hoc (Selesai sebelumnya)
 
@@ -100,7 +153,7 @@
 - Pint: lulus.
 - Route terdaftar: settings.appearance dan settings.appearance.update.
 
-### Phase 11 — Update Besar — 28 September 2026
+### Phase 11 Ã¢â‚¬â€ Update Besar Ã¢â‚¬â€ 28 September 2026
 
 Enam perubahan besar didokumentasikan pada PRD, BUSINESS_RULES,
 IMPLEMENTATION_PLAN, GOALS, DESIGN, SECURITY, PERMISSIONS, SCORING_RULES,
@@ -148,7 +201,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Menambahkan halaman pengaturan tampilan.
 - Perubahan branding berlaku global dan dicatat di audit log.
 
-### Flowchart Sistem dan Penggunaan — 28 September 2026
+### Flowchart Sistem dan Penggunaan Ã¢â‚¬â€ 28 September 2026
 
 - Menambahkan `FLOWCHART.md` berisi 12 diagram Mermaid yang mencakup:
   flowchart sistem high-level, alur autentikasi, otorisasi RBAC + scope,
@@ -158,7 +211,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
   per role (Super Admin, HR Admin, HR Manager, Branch Head, Division Head,
   Sub Division Head, Auditor).
 
-### Panduan Instalasi Production — 24 September 2026
+### Panduan Instalasi Production Ã¢â‚¬â€ 24 September 2026
 
 - Mengganti README bootstrap dengan dokumentasi repository yang mencakup fitur,
   arsitektur, role, instalasi lokal, pengujian, keamanan, dan deployment.
@@ -172,7 +225,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Menyelaraskan timeout job export, worker, dan retry antrean database agar job
   panjang tidak diproses ganda; default `DB_QUEUE_RETRY_AFTER` menjadi 300 detik.
 
-### Penutupan Gap Akses dan Penilaian — 24 September 2026
+### Penutupan Gap Akses dan Penilaian Ã¢â‚¬â€ 24 September 2026
 
 - Menambahkan akses **Mulai Penilaian** pada detail karyawan untuk periode aktif
   yang telah lolos policy dan organizational scope, termasuk akses melanjutkan
@@ -193,7 +246,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Memperbaiki runner UAT agar tujuh login role dibagi sesuai rate limit lima
   request per menit; UAT Brave headless tujuh role kembali lulus pada MySQL.
 
-### Reverse Proxy dan HTTPS — 22 September 2026
+### Reverse Proxy dan HTTPS Ã¢â‚¬â€ 22 September 2026
 
 - Menambahkan konfigurasi `TRUSTED_PROXIES` berbasis daftar IP/CIDR eksplisit
   agar skema, host, redirect, URL aset, dan HSTS tetap benar di belakang reverse
@@ -205,7 +258,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Memperjelas konfigurasi reverse proxy pada dokumentasi deployment dan
   keamanan; wildcard proxy tetap dilarang.
 
-### Pembersihan Dead Code dan Artefak Pengembangan — 22 September 2026
+### Pembersihan Dead Code dan Artefak Pengembangan Ã¢â‚¬â€ 22 September 2026
 
 - Menghapus controller dan halaman registrasi publik yang tidak memiliki route,
   sambil mempertahankan regresi test bahwa `/register` tetap tertutup.
@@ -220,7 +273,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
   screenshot, JSON, atau log yang menjadi bukti UAT, serta menambahkan aturan
   ignore agar artefak sementara tersebut tidak kembali masuk ke project.
 
-### Manual Book Operasional — 18 September 2026
+### Manual Book Operasional Ã¢â‚¬â€ 18 September 2026
 
 - Menambahkan manual book penggunaan KPI Kepegawaian dalam format HTML/PDF
   yang menjelaskan role dan scope, konfigurasi KPI, pengisian performa per
@@ -229,7 +282,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
   tombol navigasi untuk memulai penilaian, hasil bersifat per penilai, belum
   ada alur kembali ke draf, dan laporan belum membatasi status final.
 
-### Posisi Temporary Reveal Kata Sandi — 18 September 2026
+### Posisi Temporary Reveal Kata Sandi Ã¢â‚¬â€ 18 September 2026
 
 - Memindahkan temporary reveal dari area ikon Eye ke indeks karakter yang
   benar di dalam input Login dan Reset Password, termasuk saat karakter
@@ -237,7 +290,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Mempertahankan native `type="password"`, masking setelah 500 ms, serta
   menonaktifkan temporary reveal untuk paste dan autofill.
 
-### Matriks RBAC dan Pemulihan Kata Sandi — 18 September 2026
+### Matriks RBAC dan Pemulihan Kata Sandi Ã¢â‚¬â€ 18 September 2026
 
 - Menetapkan ulang permission, menu, dan tindakan Super Admin, HR Admin, HR
   Manager, Branch Head, Division Head, Sub Division Head, Auditor, dan Employee.
@@ -256,7 +309,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Menambahkan `RBAC_MATRIX.md` serta pengujian matriks, scope data UAT, badge,
   direct URL 403, dan isi email reset.
 
-### Perbaikan Query Tren Beranda — 18 September 2026
+### Perbaikan Query Tren Beranda Ã¢â‚¬â€ 18 September 2026
 
 - Mengkualifikasi kolom `employee_id`, `status`, dan `period_id` pada query
   evaluasi Beranda agar join dengan `performance_periods` tidak menghasilkan
@@ -264,7 +317,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Menambahkan regresi test untuk pengguna berscope tanpa karyawan yang tetap
   memiliki izin melihat tren penilaian.
 
-### Akun Pengujian Lokal per Role — 18 September 2026
+### Akun Pengujian Lokal per Role Ã¢â‚¬â€ 18 September 2026
 
 - Menambahkan `LocalRoleAccountSeeder` yang idempotent untuk membuat satu akun
   aktif bagi setiap role dengan scope organisasi yang sesuai.
@@ -273,7 +326,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Menambahkan test cakupan seluruh role dan idempotensi seeder serta petunjuk
   penggunaannya pada `panduan.md`.
 
-### Perbaikan Render Browser Lokal — 18 September 2026
+### Perbaikan Render Browser Lokal Ã¢â‚¬â€ 18 September 2026
 
 - Menambahkan nonce CSP per request pada tag Ziggy, React Refresh, dan Vite
   tanpa membuka `script-src 'unsafe-inline'`.
@@ -287,7 +340,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Menambahkan Composer script `dev:windows` tanpa Laravel Pail karena ekstensi
   `pcntl` tidak tersedia pada PHP Windows.
 
-### UAT Lokal dan Uji Operasional — 18 September 2026
+### UAT Lokal dan Uji Operasional Ã¢â‚¬â€ 18 September 2026
 
 - Memverifikasi queue database end-to-end untuk ekspor XLSX dan queued
   notification tanpa failed job, serta scheduled cleanup ekspor kedaluwarsa.
@@ -305,10 +358,10 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Menambahkan `panduan.md` berisi perintah menjalankan aplikasi, queue,
   scheduler, pemeriksaan browser/PWA, smoke test, dan quality gate lokal.
 
-### Lanjutan Penyelesaian Phase — 18 September 2026
+### Lanjutan Penyelesaian Phase Ã¢â‚¬â€ 18 September 2026
 
-- Menyelesaikan workflow penilaian `DRAFT → SUBMITTED → APPROVED → FINALIZED
-  → CLOSED`, transisi periode, policy, timestamp, audit, dan UI tindakan.
+- Menyelesaikan workflow penilaian `DRAFT Ã¢â€ â€™ SUBMITTED Ã¢â€ â€™ APPROVED Ã¢â€ â€™ FINALIZED
+  Ã¢â€ â€™ CLOSED`, transisi periode, policy, timestamp, audit, dan UI tindakan.
 - Menyelesaikan lifecycle catatan masalah, kategori terkelola, rule perhatian
   configurable, notifikasi dalam aplikasi, Beranda scoped, serta halaman
   Karyawan Bermasalah dengan status dan penyelesaian.
@@ -338,13 +391,13 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Verifikasi MySQL lokal, browser/PWA perangkat nyata, dan infrastruktur
   production belum dilakukan dan tetap menjadi gate sebelum deploy.
 
-### Audit Kesiapan — 17 September 2026
+### Audit Kesiapan Ã¢â‚¬â€ 17 September 2026
 
 - Mengaudit implementasi terhadap PRD, MVP, business rules, database,
   reporting, PWA, security, testing, dan implementation plan.
 - Menetapkan status project **belum siap produksi**: quality gate Phase 0 lulus
-  tetapi implementasinya masih sebagian; Phase 1–2 lulus lokal dengan batas
-  verifikasi; Phase 3–4, 6, 8, dan 9 masih sebagian; Phase 5 dan 7 belum final;
+  tetapi implementasinya masih sebagian; Phase 1Ã¢â‚¬â€œ2 lulus lokal dengan batas
+  verifikasi; Phase 3Ã¢â‚¬â€œ4, 6, 8, dan 9 masih sebagian; Phase 5 dan 7 belum final;
   Phase 10 belum siap.
 - Mencatat gap penghalang di `IMPLEMENTATION_PLAN.md`, terutama workflow
   penilaian, rule perhatian/notifikasi/dashboard, laporan lengkap, PWA,
@@ -387,7 +440,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Mendokumentasikan kontrak bootstrap dan urutan verifikasi lokal Phase 0 di
   README tanpa mengekspos konfigurasi rahasia.
 
-### Phase 1 — Identity dan Authorization
+### Phase 1 Ã¢â‚¬â€ Identity dan Authorization
 
 - Menyatukan kontrak provisioning pengguna dan cakupan organisasi melalui
   FormRequest serta service transaksional yang memvalidasi hierarchy scope.
@@ -399,7 +452,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Menambahkan regresi test provisioning berscope, audit, perlindungan Super
   Admin, impersonasi, dan timeout impersonasi.
 
-### Phase 2 — Struktur Organisasi
+### Phase 2 Ã¢â‚¬â€ Struktur Organisasi
 
 - Melengkapi pengelolaan Cabang, Divisi, Sub Divisi, dan Jabatan dengan alur
   tambah, ubah, dan penonaktifan tanpa penghapusan histori.
@@ -407,7 +460,7 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Menambahkan audit create/update serta regresi test hierarchy, scope, dan
   uniqueness kode organisasi.
 
-### Phase 3 — Data Karyawan
+### Phase 3 Ã¢â‚¬â€ Data Karyawan
 
 - Menutup lifecycle karyawan: identitas, penempatan awal, mutasi, perubahan status
   akhir, serta riwayat penempatan dan status yang tidak dihapus.
@@ -415,36 +468,36 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 - Memindahkan validasi mutasi dan status ke FormRequest; perubahan status selalu
   menghasilkan histori dan audit log.
 
-### Phase 4 — Konfigurasi Penilaian
+### Phase 4 Ã¢â‚¬â€ Konfigurasi Penilaian
 
 - Menegakkan policy dan FormRequest pada periode, komponen, serta kriteria.
 - Menambahkan validasi total bobot aktif dan rentang aturan masa kerja.
 - Menyediakan input aturan masa kerja pada konfigurasi komponen serta audit perubahan.
 
-### Phase 5 — Alur Penilaian
+### Phase 5 Ã¢â‚¬â€ Alur Penilaian
 
 - Menambahkan FormRequest penilaian, pemisahan izin simpan draf dan finalisasi,
   pemulihan draf evaluator, serta regresi lifecycle penilaian.
 
-### Phase 6 — Catatan Masalah dan Perhatian
+### Phase 6 Ã¢â‚¬â€ Catatan Masalah dan Perhatian
 
 - Menambahkan catatan masalah privat per karyawan, tingkat keparahan, penyelesaian,
   policy/scope, audit log, aturan perhatian, peringatan dashboard, dan notifikasi penyelesaian.
 
-### Phase 7 — Laporan
+### Phase 7 Ã¢â‚¬â€ Laporan
 
 - Menambahkan laporan karyawan scoped, ekspor XLSX berbasis queue, riwayat status ekspor,
   download privat milik pemohon, dan audit penyelesaian ekspor.
 
-### Phase 8 — PWA
+### Phase 8 Ã¢â‚¬â€ PWA
 
 - Menambahkan UX instalasi dan pembaruan PWA, offline fallback, serta cache aset statis yang tidak menyimpan data privat.
 
-### Phase 9 — Security Hardening
+### Phase 9 Ã¢â‚¬â€ Security Hardening
 
 - Menambahkan CSP, security headers, HSTS saat HTTPS, dan rate limit login.
 
-### Phase 10 — Kesiapan Produksi
+### Phase 10 Ã¢â‚¬â€ Kesiapan Produksi
 
 - Menyelaraskan dokumentasi aaPanel/Nginx, Supervisor, scheduler, backup, dan smoke test operasional.
 
