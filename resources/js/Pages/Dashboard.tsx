@@ -32,36 +32,46 @@ export default function Dashboard({ metrics, distributions, trend, priorities, a
     const applyFilters = () => router.get(route('dashboard'), values, { preserveState: true, replace: true });
 
     return (
-        <AuthenticatedLayout header={<div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-end"><div><p className="text-sm text-slate-500">Beranda</p><h1 className="text-[26px] font-bold text-slate-900">Ringkasan Sistem</h1></div><div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5"><FilterSelect ariaLabel="Periode" value={values.period_id} options={filterOptions.periods} placeholder="Semua periode" onChange={(value) => setValues({ ...values, period_id: value })} /><FilterSelect ariaLabel="Cabang" value={values.branch_id} options={filterOptions.branches} placeholder="Semua cabang" onChange={(value) => setValues({ ...values, branch_id: value, division_id: '', sub_division_id: '' })} /><FilterSelect ariaLabel="Divisi" value={values.division_id} options={divisions} placeholder="Semua divisi" onChange={(value) => setValues({ ...values, division_id: value, sub_division_id: '' })} /><FilterSelect ariaLabel="Sub Divisi" value={values.sub_division_id} options={subDivisions} placeholder="Semua sub divisi" onChange={(value) => setValues({ ...values, sub_division_id: value })} /><button className="min-h-10 rounded-lg bg-green-600 px-4 text-sm font-semibold text-white hover:bg-green-700" onClick={applyFilters} type="button">Terapkan</button></div></div>}>
+        <AuthenticatedLayout header={<div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-end"><div><p className="text-sm text-slate-500">Beranda</p><h1 className="text-[26px] font-bold text-slate-900">Ringkasan</h1></div><div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5"><FilterSelect ariaLabel="Periode" value={values.period_id} options={filterOptions.periods} placeholder="Semua periode" onChange={(value) => setValues({ ...values, period_id: value })} /><FilterSelect ariaLabel="Cabang" value={values.branch_id} options={filterOptions.branches} placeholder="Semua cabang" onChange={(value) => setValues({ ...values, branch_id: value, division_id: '', sub_division_id: '' })} /><FilterSelect ariaLabel="Divisi" value={values.division_id} options={divisions} placeholder="Semua divisi" onChange={(value) => setValues({ ...values, division_id: value, sub_division_id: '' })} /><FilterSelect ariaLabel="Sub Divisi" value={values.sub_division_id} options={subDivisions} placeholder="Semua sub divisi" onChange={(value) => setValues({ ...values, sub_division_id: value })} /><button className="min-h-10 rounded-lg bg-green-600 px-4 text-sm font-semibold text-white hover:bg-green-700" onClick={applyFilters} type="button">Terapkan</button></div></div>}>
             <Head title="Beranda" />
             <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8">
                 <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <Metric icon={<UsersRound size={20} />} label="Total karyawan" value={metrics.total} tone="green" />
-                    <Metric icon={<ClipboardCheck size={20} />} label="Karyawan aktif" value={metrics.active} tone="blue" />
+                    <Metric icon={<UsersRound size={20} />} label="Total anggota" value={metrics.total} tone="green" />
+                    <Metric icon={<ClipboardCheck size={20} />} label="Anggota aktif" value={metrics.active} tone="blue" />
                     <Metric icon={<AlertTriangle size={20} />} label="Perlu perhatian" value={metrics.attention} tone="amber" />
-                    <Metric icon={<ChartNoAxesCombined size={20} />} label="Rata-rata nilai" value={Number(metrics.average).toFixed(2)} tone="slate" />
+                    <Metric icon={<ChartNoAxesCombined size={20} />} label="Rata-rata penilaian" value={Number(metrics.average).toFixed(2)} tone="slate" />
                 </section>
                 <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                    <DistributionChart title="Distribusi per Divisi" data={distributions.byDivision} />
-                    <DistributionChart title="Distribusi per Cabang" data={distributions.byBranch} />
-                    <DistributionChart title="Distribusi per Status" data={distributions.byStatus} />
+                    <DistributionChart title="Sebaran per Divisi" data={distributions.byDivision} />
+                    <DistributionChart title="Sebaran per Cabang" data={distributions.byBranch} />
+                    <DistributionChart title="Sebaran per Status" data={distributions.byStatus} />
                 </section>
                 <section className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <div><h2 className="font-semibold text-slate-900">Tren penilaian</h2><p className="mt-1 text-sm text-slate-500">Rata-rata nilai final per periode.</p></div>
-                        <div className="mt-5 h-72">
-                            {trend.length ? <ResponsiveContainer width="100%" height="100%"><LineChart data={trend.map((item) => ({ ...item, score: Number(item.score) }))} margin={{ top: 10, right: 16, left: -16, bottom: 0 }}><CartesianGrid stroke="#E2E8F0" strokeDasharray="4 4" vertical={false} /><XAxis axisLine={false} dataKey="name" fontSize={12} tickLine={false} /><YAxis axisLine={false} domain={[0, 100]} fontSize={12} tickLine={false} /><Tooltip contentStyle={{ borderColor: '#E2E8F0', borderRadius: 10 }} /><Line dataKey="score" dot={{ fill: '#16A34A', r: 4 }} stroke="#16A34A" strokeWidth={3} type="monotone" /></LineChart></ResponsiveContainer> : <Empty text="Belum ada penilaian final untuk ditampilkan." />}
+                        <div><h2 className="font-semibold text-slate-900">Tren Penilaian</h2><p className="mt-1 text-sm text-slate-500">Perkembangan nilai rata-rata dari waktu ke waktu.</p></div>
+                        <div className="mt-4 h-64">
+                            {trend.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={trend}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                                        <XAxis dataKey="name" tick={{ fill: '#64748B', fontSize: 12 }} />
+                                        <YAxis domain={[0, 100]} tick={{ fill: '#64748B', fontSize: 12 }} />
+                                        <Tooltip contentStyle={{ borderColor: '#E2E8F0', borderRadius: 10 }} />
+                                        <Line type="monotone" dataKey="score" stroke="#16A34A" strokeWidth={2} dot={{ fill: '#16A34A', r: 4 }} name="Nilai" />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            ) : <Empty text="Belum ada data penilaian yang dapat ditampilkan." />}
                         </div>
                     </div>
                     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <h2 className="font-semibold text-slate-900">Perlu Perhatian</h2>
-                        <p className="mt-1 text-sm text-slate-500">Karyawan yang memenuhi aturan perhatian aktif.</p>
-                        <div className="mt-4 space-y-3">{priorities.length ? priorities.map((item) => <Link className="block rounded-lg border border-slate-200 p-3 hover:border-amber-300 hover:bg-amber-50" href={route('employees.show', item.id)} key={item.id}><div className="flex items-center justify-between gap-3"><div><p className="text-sm font-semibold text-slate-900">{item.name}</p><p className="text-xs text-slate-500">{item.number}</p></div><ArrowRight className="text-slate-400" size={16} /></div><p className="mt-2 text-xs text-amber-800">{item.reasons.map((reason) => reason.rule).join(' · ')}</p></Link>) : <Empty text="Tidak ada karyawan yang memerlukan perhatian." />}</div>
+                        <p className="mt-1 text-sm text-slate-500">Anggota yang memerlukan tindak lanjut berdasarkan aturan penilaian.</p>
+                        <div className="mt-4 space-y-3">{priorities.length ? priorities.map((item) => <Link className="block rounded-lg border border-slate-200 p-3 hover:border-amber-300 hover:bg-amber-50" href={route('employees.show', item.id)} key={item.id}><div className="flex items-center justify-between gap-3"><div><p className="text-sm font-semibold text-slate-900">{item.name}</p><p className="text-xs text-slate-500">{item.number}</p></div><ArrowRight className="text-slate-400" size={16} /></div><p className="mt-2 text-xs text-amber-800">{item.reasons.map((reason) => reason.rule).join(' · ')}</p></Link>) : <Empty text="Tidak ada anggota yang memerlukan perhatian saat ini." />}</div>
                     </div>
                 </section>
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <h2 className="font-semibold text-slate-900">Aktivitas penilaian terbaru</h2>
-                    <div className="mt-4 divide-y divide-slate-100">{activities.length ? activities.map((activity) => <div className="flex flex-col justify-between gap-2 py-3 sm:flex-row sm:items-center" key={activity.id}><div><p className="text-sm font-semibold text-slate-800">{activity.employee}</p><p className="text-xs text-slate-500">{activity.criteria || 'Belum memiliki kriteria'} · {formatDistanceToNow(new Date(activity.date), { addSuffix: true, locale: id })}</p></div><span className="w-fit rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-800">{Number(activity.score).toFixed(2)}</span></div>) : <Empty text="Belum ada aktivitas penilaian final." />}</div>
+                    <div className="mt-4 divide-y divide-slate-100">{activities.length ? activities.map((activity) => <div className="flex flex-col justify-between gap-2 py-3 sm:flex-row sm:items-center" key={activity.id}><div><p className="text-sm font-semibold text-slate-800">{activity.employee}</p><p className="text-xs text-slate-500">{activity.criteria || 'Belum memiliki kriteria'} · {formatDistanceToNow(new Date(activity.date), { addSuffix: true, locale: id })}</p></div><span className="w-fit rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-800">{Number(activity.score).toFixed(2)}</span></div>) : <Empty text="Belum ada aktivitas penilaian." />}</div>
                 </section>
             </div>
         </AuthenticatedLayout>

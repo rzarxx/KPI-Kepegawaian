@@ -7,6 +7,7 @@ use App\Models\Branch;
 use App\Models\Division;
 use App\Models\Employee;
 use App\Models\User;
+use Database\Seeders\AccessControlSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
@@ -119,7 +120,7 @@ class Phase11UpdateTest extends TestCase
 
     public function test_branding_is_blocked_during_impersonation(): void
     {
-        $this->seed(\Database\Seeders\AccessControlSeeder::class);
+        $this->seed(AccessControlSeeder::class);
         $superAdmin = User::factory()->create();
         $superAdmin->assignRole('Super Admin');
         $target = User::factory()->create();

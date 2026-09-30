@@ -25,6 +25,6 @@ class ValidateImpersonationSession
         }
         app(ImpersonationService::class)->end($request, $session?->expires_at->isPast() ? 'timeout' : 'revoked');
 
-        return redirect()->route('dashboard')->with('error', 'Sesi impersonasi telah berakhir.');
+        return redirect()->route('dashboard')->with('error', 'Sesi akses sementara telah berakhir. Anda telah dikembalikan ke akun asli.');
     }
 }

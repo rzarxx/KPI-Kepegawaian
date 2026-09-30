@@ -9,7 +9,7 @@ class EnsureNotImpersonating
 {
     public function handle(Request $request, Closure $next)
     {
-        abort_if($request->session()->has('impersonation.original_user_id'), 403, 'Aksi ini tidak tersedia selama impersonasi.');
+        abort_if($request->session()->has('impersonation.original_user_id'), 403, 'Fitur ini tidak dapat digunakan saat mengakses akun pengguna lain.');
 
         return $next($request);
     }

@@ -1,10 +1,11 @@
-﻿<?php
+<?php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 #[Fillable(['key', 'value', 'type', 'group'])]
 class AppSetting extends Model
@@ -33,7 +34,7 @@ class AppSetting extends Model
     {
         try {
             return Cache::remember(static::CACHE_KEY, static::CACHE_TTL, function (): array {
-                if (! \Illuminate\Support\Facades\Schema::hasTable((new static)->getTable())) {
+                if (! Schema::hasTable((new static)->getTable())) {
                     return [];
                 }
 

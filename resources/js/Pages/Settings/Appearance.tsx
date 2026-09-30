@@ -68,6 +68,7 @@ export default function Appearance({ settings }: { settings: Settings }) {
                 <div>
                     <p className="text-sm text-slate-500">Pengaturan</p>
                     <h1 className="text-[26px] font-bold text-slate-900">Tampilan Sistem</h1>
+                    <p className="mt-1 text-sm text-slate-500">Sesuaikan identitas dan tampilan aplikasi agar lebih nyaman digunakan.</p>
                 </div>
             }
         >
@@ -76,7 +77,7 @@ export default function Appearance({ settings }: { settings: Settings }) {
                 <form className="space-y-6" onSubmit={submit}>
                     <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                         <h2 className="text-base font-semibold text-slate-900">Identitas Aplikasi</h2>
-                        <p className="mt-1 text-sm text-slate-500">Nama dan logo yang ditampilkan di sidebar dan halaman masuk.</p>
+                        <p className="mt-1 text-sm text-slate-500">Nama dan logo yang akan tampil di sidebar serta halaman masuk.</p>
                         <div className="mt-5 space-y-4">
                             <label className="block text-sm font-medium text-slate-700">
                                 Nama Aplikasi
@@ -91,10 +92,10 @@ export default function Appearance({ settings }: { settings: Settings }) {
                             </label>
                             <div>
                                 <p className="text-sm font-medium text-slate-700">Logo</p>
-                                <p className="mt-1 text-xs text-slate-500">Format: PNG, SVG, atau WebP. Maksimal 512 KB.</p>
+                                <p className="mt-1 text-xs text-slate-500">Unggah gambar berformat PNG, SVG, atau WebP. Ukuran maksimal 512 KB.</p>
                                 <div className="mt-3 flex items-center gap-4">
                                     {logoPreview ? (
-                                        <img src={logoPreview} alt="Logo preview" className="size-16 rounded-lg border border-slate-200 object-contain p-1" />
+                                        <img src={logoPreview} alt="Pratinjau logo" className="size-16 rounded-lg border border-slate-200 object-contain p-1" />
                                     ) : (
                                         <div className="flex size-16 items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-400">
                                             <Palette size={24} />
@@ -118,8 +119,8 @@ export default function Appearance({ settings }: { settings: Settings }) {
                     </section>
 
                     <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                        <h2 className="text-base font-semibold text-slate-900">Aksen Warna</h2>
-                        <p className="mt-1 text-sm text-slate-500">Warna utama yang digunakan pada tombol, badge, dan elemen interaktif.</p>
+                        <h2 className="text-base font-semibold text-slate-900">Warna Tema</h2>
+                        <p className="mt-1 text-sm text-slate-500">Pilih warna utama yang digunakan pada tombol, lencana, dan elemen interaktif lainnya.</p>
                         <div className="mt-5 space-y-3">
                             <div className="flex flex-wrap gap-2">
                                 {presetColors.map((color) => (
@@ -129,7 +130,7 @@ export default function Appearance({ settings }: { settings: Settings }) {
                                         className={`size-10 rounded-lg border-2 transition ${form.primary_color === color ? 'border-slate-900 ring-2 ring-slate-900/20' : 'border-slate-200'}`}
                                         style={{ backgroundColor: color }}
                                         onClick={() => setForm({ ...form, primary_color: color })}
-                                        aria-label={`Warna ${color}`}
+                                        aria-label={`Pilih warna ${color}`}
                                     />
                                 ))}
                             </div>
@@ -150,16 +151,16 @@ export default function Appearance({ settings }: { settings: Settings }) {
                     </section>
 
                     <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                        <h2 className="text-base font-semibold text-slate-900">Footer</h2>
-                        <p className="mt-1 text-sm text-slate-500">Teks pendek yang ditampilkan di bagian bawah sidebar.</p>
+                        <h2 className="text-base font-semibold text-slate-900">Teks Footer</h2>
+                        <p className="mt-1 text-sm text-slate-500">Teks singkat yang ditampilkan di bagian bawah sidebar, misalnya nama yayasan atau hak cipta.</p>
                         <label className="mt-5 block text-sm font-medium text-slate-700">
-                            Teks Footer
+                            Footer
                             <input
                                 className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600"
                                 maxLength={200}
                                 value={form.footer_text}
                                 onChange={(event) => setForm({ ...form, footer_text: event.target.value })}
-                                placeholder="Contoh: © 2026 Perusahaan"
+                                placeholder="Contoh: © 2026 Yayasan Anda"
                             />
                             {errors.footer_text && <span className="mt-1 block text-xs text-red-600">{errors.footer_text}</span>}
                         </label>
