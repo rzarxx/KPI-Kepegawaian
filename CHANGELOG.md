@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+### Perbaikan Deploy — 30 September 2026
+
+#### Migration Fix: Drop Foreign Key Sebelum Unique Index
+
+- Memperbaiki migration `2026_09_28_100000_make_evaluation_period_nullable`
+  yang gagal karena MySQL menolak drop unique index sebelum foreign key
+  yang bergantung padanya dilepas.
+- Foreign key `period_id` sekarang di-drop di closure terpisah sebelum
+  unique index `[employee_id, period_id, evaluator_id]` di-drop.
+
+
+#### Sinkronisasi Dokumentasi dengan Kode
+
+- DATABASE.md: tabel `export_logs` dikoreksi menjadi `report_exports`
+  sesuai nama migration dan model yang digunakan. Kolom `user_id` dan
+  `export_type` diganti `requested_by` dan `error_message` sesuai migrasi.
+- DATABASE.md: kolom `incident_date` pada `employee_incidents` dikoreksi
+  menjadi `occurred_at` sesuai migrasi dan model.
+- DATABASE.md: `national_id` pada `employees` ditandai `unique` sesuai
+  constraint yang ditambahkan di migrasi `complete_domain_contracts`.
+- DATABASE.md: kolom `closed_at` ditambahkan pada `employee_evaluations`.
+- DATABASE.md: tabel `employee_documents`, `incident_categories`, dan
+  `employee_attention_rules` ditambahkan (sebelumnya ada di migrasi tetapi
+  belum didokumentasikan).
+- PERMISSIONS.md: permission `employee_document.view/create/delete` dan
+  `impersonation.start` ditambahkan. Permission `branding.view/manage`
+  dihapus karena tidak ada di seeder (branding dikelola via
+  `settings.manage`).
+#### AppSetting: Graceful Fallback Saat Tabel Belum Ada
+
+- Menambahkan `try/catch` pada `AppSetting::cached()` agar aplikasi
+  tidak crash saat tabel `app_settings` belum ada (misalnya sebelum
+  migration selesai dijalankan).
+
+
 ### Phase 11 — Implementasi — 29 September 2026
 
 #### 11.1 Penilaian Ad-Hoc (Selesai sebelumnya)

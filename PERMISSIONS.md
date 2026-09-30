@@ -70,9 +70,14 @@ Initial:
 - settings.view
 - settings.manage
 
-### Branding
-- branding.view
-- branding.manage
+### Document
+- employee_document.view
+- employee_document.create
+- employee_document.delete
+
+### Impersonation
+- impersonation.start
+
 
 ## 4. Scope
 

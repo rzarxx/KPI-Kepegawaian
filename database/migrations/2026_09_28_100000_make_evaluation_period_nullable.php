@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -9,8 +9,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('employee_evaluations', function (Blueprint $table): void {
-            $table->dropUnique(['employee_id', 'period_id', 'evaluator_id']);
             $table->dropForeign(['period_id']);
+        });
+
+        Schema::table('employee_evaluations', function (Blueprint $table): void {
+            $table->dropUnique(['employee_id', 'period_id', 'evaluator_id']);
         });
 
         Schema::table('employee_evaluations', function (Blueprint $table): void {

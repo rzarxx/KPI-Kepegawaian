@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -31,9 +31,17 @@ class AppSetting extends Model
 
     public static function cached(): array
     {
-        return Cache::remember(static::CACHE_KEY, static::CACHE_TTL, function (): array {
-            return static::query()->pluck('value', 'key')->all();
-        });
+        try {
+            return Cache::remember(static::CACHE_KEY, static::CACHE_TTL, function (): array {
+                if (! \Illuminate\Support\Facades\Schema::hasTable((new static)->getTable())) {
+                    return [];
+                }
+
+                return static::query()->pluck('value', 'key')->all();
+            });
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     public static function clearCache(): void
