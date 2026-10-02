@@ -97,7 +97,7 @@ export default function AuthenticatedLayout({
         : undefined;
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800" style={accentStyle}>
+        <div className="flex min-h-screen flex-col bg-slate-50 text-slate-800" style={accentStyle}>
             <Toaster />
             <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-slate-200 bg-white lg:flex">
                 <BrandHeader appName={brand.app_name} appLogo={brand.app_logo} />
@@ -105,11 +105,7 @@ export default function AuthenticatedLayout({
                     <p className="px-3 pb-2 text-xs font-semibold tracking-wide text-slate-400">MENU UTAMA</p>
                     {nav.map((item) => <NavigationLink item={item} key={item.href} />)}
                 </nav>
-                {brand.footer_text && (
-                    <div className="border-t border-slate-100 px-5 py-3">
-                        <p className="text-xs text-slate-400">{brand.footer_text}</p>
-                    </div>
-                )}
+                
             </aside>
             <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between border-b border-slate-200 bg-white px-4 py-2 lg:pl-[17rem] lg:pr-8">
                 <Button variant="ghost" className="lg:hidden" aria-label="Buka menu" onClick={() => setMenuOpen(true)}><Menu size={20} /></Button>
@@ -121,7 +117,7 @@ export default function AuthenticatedLayout({
                         <div className="absolute right-0 top-full mt-1 w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-lg" onMouseLeave={() => setAccountOpen(false)}>
                             {access && (
                                 <div className="mb-2 border-b border-slate-100 px-2 pb-2">
-                                    <p className="text-xs font-semibold text-green-800">{access.role}</p>
+                                    <p className="text-xs font-semibold text-brand-dark">{access.role}</p>
                                     <p className="mt-1 text-xs text-slate-500">Cakupan: {access.scopeLabels.join('; ')}</p>
                                 </div>
                             )}
@@ -145,23 +141,29 @@ export default function AuthenticatedLayout({
             )}
             {menuOpen && (
                 <div className="fixed inset-0 z-40 bg-slate-950/30 lg:hidden" onClick={() => setMenuOpen(false)}>
-                    <aside className="h-full w-72 bg-white shadow-xl" onClick={(event) => event.stopPropagation()}>
+                    <aside className="flex h-full w-72 flex-col bg-white shadow-xl" onClick={(event) => event.stopPropagation()}>
                         <div className="flex items-center justify-between">
                             <BrandHeader appName={brand.app_name} appLogo={brand.app_logo} />
                             <Button variant="ghost" aria-label="Tutup menu" onClick={() => setMenuOpen(false)}><X size={20} /></Button>
                         </div>
                         {access && (
                             <div className="mx-4 rounded-lg bg-slate-50 p-3">
-                                <p className="text-xs font-semibold text-green-800">{access.role}</p>
+                                <p className="text-xs font-semibold text-brand-dark">{access.role}</p>
                                 <p className="mt-1 text-xs text-slate-500">{access.scopeLabels.join('; ')}</p>
                             </div>
                         )}
-                        <nav className="px-3 py-4">{nav.map((item) => <NavigationLink item={item} key={item.href} onClick={() => setMenuOpen(false)} />)}</nav>
+                        <nav className="flex-1 overflow-y-auto px-3 py-4">{nav.map((item) => <NavigationLink item={item} key={item.href} onClick={() => setMenuOpen(false)} />)}</nav>
+                        
                     </aside>
                 </div>
             )}
             {header && <div className="border-b border-slate-200 bg-white px-4 py-5 lg:pl-[17rem] lg:pr-8">{header}</div>}
-            <main className="lg:pl-60">{children}</main>
+            <main className="flex-1 lg:pl-60">{children}</main>
+            {brand.footer_text && (
+                <footer className="mt-auto border-t border-slate-200 bg-white py-4 text-center text-sm text-slate-500 lg:pl-60">
+                    {brand.footer_text}
+                </footer>
+            )}
         </div>
     );
 }
@@ -184,7 +186,7 @@ function BrandHeader({ appName, appLogo }: { appName: string; appLogo: string | 
 
 function NavigationLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
     return (
-        <Link href={item.href} onClick={onClick} className={`mb-1 flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition ${item.active ? 'bg-green-50 text-green-800' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}>
+        <Link href={item.href} onClick={onClick} className={`mb-1 flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition ${item.active ? 'bg-brand-subtle text-brand-dark' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}>
             {item.icon}{item.label}
         </Link>
     );

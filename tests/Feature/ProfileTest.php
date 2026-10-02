@@ -68,8 +68,10 @@ class ProfileTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_delete_their_account(): void
+    public function test_profile_delete_route_is_not_available(): void
     {
+        // Self-service account deletion is disabled.
+        // User deactivation is handled exclusively by admins via UserManagementController.
         $user = User::factory()->create();
 
         $response = $this
@@ -78,33 +80,9 @@ class ProfileTest extends TestCase
                 'password' => 'password',
             ]);
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/');
+        $response->assertStatus(405); // Method Not Allowed — route does not exist
 
-        $this->assertGuest();
-        $this->assertNull($user->fresh());
-        $this->assertDatabaseHas('audit_logs', [
-            'auditable_id' => $user->id,
-            'action' => 'profile.deleted',
-        ]);
-    }
-
-    public function test_correct_password_must_be_provided_to_delete_account(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this
-            ->actingAs($user)
-            ->from('/profile')
-            ->delete('/profile', [
-                'password' => 'wrong-password',
-            ]);
-
-        $response
-            ->assertSessionHasErrors('password')
-            ->assertRedirect('/profile');
-
+        // User must still exist in the database
         $this->assertNotNull($user->fresh());
     }
 

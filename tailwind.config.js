@@ -16,10 +16,10 @@ export default {
             },
             colors: {
                 brand: {
-                    DEFAULT: '#16A34A',
-                    dark: '#15803D',
-                    soft: '#DCFCE7',
-                    subtle: '#F0FDF4',
+                    DEFAULT: 'var(--brand-color, #16A34A)',
+                    dark: 'color-mix(in srgb, var(--brand-color, #16A34A) 80%, black)',
+                    soft: 'color-mix(in srgb, var(--brand-color, #16A34A) 15%, white)',
+                    subtle: 'color-mix(in srgb, var(--brand-color, #16A34A) 5%, white)',
                 },
             },
         },

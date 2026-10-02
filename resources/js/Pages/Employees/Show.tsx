@@ -157,7 +157,7 @@ export default function Show({
                             </p>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            <span className="h-fit rounded-full bg-green-50 px-3 py-1.5 text-sm font-semibold text-green-800">
+                            <span className="h-fit rounded-full bg-brand-subtle px-3 py-1.5 text-sm font-semibold text-brand-dark">
                                 {employee.status_label}
                             </span>
                             {canViewIncidents && (
@@ -321,12 +321,12 @@ function EvaluationCard({
                 Mulai penilaian langsung atau pilih periode tertentu.
             </p>
             <div className="mt-4 space-y-3">
-                <div className="flex flex-col justify-between gap-3 rounded-lg border border-green-200 bg-green-50 p-4 sm:flex-row sm:items-center">
+                <div className="flex flex-col justify-between gap-3 rounded-lg border border-brand-soft bg-brand-subtle p-4 sm:flex-row sm:items-center">
                     <div>
                         <p className="text-sm font-semibold text-green-900">
                             Penilaian Langsung
                         </p>
-                        <p className="mt-1 text-xs text-green-700">
+                        <p className="mt-1 text-xs text-brand">
                             Tanpa periode tertentu
                         </p>
                     </div>
@@ -670,7 +670,7 @@ function HistoryCard({
                     {assignments.length ? (
                         assignments.map((assignment) => (
                             <div
-                                className="border-l-2 border-green-200 pl-4"
+                                className="border-l-2 border-brand-soft pl-4"
                                 key={assignment.id}
                             >
                                 <p className="font-semibold text-slate-800">
@@ -791,7 +791,7 @@ const activityColors = {
     ASSIGNMENT: "bg-blue-500",
     STATUS: "bg-slate-500",
     INCIDENT: "bg-red-500",
-    EVALUATION: "bg-green-600",
+    EVALUATION: "bg-brand",
 };
 
 function DocumentsCard({
@@ -894,7 +894,7 @@ function DocumentsCard({
                             <div className="flex gap-2">
                                 <Link
                                     aria-label="Unduh dokumen"
-                                    className="flex size-10 items-center justify-center rounded-lg border border-slate-200 text-green-700 hover:bg-green-50"
+                                    className="flex size-10 items-center justify-center rounded-lg border border-slate-200 text-brand hover:bg-brand-subtle"
                                     href={route(
                                         "employees.documents.download",
                                         document.id,
@@ -930,7 +930,7 @@ function DocumentsCard({
     );
 }
 const inputClass =
-    "mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600";
+    "mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand";
 function formatBytes(bytes: number) {
     return bytes < 1024 * 1024
         ? Math.max(1, Math.round(bytes / 1024)) + " KB"

@@ -74,7 +74,7 @@ export default function Index({
             <Head title="Laporan" />
             <div className="mx-auto max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
                 <form className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" onSubmit={handleSubmit(apply)}>
-                    <div className="flex items-center gap-2"><Filter size={18} className="text-green-700" /><h2 className="font-semibold text-slate-900">Filter laporan</h2></div>
+                    <div className="flex items-center gap-2"><Filter size={18} className="text-brand" /><h2 className="font-semibold text-slate-900">Filter laporan</h2></div>
                     <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         <Field label="Tanggal mulai"><input className={input} type="date" {...register('start_date')} /></Field>
                         <Field label="Tanggal akhir" error={errors.end_date?.message}><input className={input} type="date" {...register('end_date')} /></Field>
@@ -97,7 +97,7 @@ export default function Index({
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <h2 className="font-semibold text-slate-900">Riwayat ekspor</h2>
                     <p className="mt-1 text-sm text-slate-500">File disimpan privat dan otomatis kedaluwarsa setelah 24 jam.</p>
-                    <div className="mt-4 divide-y divide-slate-100">{exports.length ? exports.map((item) => <div className="flex items-center justify-between gap-4 py-3 text-sm" key={item.id}><div><p className="font-medium text-slate-800">{exportLabels[item.status] || item.status}</p><p className="text-xs text-slate-500">{item.row_count !== null && item.row_count !== undefined ? item.row_count + ' baris' : 'Menunggu proses'}</p></div>{item.status === 'COMPLETED' && <Link aria-label="Unduh laporan" className="flex size-10 items-center justify-center rounded-lg border border-slate-200 text-green-700 hover:bg-green-50" href={route('reports.download', item.id)}><Download size={17} /></Link>}</div>) : <p className="py-8 text-center text-sm text-slate-500">Belum ada riwayat ekspor.</p>}</div>
+                    <div className="mt-4 divide-y divide-slate-100">{exports.length ? exports.map((item) => <div className="flex items-center justify-between gap-4 py-3 text-sm" key={item.id}><div><p className="font-medium text-slate-800">{exportLabels[item.status] || item.status}</p><p className="text-xs text-slate-500">{item.row_count !== null && item.row_count !== undefined ? item.row_count + ' baris' : 'Menunggu proses'}</p></div>{item.status === 'COMPLETED' && <Link aria-label="Unduh laporan" className="flex size-10 items-center justify-center rounded-lg border border-slate-200 text-brand hover:bg-brand-subtle" href={route('reports.download', item.id)}><Download size={17} /></Link>}</div>) : <p className="py-8 text-center text-sm text-slate-500">Belum ada riwayat ekspor.</p>}</div>
                 </section>
             </div>
         </AuthenticatedLayout>
@@ -106,7 +106,7 @@ export default function Index({
 
 function clean(values: FilterValues) { return Object.fromEntries(Object.entries(values).filter(([, value]) => value !== '')); }
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) { return <label className="text-sm font-medium text-slate-700">{label}{children}{error && <span className="mt-1 block text-xs text-red-600">{error}</span>}</label>; }
-function Pagination({ links }: { links: Paginated<unknown>['links'] }) { return <nav className="flex flex-wrap justify-center gap-1 border-t border-slate-100 p-4" aria-label="Navigasi halaman">{links.map((link, index) => link.url ? <Link className={'rounded-lg border px-3 py-2 text-sm ' + (link.active ? 'border-green-600 bg-green-50 text-green-800' : 'border-slate-200 text-slate-600')} href={link.url} key={index}>{paginationLabel(link.label)}</Link> : <span className="rounded-lg border border-slate-100 px-3 py-2 text-sm text-slate-300" key={index}>{paginationLabel(link.label)}</span>)}</nav>; }
+function Pagination({ links }: { links: Paginated<unknown>['links'] }) { return <nav className="flex flex-wrap justify-center gap-1 border-t border-slate-100 p-4" aria-label="Navigasi halaman">{links.map((link, index) => link.url ? <Link className={'rounded-lg border px-3 py-2 text-sm ' + (link.active ? 'border-brand bg-brand-subtle text-brand-dark' : 'border-slate-200 text-slate-600')} href={link.url} key={index}>{paginationLabel(link.label)}</Link> : <span className="rounded-lg border border-slate-100 px-3 py-2 text-sm text-slate-300" key={index}>{paginationLabel(link.label)}</span>)}</nav>; }
 function paginationLabel(label: string) { return label.replace('&laquo;', '‹').replace('&raquo;', '›'); }
-const input = 'mt-1 min-h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600';
+const input = 'mt-1 min-h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand';
 const exportLabels: Record<string, string> = { QUEUED: 'Menunggu antrean', PROCESSING: 'Sedang diproses', COMPLETED: 'Siap diunduh', FAILED: 'Gagal diproses', EXPIRED: 'Kedaluwarsa' };

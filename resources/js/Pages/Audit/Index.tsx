@@ -37,9 +37,9 @@ export default function Index({ logs, filters }: { logs: { data: AuditRow[]; lin
                 <form className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row" onSubmit={submit}>
                     <label className="flex-1 text-sm font-medium text-slate-700">
                         Cari jenis tindakan
-                        <input className="mt-1 h-10 w-full rounded-lg border-slate-300 text-sm focus:border-green-600 focus:ring-green-600" onChange={(event) => setAction(event.target.value)} placeholder="Contoh: auth.login" value={action} />
+                        <input className="mt-1 h-10 w-full rounded-lg border-slate-300 text-sm focus:border-brand focus:ring-brand" onChange={(event) => setAction(event.target.value)} placeholder="Contoh: auth.login" value={action} />
                     </label>
-                    <button className="flex min-h-10 items-center justify-center gap-2 self-end rounded-lg bg-green-600 px-4 text-sm font-semibold text-white hover:bg-green-700" type="submit"><Search size={16} />Cari</button>
+                    <button className="flex min-h-10 items-center justify-center gap-2 self-end rounded-lg bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-dark" type="submit"><Search size={16} />Cari</button>
                 </form>
                 <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                     <div className="overflow-x-auto">
@@ -51,7 +51,7 @@ export default function Index({ logs, filters }: { logs: { data: AuditRow[]; lin
                         </table>
                     </div>
                     {!logs.data.length && <p className="p-8 text-center text-sm text-slate-500">Belum ada aktivitas yang sesuai dengan pencarian.</p>}
-                    {logs.links.length > 3 && <nav className="flex flex-wrap gap-2 border-t border-slate-100 p-4">{logs.links.map((link, index) => link.url ? <Link className={`rounded-lg px-3 py-2 text-sm ${link.active ? 'bg-green-600 text-white' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'}`} href={link.url} key={index}>{pageLabel(link.label)}</Link> : <span className="rounded-lg border border-slate-100 px-3 py-2 text-sm text-slate-300" key={index}>{pageLabel(link.label)}</span>)}</nav>}
+                    {logs.links.length > 3 && <nav className="flex flex-wrap gap-2 border-t border-slate-100 p-4">{logs.links.map((link, index) => link.url ? <Link className={`rounded-lg px-3 py-2 text-sm ${link.active ? 'bg-brand text-white' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'}`} href={link.url} key={index}>{pageLabel(link.label)}</Link> : <span className="rounded-lg border border-slate-100 px-3 py-2 text-sm text-slate-300" key={index}>{pageLabel(link.label)}</span>)}</nav>}
                 </section>
             </div>
         </AuthenticatedLayout>

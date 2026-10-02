@@ -57,6 +57,8 @@ class AppSetting extends Model
         return [
             'app_name' => $settings['app_name'] ?? 'KPI Kepegawaian',
             'app_logo' => $settings['app_logo'] ?? null,
+            'app_favicon' => $settings['app_favicon'] ?? null,
+            'app_og_image' => $settings['app_og_image'] ?? null,
             'primary_color' => $settings['primary_color'] ?? '#16A34A',
             'footer_text' => $settings['footer_text'] ?? '',
         ];

@@ -82,7 +82,7 @@ export default function Appearance({ settings }: { settings: Settings }) {
                             <label className="block text-sm font-medium text-slate-700">
                                 Nama Aplikasi
                                 <input
-                                    className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600"
+                                    className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand"
                                     maxLength={100}
                                     required
                                     value={form.app_name}
@@ -138,7 +138,7 @@ export default function Appearance({ settings }: { settings: Settings }) {
                                 Kode warna kustom
                                 <input
                                     type="text"
-                                    className="h-10 w-32 rounded-[9px] border-slate-300 font-mono text-sm focus:border-green-600 focus:ring-green-600"
+                                    className="h-10 w-32 rounded-[9px] border-slate-300 font-mono text-sm focus:border-brand focus:ring-brand"
                                     maxLength={7}
                                     pattern="^#[0-9A-Fa-f]{6}$"
                                     value={form.primary_color}
@@ -156,7 +156,7 @@ export default function Appearance({ settings }: { settings: Settings }) {
                         <label className="mt-5 block text-sm font-medium text-slate-700">
                             Footer
                             <input
-                                className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600"
+                                className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand"
                                 maxLength={200}
                                 value={form.footer_text}
                                 onChange={(event) => setForm({ ...form, footer_text: event.target.value })}

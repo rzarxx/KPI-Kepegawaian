@@ -19,7 +19,7 @@ use Inertia\Testing\AssertableInertia;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
-class PhaseCompletionTest extends TestCase
+class IntegrationRegressionTest extends TestCase
 {
     use RefreshDatabase;
 
