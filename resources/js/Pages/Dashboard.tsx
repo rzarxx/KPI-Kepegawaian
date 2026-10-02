@@ -80,20 +80,60 @@ export default function Dashboard({ metrics, distributions, trend, priorities, a
 
 function DistributionChart({ title, data }: { title: string; data: DistributionItem[] }) {
     const hasData = data.length > 0 && data.some((item) => item.value > 0);
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+
+    const renderLegend = ({ payload }: { payload?: { value: string; color: string }[] }) => (
+        <ul className="mt-2 flex flex-col gap-1 overflow-hidden px-1">
+            {(payload ?? []).map((entry, index) => {
+                const item = data[index];
+                const pct = total > 0 ? ((item?.value ?? 0) / total * 100).toFixed(0) : '0';
+                return (
+                    <li key={`legend-${index}`} className="flex items-center gap-2 min-w-0">
+                        <span className="inline-block size-2.5 shrink-0 rounded-full" style={{ backgroundColor: entry.color }} />
+                        <span className="truncate text-xs text-slate-600" title={`${entry.value} — ${item?.value ?? 0} orang (${pct}%)`}>
+                            {entry.value}
+                        </span>
+                        <span className="ml-auto shrink-0 text-xs font-semibold text-slate-700">{pct}%</span>
+                    </li>
+                );
+            })}
+        </ul>
+    );
+
     return (
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="font-semibold text-slate-900">{title}</h2>
-            <div className="mt-4 h-64">
+            <div className="mt-4 h-72">
                 {hasData ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
-                            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
+                            <Pie
+                                data={data}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="42%"
+                                outerRadius={75}
+                                innerRadius={32}
+                                label={false}
+                                labelLine={false}
+                                strokeWidth={1.5}
+                                stroke="#fff"
+                            >
                                 {data.map((_entry, index) => (
                                     <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                                 ))}
                             </Pie>
-                            <Tooltip formatter={(value) => [String(value), 'Jumlah']} contentStyle={{ borderColor: '#E2E8F0', borderRadius: 10 }} />
-                            <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} />
+                            <Tooltip
+                                formatter={(value) => [String(value) + ' orang', 'Jumlah']}
+                                contentStyle={{ borderColor: '#E2E8F0', borderRadius: 10, fontSize: 12 }}
+                                cursor={{ fill: 'transparent' }}
+                            />
+                            <Legend
+                                content={renderLegend as never}
+                                verticalAlign="bottom"
+                                height={36}
+                            />
                         </PieChart>
                     </ResponsiveContainer>
                 ) : (
