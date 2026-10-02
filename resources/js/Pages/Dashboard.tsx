@@ -82,8 +82,11 @@ function DistributionChart({ title, data }: { title: string; data: DistributionI
     const hasData = data.length > 0 && data.some((item) => item.value > 0);
     const total = data.reduce((sum, item) => sum + item.value, 0);
 
+    // Hitung tinggi legend secara dinamis: setiap item ~20px, minimal 40px
+    const legendHeight = Math.max(40, data.length * 20);
+
     const renderLegend = ({ payload }: { payload?: { value: string; color: string }[] }) => (
-        <ul className="mt-2 flex flex-col gap-1 overflow-hidden px-1">
+        <ul className="flex flex-col gap-1 overflow-hidden px-1 pt-2">
             {(payload ?? []).map((entry, index) => {
                 const item = data[index];
                 const pct = total > 0 ? ((item?.value ?? 0) / total * 100).toFixed(0) : '0';
@@ -112,9 +115,9 @@ function DistributionChart({ title, data }: { title: string; data: DistributionI
                                 dataKey="value"
                                 nameKey="name"
                                 cx="50%"
-                                cy="42%"
-                                outerRadius={75}
-                                innerRadius={32}
+                                cy="36%"
+                                outerRadius={68}
+                                innerRadius={30}
                                 label={false}
                                 labelLine={false}
                                 strokeWidth={1.5}
@@ -132,7 +135,8 @@ function DistributionChart({ title, data }: { title: string; data: DistributionI
                             <Legend
                                 content={renderLegend as never}
                                 verticalAlign="bottom"
-                                height={36}
+                                height={legendHeight}
+                                wrapperStyle={{ overflowY: 'auto', maxHeight: 120 }}
                             />
                         </PieChart>
                     </ResponsiveContainer>
