@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\AppSetting;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 
 class UpdateBrandingAction
@@ -23,6 +24,10 @@ class UpdateBrandingAction
             $this->removeExistingBrandingAssets();
             $this->processLogoUpload($logoFile, $data['primary_color']);
         }
+
+        // Clear Blade view cache so app.blade.php picks up the new
+        // favicon, primary_color, and app_name on the very next request.
+        Artisan::call('view:clear');
     }
 
     private function removeExistingBrandingAssets(): void

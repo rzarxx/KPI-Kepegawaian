@@ -92,8 +92,8 @@ export default function AuthenticatedLayout({
             : []),
     ] as NavItem[];
 
-    const accentStyle = brand.primary_color && brand.primary_color !== '#16A34A'
-        ? { '--brand-color': brand.primary_color } as React.CSSProperties
+    const accentStyle = brand.primary_color
+        ? ({ '--brand-color': brand.primary_color } as React.CSSProperties)
         : undefined;
 
     return (
