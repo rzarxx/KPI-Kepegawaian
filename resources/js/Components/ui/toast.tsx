@@ -41,13 +41,13 @@ export function Toaster() {
 }
 
 const icons: Record<ToastType, React.ReactNode> = {
-    success: <CircleCheck className="mt-0.5 shrink-0 text-green-600" size={18} />,
+    success: <CircleCheck className="mt-0.5 shrink-0 text-brand" size={18} />,
     error: <CircleAlert className="mt-0.5 shrink-0 text-red-600" size={18} />,
     info: <Info className="mt-0.5 shrink-0 text-blue-600" size={18} />,
 };
 
 const styles: Record<ToastType, string> = {
-    success: 'border-green-200 bg-green-50 text-green-900',
+    success: 'border-brand-soft bg-brand-subtle text-green-900',
     error: 'border-red-200 bg-red-50 text-red-900',
     info: 'border-blue-200 bg-blue-50 text-blue-900',
 };

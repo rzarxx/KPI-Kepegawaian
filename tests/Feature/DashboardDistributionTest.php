@@ -12,7 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
-class Phase11UpdateTest extends TestCase
+class DashboardDistributionTest extends TestCase
 {
     use RefreshDatabase;
 

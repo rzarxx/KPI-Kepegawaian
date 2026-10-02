@@ -94,7 +94,7 @@ export default function Index({
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2">
                                         <p className="truncate font-medium text-slate-800">{user.name}</p>
-                                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${user.is_active ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${user.is_active ? 'bg-brand-subtle text-brand' : 'bg-slate-100 text-slate-500'}`}>
                                             {user.is_active ? 'Aktif' : 'Nonaktif'}
                                         </span>
                                     </div>
@@ -162,7 +162,7 @@ function ActionMenu({ user, canManageRoles, canImpersonate, toggling, onEdit, on
                         <Pencil size={15} />Ubah akses
                     </button>
                 )}
-                <button type="button" disabled={toggling} className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${user.is_active ? 'text-amber-700 hover:bg-amber-50' : 'text-green-700 hover:bg-green-50'}`} onClick={onToggle}>
+                <button type="button" disabled={toggling} className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${user.is_active ? 'text-amber-700 hover:bg-amber-50' : 'text-brand hover:bg-brand-subtle'}`} onClick={onToggle}>
                     <Power size={15} />{user.is_active ? 'Nonaktifkan' : 'Aktifkan kembali'}
                 </button>
                 {canImpersonate && user.is_active && !user.roles.includes('Super Admin') && (
@@ -257,9 +257,9 @@ function changeRole(role: string, currentScopes: Scope[], setScopes: (scopes: Sc
 }
 
 function Field({ label, value, error, onChange, type = 'text' }: { label: string; value: string; error?: string; onChange: (value: string) => void; type?: string }) {
-    return <label className="mt-4 block text-sm font-semibold text-slate-700">{label}<input className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600" type={type} value={value} onChange={(event) => onChange(event.target.value)} required />{error && <p className="mt-1 text-xs text-red-600">{error}</p>}</label>;
+    return <label className="mt-4 block text-sm font-semibold text-slate-700">{label}<input className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand" type={type} value={value} onChange={(event) => onChange(event.target.value)} required />{error && <p className="mt-1 text-xs text-red-600">{error}</p>}</label>;
 }
 
 function Select({ label, value, error, onChange, options, compact = false }: { label: string; value: string; error?: string; onChange: (value: string) => void; options: Option[]; compact?: boolean }) {
-    return <label className={`${compact ? '' : 'mt-4'} block text-sm font-semibold text-slate-700`}>{label}<select className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600" value={value} onChange={(event) => onChange(event.target.value)}><option value="">Pilih {label.toLowerCase()}</option>{options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}</select>{error && <p className="mt-1 text-xs text-red-600">{error}</p>}</label>;
+    return <label className={`${compact ? '' : 'mt-4'} block text-sm font-semibold text-slate-700`}>{label}<select className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand" value={value} onChange={(event) => onChange(event.target.value)}><option value="">Pilih {label.toLowerCase()}</option>{options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}</select>{error && <p className="mt-1 text-xs text-red-600">{error}</p>}</label>;
 }

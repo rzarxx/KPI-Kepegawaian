@@ -55,7 +55,7 @@ export default function Incidents({
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <h2 className="flex items-center gap-2 font-semibold text-slate-900"><AlertTriangle size={18} />Riwayat Catatan</h2>
                     <div className="mt-4 space-y-3">
-                        {incidents.length ? incidents.map((incident) => <IncidentCard incident={incident} canResolve={canResolve} key={incident.id} />) : <div className="rounded-lg border border-dashed border-slate-200 py-10 text-center"><ShieldCheck className="mx-auto text-green-600" size={28} /><p className="mt-3 text-sm font-medium text-slate-700">Belum ada catatan masalah</p><p className="mt-1 text-sm text-slate-500">Riwayat masalah dan tindak lanjut akan tampil di sini.</p></div>}
+                        {incidents.length ? incidents.map((incident) => <IncidentCard incident={incident} canResolve={canResolve} key={incident.id} />) : <div className="rounded-lg border border-dashed border-slate-200 py-10 text-center"><ShieldCheck className="mx-auto text-brand" size={28} /><p className="mt-3 text-sm font-medium text-slate-700">Belum ada catatan masalah</p><p className="mt-1 text-sm text-slate-500">Riwayat masalah dan tindak lanjut akan tampil di sini.</p></div>}
                     </div>
                 </section>
             </div>
@@ -100,7 +100,7 @@ function IncidentCard({ incident, canResolve }: { incident: Incident; canResolve
                 <span className={'h-fit whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ' + status.className}>{status.label}</span>
             </div>
             <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-500"><Clock3 size={14} />{incident.occurred_at}{incident.reporter ? ' · Dicatat oleh ' + incident.reporter : ''}</p>
-            {incident.resolution && <p className="mt-3 rounded-lg bg-green-50 p-3 text-sm text-green-800">Tindak lanjut: {incident.resolution}</p>}
+            {incident.resolution && <p className="mt-3 rounded-lg bg-brand-subtle p-3 text-sm text-brand-dark">Tindak lanjut: {incident.resolution}</p>}
             {canResolve && ['OPEN', 'UNDER_REVIEW'].includes(incident.status) && <ResolveForm incident={incident} />}
         </article>
     );
@@ -126,8 +126,8 @@ const severityClasses = { LOW: 'bg-slate-100 text-slate-700', MEDIUM: 'bg-amber-
 const statusLabels = {
     OPEN: { label: 'Terbuka', className: 'bg-red-50 text-red-700' },
     UNDER_REVIEW: { label: 'Ditinjau', className: 'bg-amber-50 text-amber-800' },
-    RESOLVED: { label: 'Selesai', className: 'bg-green-50 text-green-800' },
+    RESOLVED: { label: 'Selesai', className: 'bg-brand-subtle text-brand-dark' },
     CLOSED: { label: 'Ditutup', className: 'bg-slate-100 text-slate-700' },
 };
-const input = 'mt-1 min-h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600';
+const input = 'mt-1 min-h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand';
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) { return <label className="text-sm font-medium text-slate-700">{label}{children}{error && <span className="mt-1 block text-xs text-red-600">{error}</span>}</label>; }

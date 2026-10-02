@@ -59,7 +59,7 @@ export default function Form({
                             <label className="text-sm font-medium text-slate-700">
                                 Periode (opsional)
                                 <select
-                                    className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600"
+                                    className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand"
                                     value={form.data.period_id}
                                     onChange={(event) => form.setData('period_id', event.target.value)}
                                 >
@@ -74,9 +74,9 @@ export default function Form({
                     )}
 
                     {!editable && <div className="mt-5 flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600"><LockKeyhole className="mt-0.5 shrink-0" size={17} /><p>Penilaian ini sudah diajukan dan tidak dapat diubah. Silakan gunakan opsi yang tersedia untuk melanjutkan proses.</p></div>}
-                    <div className="mt-6 space-y-4">{components.map((component, index) => <div className="grid gap-3 border-b border-slate-100 pb-4 sm:grid-cols-[1fr_150px]" key={component.id}><div><p className="font-medium text-slate-800">{component.name}</p><p className="text-xs text-slate-500">Bobot {component.default_weight}% {component.is_auto_calculated ? '· dihitung otomatis' : ''}</p></div><input aria-label={'Nilai ' + component.name} className="h-10 rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600 disabled:bg-slate-50 disabled:text-slate-500" disabled={!editable || component.is_auto_calculated} max="100" min="0" onChange={(event) => { const scores = [...form.data.scores]; scores[index] = { ...scores[index], raw_score: event.target.value }; form.setData('scores', scores); }} placeholder={component.is_auto_calculated ? 'Otomatis' : '0-100'} type="number" value={form.data.scores[index].raw_score} />{scoreError(index) && <p className="text-xs text-red-600 sm:col-start-2">{scoreError(index)}</p>}</div>)}</div>
+                    <div className="mt-6 space-y-4">{components.map((component, index) => <div className="grid gap-3 border-b border-slate-100 pb-4 sm:grid-cols-[1fr_150px]" key={component.id}><div><p className="font-medium text-slate-800">{component.name}</p><p className="text-xs text-slate-500">Bobot {component.default_weight}% {component.is_auto_calculated ? '· dihitung otomatis' : ''}</p></div><input aria-label={'Nilai ' + component.name} className="h-10 rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50 disabled:text-slate-500" disabled={!editable || component.is_auto_calculated} max="100" min="0" onChange={(event) => { const scores = [...form.data.scores]; scores[index] = { ...scores[index], raw_score: event.target.value }; form.setData('scores', scores); }} placeholder={component.is_auto_calculated ? 'Otomatis' : '0-100'} type="number" value={form.data.scores[index].raw_score} />{scoreError(index) && <p className="text-xs text-red-600 sm:col-start-2">{scoreError(index)}</p>}</div>)}</div>
                     {form.errors.scores && <p className="mt-3 text-sm text-red-600">{form.errors.scores}</p>}
-                    <textarea className="mt-5 min-h-24 w-full rounded-[9px] border-slate-300 text-sm focus:border-green-600 focus:ring-green-600 disabled:bg-slate-50" disabled={!editable} onChange={(event) => form.setData('notes', event.target.value)} placeholder="Catatan tambahan (opsional)" value={form.data.notes} />
+                    <textarea className="mt-5 min-h-24 w-full rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50" disabled={!editable} onChange={(event) => form.setData('notes', event.target.value)} placeholder="Catatan tambahan (opsional)" value={form.data.notes} />
                     <div className="mt-5 flex flex-wrap justify-end gap-3">{editable && <Button disabled={form.processing} type="submit" variant="secondary">Simpan Draf</Button>}{transition && <Button disabled={form.processing} onClick={move} type="button">{transition.icon}{transition.label}</Button>}</div>
                 </form>
                 <aside className="h-fit rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -99,4 +99,4 @@ function transitionFor(evaluation: Evaluation | null, abilities: Abilities) {
     return null;
 }
 const statusLabels = { DRAFT: 'Draf', SUBMITTED: 'Diajukan', APPROVED: 'Disetujui', FINALIZED: 'Final', CLOSED: 'Ditutup' };
-const statusStyles = { DRAFT: 'bg-slate-100 text-slate-700', SUBMITTED: 'bg-blue-50 text-blue-700', APPROVED: 'bg-amber-50 text-amber-800', FINALIZED: 'bg-green-50 text-green-800', CLOSED: 'bg-slate-900 text-white' };
+const statusStyles = { DRAFT: 'bg-slate-100 text-slate-700', SUBMITTED: 'bg-blue-50 text-blue-700', APPROVED: 'bg-amber-50 text-amber-800', FINALIZED: 'bg-brand-subtle text-brand-dark', CLOSED: 'bg-slate-900 text-white' };
