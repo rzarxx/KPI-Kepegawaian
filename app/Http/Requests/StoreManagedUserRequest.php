@@ -22,6 +22,16 @@ class StoreManagedUserRequest extends FormRequest
                 'sub_division_id' => $this->input('sub_division_id'),
             ]]]);
         }
+
+        if ($this->has('scopes') && is_array($this->input('scopes'))) {
+            $this->merge([
+                'scopes' => collect($this->input('scopes'))->map(fn ($scope) => [
+                    'branch_id' => ($scope['branch_id'] ?? '') !== '' ? $scope['branch_id'] : null,
+                    'division_id' => ($scope['division_id'] ?? '') !== '' ? $scope['division_id'] : null,
+                    'sub_division_id' => ($scope['sub_division_id'] ?? '') !== '' ? $scope['sub_division_id'] : null,
+                ])->all(),
+            ]);
+        }
     }
 
     public function rules(): array

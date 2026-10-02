@@ -7,7 +7,6 @@ use App\Models\SubDivision;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class UserAccessService
@@ -33,7 +32,7 @@ class UserAccessService
         $this->validateScopes($actor, $data['scopes'] ?? []);
 
         return DB::transaction(function () use ($data): User {
-            $user = User::query()->create(['name' => $data['name'], 'email' => $data['email'], 'password' => Hash::make($data['password']), 'is_active' => true]);
+            $user = User::query()->create(['name' => $data['name'], 'email' => $data['email'], 'password' => $data['password'], 'is_active' => true]);
             $user->assignRole($data['role']);
             $this->replaceScopes($user, $data['scopes'] ?? []);
 
