@@ -12,11 +12,11 @@ export default function Welcome({ auth }: { auth: { user?: { name: string } } })
         <>
             <Head title="Sistem Penilaian Karyawan" />
             <main style={accentStyle} className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
-                <header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
+                <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
                     <div className="flex items-center gap-3">{brand.app_logo ? <img src={`/storage/${brand.app_logo}`} alt={brand.app_name} className="size-10 object-contain rounded-lg" /> : <ApplicationLogo className="size-10" />}<div><p className="text-sm font-bold">{brand.app_name}</p><p className="text-xs text-slate-500">Sistem Penilaian Karyawan</p></div></div>
                     <Link className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-dark" href={auth.user ? route('dashboard') : route('login')}>{auth.user ? 'Buka Beranda' : 'Masuk'}<ArrowRight size={16} /></Link>
                 </header>
-                <section className="mx-auto flex-1 grid max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
+                <section className="mx-auto w-full flex-1 grid max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
                     <div>
                         <span className="inline-flex rounded-full bg-brand-soft px-3 py-1 text-sm font-semibold text-brand-dark">Aplikasi internal perusahaan</span>
                         <h1 className="mt-6 max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">Penilaian karyawan yang terukur, aman, dan mudah ditindaklanjuti.</h1>
