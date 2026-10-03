@@ -43,6 +43,20 @@ class EmployeeDocumentController extends Controller
         return Storage::disk($document->disk)->download($document->path, $document->original_name);
     }
 
+    public function preview(EmployeeDocument $document): \Illuminate\Http\Response
+    {
+        $this->authorize('view', $document);
+
+        abort_unless(Storage::disk($document->disk)->exists($document->path), 404);
+
+        $content = Storage::disk($document->disk)->get($document->path);
+
+        return response($content, 200)
+            ->header('Content-Type', $document->mime_type)
+            ->header('Content-Disposition', 'inline; filename="' . $document->original_name . '"')
+            ->header('Cache-Control', 'private, no-store');
+    }
+
     public function destroy(EmployeeDocument $document, AuditLogger $audit): RedirectResponse
     {
         $this->authorize('delete', $document);

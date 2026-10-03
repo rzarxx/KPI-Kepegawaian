@@ -132,14 +132,27 @@ class EmployeeController extends Controller
             $evaluationsByPeriod = EmployeeEvaluation::query()
                 ->where('employee_id', $employee->id)
                 ->where('evaluator_id', $user->id)
+                ->where('evaluation_type', EmployeeEvaluation::TYPE_SUPERVISOR)
                 ->whereIn('period_id', $evaluationPeriods->pluck('id'))
-                ->pluck('id', 'period_id');
+                ->get(['id', 'period_id', 'status'])
+                ->keyBy('period_id');
+            // Self-assessment dari karyawan sendiri
+            $selfAssessmentsByPeriod = EmployeeEvaluation::query()
+                ->where('employee_id', $employee->id)
+                ->where('evaluation_type', EmployeeEvaluation::TYPE_SELF)
+                ->whereIn('period_id', $evaluationPeriods->pluck('id'))
+                ->get(['id', 'period_id', 'status', 'total_score'])
+                ->keyBy('period_id');
             $evaluationPeriods = $evaluationPeriods->map(fn (PerformancePeriod $period): array => [
                 'id' => $period->id,
                 'name' => $period->name,
                 'start_date' => $period->start_date->toDateString(),
                 'end_date' => $period->end_date->toDateString(),
-                'evaluation_id' => $evaluationsByPeriod->get($period->id),
+                'evaluation_id' => $evaluationsByPeriod->get($period->id)?->id,
+                'evaluation_status' => $evaluationsByPeriod->get($period->id)?->status,
+                'self_assessment_id' => $selfAssessmentsByPeriod->get($period->id)?->id,
+                'self_assessment_status' => $selfAssessmentsByPeriod->get($period->id)?->status,
+                'self_assessment_score' => $selfAssessmentsByPeriod->get($period->id)?->total_score,
             ]);
         }
 

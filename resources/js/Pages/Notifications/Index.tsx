@@ -2,7 +2,7 @@ import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { Bell, BellRing, CheckCheck, ExternalLink } from 'lucide-react';
+import { Bell, BellRing, CheckCheck, Download, ExternalLink } from 'lucide-react';
 import { Head, Link } from '@inertiajs/react';
 
 type Notification = {
@@ -16,6 +16,11 @@ type Notification = {
 };
 type Paginated<T> = { data: T[]; links: { url?: string; label: string; active: boolean }[] };
 
+/** Returns true when the URL points to a file download (not a page navigation) */
+function isDownloadUrl(url: string): boolean {
+    return url.includes('/laporan/ekspor/') || url.includes('/dokumen-karyawan/');
+}
+
 export default function Index({ notifications }: { notifications: Paginated<Notification> }) {
     const unread = notifications.data.some((notification) => !notification.read_at);
     return (
@@ -23,7 +28,14 @@ export default function Index({ notifications }: { notifications: Paginated<Noti
             <Head title="Notifikasi" />
             <div className="mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
                 <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                    {notifications.data.length ? <div className="divide-y divide-slate-100">{notifications.data.map((notification) => <article className={'flex gap-4 p-5 ' + (!notification.read_at ? 'bg-brand-subtle/40' : '')} key={notification.id}><span className={'mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-full ' + levelClasses[notification.level]}>{notification.read_at ? <Bell size={18} /> : <BellRing size={18} />}</span><div className="min-w-0 flex-1"><div className="flex flex-col justify-between gap-1 sm:flex-row"><p className="font-semibold text-slate-900">{notification.title}</p><span className="whitespace-nowrap text-xs text-slate-400">{formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: id })}</span></div><p className="mt-1 text-sm leading-6 text-slate-600">{notification.message}</p><div className="mt-3 flex flex-wrap gap-3">{notification.url && <Link className="inline-flex items-center gap-1 text-sm font-semibold text-brand hover:text-brand-dark" href={notification.url}><ExternalLink size={15} />Buka detail</Link>}{!notification.read_at && <Link as="button" method="post" preserveScroll className="text-sm font-medium text-slate-500 hover:text-slate-800" href={route('notifications.read', notification.id)}>Tandai dibaca</Link>}</div></div></article>)}</div> : <div className="py-16 text-center"><Bell className="mx-auto text-slate-300" size={32} /><p className="mt-3 font-semibold text-slate-800">Belum ada notifikasi</p><p className="mt-1 text-sm text-slate-500">Pembaruan penting akan muncul di sini.</p></div>}
+                    {notifications.data.length ? <div className="divide-y divide-slate-100">{notifications.data.map((notification) => <article className={'flex gap-4 p-5 ' + (!notification.read_at ? 'bg-brand-subtle/40' : '')} key={notification.id}><span className={'mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-full ' + levelClasses[notification.level]}>{notification.read_at ? <Bell size={18} /> : <BellRing size={18} />}</span><div className="min-w-0 flex-1"><div className="flex flex-col justify-between gap-1 sm:flex-row"><p className="font-semibold text-slate-900">{notification.title}</p><span className="whitespace-nowrap text-xs text-slate-400">{formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: id })}</span></div><p className="mt-1 text-sm leading-6 text-slate-600">{notification.message}</p><div className="mt-3 flex flex-wrap gap-3">{notification.url && (
+    isDownloadUrl(notification.url)
+        ? <a
+            className="inline-flex items-center gap-1 text-sm font-semibold text-brand hover:text-brand-dark"
+            href={notification.url}
+          ><Download size={15} />Unduh sekarang</a>
+        : <Link className="inline-flex items-center gap-1 text-sm font-semibold text-brand hover:text-brand-dark" href={notification.url}><ExternalLink size={15} />Buka detail</Link>
+)}{!notification.read_at && <Link as="button" method="post" preserveScroll className="text-sm font-medium text-slate-500 hover:text-slate-800" href={route('notifications.read', notification.id)}>Tandai dibaca</Link>}</div></div></article>)}</div> : <div className="py-16 text-center"><Bell className="mx-auto text-slate-300" size={32} /><p className="mt-3 font-semibold text-slate-800">Belum ada notifikasi</p><p className="mt-1 text-sm text-slate-500">Pembaruan penting akan muncul di sini.</p></div>}
                 </section>
                 {notifications.links.length > 3 && <nav className="mt-5 flex flex-wrap justify-center gap-1" aria-label="Navigasi halaman">{notifications.links.map((link, index) => link.url ? <Link className={'rounded-lg border px-3 py-2 text-sm ' + (link.active ? 'border-brand bg-brand-subtle text-brand-dark' : 'border-slate-200 bg-white text-slate-600')} href={link.url} key={index}>{paginationLabel(link.label)}</Link> : <span className="rounded-lg border border-slate-100 px-3 py-2 text-sm text-slate-300" key={index}>{paginationLabel(link.label)}</span>)}</nav>}
             </div>

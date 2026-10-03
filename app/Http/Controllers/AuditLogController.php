@@ -3,17 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
-use App\Services\OrganizationalScopeResolver;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AuditLogController extends Controller
 {
-    public function __invoke(Request $request, OrganizationalScopeResolver $scopes): Response
+    public function __invoke(Request $request): Response
     {
-        abort_unless($request->user()->can('audit.view'), 403);
-        abort_unless($scopes->allowedBranchIds($request->user()) === null, 403);
+        abort_unless($request->user()->hasRole('Super Admin'), 403);
 
         $filters = $request->validate([
             'action' => ['nullable', 'string', 'max:100'],

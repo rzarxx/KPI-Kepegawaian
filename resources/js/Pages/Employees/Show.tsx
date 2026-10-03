@@ -1,12 +1,13 @@
 import { Button } from "@/Components/ui/button";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, router, useForm } from "@inertiajs/react";
 import {
     AlertTriangle,
     ArrowLeft,
     BriefcaseBusiness,
     ClipboardCheck,
     Download,
+    Eye,
     FileText,
     History,
     Pencil,
@@ -15,6 +16,7 @@ import {
     Upload,
     UserRoundCheck,
     UserRoundX,
+    X,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -77,6 +79,10 @@ type EvaluationPeriod = {
     start_date: string;
     end_date: string;
     evaluation_id?: number | null;
+    evaluation_status?: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'FINALIZED' | 'CLOSED' | null;
+    self_assessment_id?: number | null;
+    self_assessment_status?: string | null;
+    self_assessment_score?: string | null;
 };
 
 export default function Show({
@@ -94,7 +100,6 @@ export default function Show({
     canUploadDocument,
     canEvaluate,
     evaluationPeriods,
-    adHocEvaluationId,
     canRehire,
     canTransfer,
     canChangeStatus,
@@ -114,7 +119,6 @@ export default function Show({
     canUploadDocument: boolean;
     canEvaluate: boolean;
     evaluationPeriods: EvaluationPeriod[];
-    adHocEvaluationId?: number | null;
     canRehire: boolean;
     canTransfer: boolean;
     canChangeStatus: boolean;
@@ -213,7 +217,6 @@ export default function Show({
                     <EvaluationCard
                         employeeId={employee.id}
                         periods={evaluationPeriods}
-                        adHocEvaluationId={adHocEvaluationId}
                     />
                 )}
                 {(canTransfer || canChangeStatus || canRehire) && (
@@ -305,12 +308,24 @@ export default function Show({
 function EvaluationCard({
     employeeId,
     periods,
-    adHocEvaluationId,
 }: {
     employeeId: number;
     periods: EvaluationPeriod[];
-    adHocEvaluationId?: number | null;
 }) {
+    const evalStatusLabel: Record<string, string> = {
+        DRAFT: 'Draf',
+        SUBMITTED: 'Diajukan',
+        APPROVED: 'Disetujui',
+        FINALIZED: 'Final',
+        CLOSED: 'Ditutup',
+    };
+    const evalStatusStyle: Record<string, string> = {
+        DRAFT: 'bg-slate-100 text-slate-600',
+        SUBMITTED: 'bg-blue-50 text-blue-700',
+        APPROVED: 'bg-amber-50 text-amber-700',
+        FINALIZED: 'bg-brand-subtle text-brand-dark',
+        CLOSED: 'bg-slate-800 text-white',
+    };
     return (
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -318,33 +333,10 @@ function EvaluationCard({
                 Penilaian Karyawan
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-                Mulai penilaian langsung atau pilih periode tertentu.
+                Pilih periode untuk memulai atau melanjutkan penilaian.
             </p>
-            <div className="mt-4 space-y-3">
-                <div className="flex flex-col justify-between gap-3 rounded-lg border border-brand-soft bg-brand-subtle p-4 sm:flex-row sm:items-center">
-                    <div>
-                        <p className="text-sm font-semibold text-green-900">
-                            Penilaian Langsung
-                        </p>
-                        <p className="mt-1 text-xs text-brand">
-                            Tanpa periode tertentu
-                        </p>
-                    </div>
-                    <Button asChild>
-                        <Link
-                            href={
-                                adHocEvaluationId
-                                    ? route("evaluations.show", adHocEvaluationId)
-                                    : route("evaluations.create", employeeId)
-                            }
-                        >
-                            {adHocEvaluationId
-                                ? "Lanjutkan Penilaian"
-                                : "Mulai Penilaian"}
-                        </Link>
-                    </Button>
-                </div>
-                {periods.length > 0 && (
+            <div className="mt-4">
+                {periods.length > 0 ? (
                     <div className="divide-y divide-slate-100 rounded-lg border border-slate-200">
                         {periods.map((period) => (
                             <div
@@ -356,28 +348,56 @@ function EvaluationCard({
                                         {period.name}
                                     </p>
                                     <p className="mt-1 text-xs text-slate-500">
-                                        {period.start_date} sampai{" "}
-                                        {period.end_date}
+                                        {period.start_date} s/d {period.end_date}
                                     </p>
+                                    {period.self_assessment_status && (
+                                        <p className="mt-1 flex items-center gap-1.5 text-xs">
+                                            <span className="inline-block size-1.5 rounded-full bg-blue-400" />
+                                            <span className="text-slate-500">
+                                                Penilaian Diri:{' '}
+                                                <span className="font-medium text-blue-700">
+                                                    {evalStatusLabel[period.self_assessment_status] ?? period.self_assessment_status}
+                                                </span>
+                                            </span>
+                                            {period.self_assessment_id && (
+                                                <Link
+                                                    href={route('self-assessment.show', period.self_assessment_id)}
+                                                    className="text-brand underline underline-offset-2 hover:no-underline"
+                                                >
+                                                    Lihat
+                                                </Link>
+                                            )}
+                                        </p>
+                                    )}
                                 </div>
-                                <Button asChild variant="secondary">
-                                    <Link
-                                        href={
-                                            period.evaluation_id
-                                                ? route(
-                                                      "evaluations.show",
-                                                      period.evaluation_id,
-                                                  )
-                                                : route("evaluations.create", employeeId) + "?period_id=" + period.id
-                                        }
-                                    >
-                                        {period.evaluation_id
-                                            ? "Lanjutkan Penilaian"
-                                            : "Mulai Penilaian"}
-                                    </Link>
-                                </Button>
+                                <div className="flex shrink-0 items-center gap-2">
+                                    {period.evaluation_status && (
+                                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                            evalStatusStyle[period.evaluation_status] ?? 'bg-slate-100 text-slate-600'
+                                        }`}>
+                                            {evalStatusLabel[period.evaluation_status] ?? period.evaluation_status}
+                                        </span>
+                                    )}
+                                    <Button asChild variant={period.evaluation_id ? 'secondary' : 'primary'}>
+                                        <Link
+                                            href={
+                                                period.evaluation_id
+                                                    ? route('evaluations.show', period.evaluation_id)
+                                                    : route('evaluations.create', employeeId) + '?period_id=' + period.id
+                                            }
+                                        >
+                                            {period.evaluation_id ? 'Buka Penilaian' : 'Mulai Penilaian'}
+                                        </Link>
+                                    </Button>
+                                </div>
                             </div>
                         ))}
+                    </div>
+                ) : (
+                    <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
+                        <ClipboardCheck className="mx-auto text-slate-300" size={28} />
+                        <p className="mt-3 text-sm font-semibold text-slate-700">Belum ada periode aktif</p>
+                        <p className="mt-1 text-xs text-slate-500">Buat periode penilaian di halaman Konfigurasi Penilaian terlebih dahulu.</p>
                     </div>
                 )}
             </div>
@@ -807,6 +827,29 @@ function DocumentsCard({
         category: "LAINNYA",
         document: null,
     });
+    const [deleteTarget, setDeleteTarget] = useState<Document | null>(null);
+    const [previewTarget, setPreviewTarget] = useState<Document | null>(null);
+    const [deleting, setDeleting] = useState(false);
+
+    const confirmDelete = () => {
+        if (!deleteTarget) return;
+        setDeleting(true);
+        router.delete(route("employees.documents.destroy", deleteTarget.id), {
+            preserveScroll: true,
+            onFinish: () => {
+                setDeleting(false);
+                setDeleteTarget(null);
+            },
+        });
+    };
+
+    const previewUrl = previewTarget
+        ? route("employees.documents.preview", previewTarget.id)
+        : null;
+    const downloadUrl = (doc: Document) => route("employees.documents.download", doc.id);
+    const isPreviewable = (doc: Document) =>
+        doc.mime_type.startsWith("image/") || doc.mime_type === "application/pdf";
+
     return (
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <div>
@@ -892,6 +935,16 @@ function DocumentsCard({
                                 </p>
                             </div>
                             <div className="flex gap-2">
+                                {isPreviewable(document) && (
+                                    <button
+                                        type="button"
+                                        aria-label="Lihat dokumen"
+                                        className="flex size-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+                                        onClick={() => setPreviewTarget(document)}
+                                    >
+                                        <Eye size={16} />
+                                    </button>
+                                )}
                                 <Link
                                     aria-label="Unduh dokumen"
                                     className="flex size-10 items-center justify-center rounded-lg border border-slate-200 text-brand hover:bg-brand-subtle"
@@ -903,19 +956,14 @@ function DocumentsCard({
                                     <Download size={16} />
                                 </Link>
                                 {document.can_delete && (
-                                    <Link
+                                    <button
+                                        type="button"
                                         aria-label="Hapus dokumen"
-                                        as="button"
                                         className="flex size-10 items-center justify-center rounded-lg border border-red-200 text-red-700 hover:bg-red-50"
-                                        href={route(
-                                            "employees.documents.destroy",
-                                            document.id,
-                                        )}
-                                        method="delete"
-                                        preserveScroll
+                                        onClick={() => setDeleteTarget(document)}
                                     >
                                         <Trash2 size={16} />
-                                    </Link>
+                                    </button>
                                 )}
                             </div>
                         </div>
@@ -926,6 +974,89 @@ function DocumentsCard({
                     </p>
                 )}
             </div>
+
+            {/* Confirm Delete Dialog */}
+            {deleteTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+                        <div className="flex items-start gap-3">
+                            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-700">
+                                <Trash2 size={18} />
+                            </span>
+                            <div>
+                                <h2 className="font-semibold text-slate-900">Hapus Dokumen?</h2>
+                                <p className="mt-1 text-sm text-slate-600">
+                                    Dokumen <span className="font-medium">"{deleteTarget.name}"</span> akan dihapus secara permanen dan tidak dapat dikembalikan.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="mt-5 flex justify-end gap-3">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={() => setDeleteTarget(null)}
+                                disabled={deleting}
+                            >
+                                Batal
+                            </Button>
+                            <button
+                                type="button"
+                                className="inline-flex min-h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                                onClick={confirmDelete}
+                                disabled={deleting}
+                            >
+                                {deleting ? "Menghapus..." : "Ya, Hapus"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Document Preview Modal */}
+            {previewTarget && previewUrl && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+                    <div className="relative flex h-full max-h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-white shadow-2xl">
+                        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                            <div className="min-w-0">
+                                <p className="truncate font-semibold text-slate-900">{previewTarget.name}</p>
+                                <p className="text-xs text-slate-500">{previewTarget.category} · {formatBytes(previewTarget.size)}</p>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-2">
+                                <Link
+                                    href={previewUrl}
+                                    className="flex min-h-9 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                                    aria-label="Unduh"
+                                >
+                                    <Download size={15} />Unduh
+                                </Link>
+                                <button
+                                    type="button"
+                                    aria-label="Tutup pratinjau"
+                                    className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
+                                    onClick={() => setPreviewTarget(null)}
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-auto bg-slate-100 p-4">
+                            {previewTarget.mime_type === "application/pdf" ? (
+                                <iframe
+                                    src={previewUrl}
+                                    className="h-full min-h-[60vh] w-full rounded-lg border border-slate-200 bg-white"
+                                    title={previewTarget.name}
+                                />
+                            ) : (
+                                <img
+                                    src={previewUrl}
+                                    alt={previewTarget.name}
+                                    className="mx-auto max-h-full rounded-lg object-contain shadow"
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }

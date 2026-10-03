@@ -17,6 +17,9 @@ class AccessControlSeeder extends Seeder
             'employee.view', 'employee.create', 'employee.update', 'employee.change_status', 'employee.transfer', 'employee.export',
             'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'employee_incident.resolve',
             'evaluation.view', 'evaluation.create', 'evaluation.update', 'evaluation.submit', 'evaluation.approve', 'evaluation.finalize',
+            'evaluation.self_assess',
+            'calibration.view', 'calibration.manage',
+            'goal.view', 'goal.create', 'goal.update',
             'report.view', 'report.export',
             'employee_document.view', 'employee_document.create', 'employee_document.delete',
             'organization.view', 'organization.manage',
@@ -42,38 +45,48 @@ class AccessControlSeeder extends Seeder
                 'employee.view', 'employee.create', 'employee.update', 'employee.change_status', 'employee.transfer', 'employee.export', 'employee.manage_track_record',
                 'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'employee_incident.resolve',
                 'evaluation.view', 'evaluation.create', 'evaluation.update', 'evaluation.submit',
+                'calibration.view', 'calibration.manage',
+                'goal.view', 'goal.create', 'goal.update',
                 'employee_document.view', 'employee_document.create', 'employee_document.delete',
                 'report.view', 'report.export', 'organization.view', 'organization.manage',
                 'user.view', 'user.create', 'user.update', 'user.disable', 'role.view',
-                'settings.view', 'settings.manage',
+                'settings.view',
+                // settings.manage tidak diberikan — hanya Super Admin yang dapat mengatur tampilan website
             ],
             'HR Manager' => [
                 'employee.view', 'employee.export', 'employee.manage_track_record',
                 'employee_incident.view', 'employee_incident.resolve',
                 'evaluation.view', 'evaluation.approve', 'evaluation.finalize',
+                'calibration.view', 'calibration.manage',
+                'goal.view', 'goal.create', 'goal.update',
                 'employee_document.view',
-                'report.view', 'report.export', 'organization.view', 'audit.view', 'settings.view',
+                'report.view', 'report.export', 'organization.view', 'settings.view',
+                // audit.view dihapus — log aktivitas hanya untuk Super Admin
             ],
             'Branch Head' => [
                 'employee.view', 'employee.update', 'employee.export',
                 'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'employee_incident.resolve',
                 'evaluation.view', 'evaluation.approve',
+                'goal.view',
                 'employee_document.view', 'report.view', 'report.export', 'organization.view',
             ],
             'Division Head' => [
                 'employee.view',
                 'employee_incident.view', 'employee_incident.create', 'employee_incident.update',
                 'evaluation.view', 'evaluation.create', 'evaluation.update', 'evaluation.submit', 'evaluation.approve',
+                'goal.view', 'goal.create', 'goal.update',
                 'employee_document.view', 'report.view', 'organization.view',
             ],
             'Sub Division Head' => [
                 'employee.view',
                 'employee_incident.view', 'employee_incident.create', 'employee_incident.update',
                 'evaluation.view', 'evaluation.create', 'evaluation.update', 'evaluation.submit',
+                'goal.view',
                 'employee_document.view', 'organization.view',
             ],
-            'Auditor' => ['employee.view', 'employee_incident.view', 'evaluation.view', 'employee_document.view', 'report.view', 'report.export', 'audit.view', 'organization.view'],
-            'Employee' => [],
+            'Auditor' => ['employee.view', 'employee_incident.view', 'evaluation.view', 'employee_document.view', 'report.view', 'report.export', 'organization.view', 'goal.view', 'calibration.view'],
+            // audit.view dihapus dari Auditor — log aktivitas hanya untuk Super Admin
+            'Employee' => ['evaluation.self_assess', 'goal.view'],
         ];
 
         foreach ($roles as $name => $rolePermissions) {
