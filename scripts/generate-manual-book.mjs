@@ -1,4 +1,10 @@
-<!doctype html>
+import { writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { chromium } from '@playwright/test';
+
+// Konten HTML Manual Book KPI Kepegawaian Lengkap dengan Visual Mockup UI dan Callout Badges
+const htmlContent = `<!doctype html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
@@ -2562,3 +2568,45 @@
 
 </body>
 </html>
+`;
+
+async function main() {
+    const htmlPath = resolve('MANUAL_BOOK_KPI_KEPEGAWAIAN.html');
+    const pdfPath = resolve('Manual Book KPI Kepegawaian.pdf');
+
+    console.log('Menulis file HTML:', htmlPath);
+    await writeFile(htmlPath, htmlContent, 'utf-8');
+
+    console.log('Meluncurkan Playwright Chromium untuk mengompilasi PDF...');
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+    
+    const fileUrl = pathToFileURL(htmlPath).href;
+    console.log('Membuka file:', fileUrl);
+    await page.goto(fileUrl, { waitUntil: 'load' });
+
+    // Tunggu font render
+    await page.evaluate(() => document.fonts.ready);
+
+    console.log('Mencetak ke PDF...');
+    await page.pdf({
+        path: pdfPath,
+        format: 'A4',
+        printBackground: true,
+        margin: {
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0
+        },
+        preferCSSPageSize: true
+    });
+
+    await browser.close();
+    console.log('PDF Berhasil Dibuat:', pdfPath);
+}
+
+main().catch((err) => {
+    console.error('Error saat membuat manual book:', err);
+    process.exit(1);
+});
