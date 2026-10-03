@@ -12,76 +12,81 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Delete any orphaned evaluations with no period (ad-hoc) before enforcing constraint
+        // Hapus data evaluasi tanpa periode sebelum enforce constraint
         DB::statement('DELETE FROM employee_evaluations WHERE period_id IS NULL');
 
-        // Helper: cek apakah FK constraint ada di tabel
-        $hasFk = function (string $constraint): bool {
-            return ! empty(DB::select(
-                "SELECT 1 FROM information_schema.TABLE_CONSTRAINTS
-                 WHERE TABLE_SCHEMA = DATABASE()
-                   AND TABLE_NAME = 'employee_evaluations'
-                   AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-                   AND CONSTRAINT_NAME = ?",
-                [$constraint]
-            ));
-        };
+        // Ambil SEMUA FK yang saat ini ada di tabel
+        $existingFks = DB::select(
+            "SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'employee_evaluations'
+               AND CONSTRAINT_TYPE = 'FOREIGN KEY'"
+        );
 
-        // Helper: cek apakah index ada di tabel
-        $hasIndex = function (string $keyName): bool {
-            return ! empty(DB::select(
-                "SELECT 1 FROM information_schema.STATISTICS
-                 WHERE TABLE_SCHEMA = DATABASE()
-                   AND TABLE_NAME = 'employee_evaluations'
-                   AND INDEX_NAME = ?",
-                [$keyName]
-            ));
-        };
-
-        // Helper: cek apakah unique constraint ada
-        $hasUnique = function (string $keyName): bool {
-            return ! empty(DB::select(
-                "SELECT 1 FROM information_schema.STATISTICS
-                 WHERE TABLE_SCHEMA = DATABASE()
-                   AND TABLE_NAME = 'employee_evaluations'
-                   AND INDEX_NAME = ?
-                   AND NON_UNIQUE = 0",
-                [$keyName]
-            ));
-        };
-
-        // 1. Drop period_id FK jika masih ada
-        if ($hasFk('employee_evaluations_period_id_foreign')) {
-            DB::statement('ALTER TABLE employee_evaluations DROP FOREIGN KEY employee_evaluations_period_id_foreign');
+        // Drop SEMUA FK terlebih dahulu agar bebas memanipulasi index apapun
+        foreach ($existingFks as $fk) {
+            DB::statement("ALTER TABLE employee_evaluations DROP FOREIGN KEY `{$fk->CONSTRAINT_NAME}`");
         }
 
-        // 2. Drop composite index (employee_id, evaluator_id) jika masih ada
-        //    Index ini dipakai sebagai backing index untuk evaluator_id FK,
-        //    jadi harus drop FK-nya dulu
-        if ($hasIndex('employee_evaluations_employee_id_evaluator_id_index')) {
-            // Drop evaluator_id FK dulu (backing index ini)
-            if ($hasFk('employee_evaluations_evaluator_id_foreign')) {
-                DB::statement('ALTER TABLE employee_evaluations DROP FOREIGN KEY employee_evaluations_evaluator_id_foreign');
-            }
+        // Drop composite index (employee_id, evaluator_id) jika masih ada
+        // Setelah semua FK di-drop, tidak ada lagi yang memblokir
+        $hasCompositeIndex = ! empty(DB::select(
+            "SELECT 1 FROM information_schema.STATISTICS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'employee_evaluations'
+               AND INDEX_NAME = 'employee_evaluations_employee_id_evaluator_id_index'
+             LIMIT 1"
+        ));
 
+        if ($hasCompositeIndex) {
             DB::statement('ALTER TABLE employee_evaluations DROP INDEX employee_evaluations_employee_id_evaluator_id_index');
-
-            // Re-add evaluator_id FK dengan index-nya sendiri
-            if (! $hasFk('employee_evaluations_evaluator_id_foreign')) {
-                DB::statement('ALTER TABLE employee_evaluations ADD CONSTRAINT employee_evaluations_evaluator_id_foreign FOREIGN KEY (evaluator_id) REFERENCES users(id) ON DELETE RESTRICT');
-            }
         }
 
-        // 3. Ubah period_id jadi NOT NULL
+        // Ubah period_id menjadi NOT NULL
         DB::statement('ALTER TABLE employee_evaluations MODIFY COLUMN period_id BIGINT UNSIGNED NOT NULL');
 
-        // 4. Re-add period_id FK jika belum ada
+        // Helper closure untuk cek apakah FK sudah ada
+        $hasFk = fn (string $name): bool => ! empty(DB::select(
+            "SELECT 1 FROM information_schema.TABLE_CONSTRAINTS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'employee_evaluations'
+               AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+               AND CONSTRAINT_NAME = ?",
+            [$name]
+        ));
+
+        // Tambahkan kembali semua FK yang dibutuhkan (idempotent)
+        if (! $hasFk('employee_evaluations_employee_id_foreign')) {
+            DB::statement('ALTER TABLE employee_evaluations ADD CONSTRAINT employee_evaluations_employee_id_foreign FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE RESTRICT');
+        }
+
+        if (! $hasFk('employee_evaluations_assignment_id_foreign')) {
+            DB::statement('ALTER TABLE employee_evaluations ADD CONSTRAINT employee_evaluations_assignment_id_foreign FOREIGN KEY (assignment_id) REFERENCES employee_assignments(id) ON DELETE RESTRICT');
+        }
+
         if (! $hasFk('employee_evaluations_period_id_foreign')) {
             DB::statement('ALTER TABLE employee_evaluations ADD CONSTRAINT employee_evaluations_period_id_foreign FOREIGN KEY (period_id) REFERENCES performance_periods(id) ON DELETE RESTRICT');
         }
 
-        // 5. Tambah unique constraint jika belum ada
-        if (! $hasUnique('evaluations_employee_period_evaluator_unique')) {
+        if (! $hasFk('employee_evaluations_evaluator_id_foreign')) {
+            DB::statement('ALTER TABLE employee_evaluations ADD CONSTRAINT employee_evaluations_evaluator_id_foreign FOREIGN KEY (evaluator_id) REFERENCES users(id) ON DELETE RESTRICT');
+        }
+
+        if (! $hasFk('employee_evaluations_criteria_id_foreign')) {
+            DB::statement('ALTER TABLE employee_evaluations ADD CONSTRAINT employee_evaluations_criteria_id_foreign FOREIGN KEY (criteria_id) REFERENCES evaluation_criteria(id) ON DELETE SET NULL');
+        }
+
+        // Tambah unique constraint jika belum ada
+        $hasUnique = ! empty(DB::select(
+            "SELECT 1 FROM information_schema.STATISTICS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = 'employee_evaluations'
+               AND INDEX_NAME = 'evaluations_employee_period_evaluator_unique'
+               AND NON_UNIQUE = 0
+             LIMIT 1"
+        ));
+
+        if (! $hasUnique) {
             DB::statement('ALTER TABLE employee_evaluations ADD UNIQUE KEY evaluations_employee_period_evaluator_unique (employee_id, period_id, evaluator_id)');
         }
     }
