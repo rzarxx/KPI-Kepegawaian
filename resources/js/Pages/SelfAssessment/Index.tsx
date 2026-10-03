@@ -96,7 +96,7 @@ export default function Index({
                                                     {statusLabels[period.self_assessment_status] ?? period.self_assessment_status}
                                                 </span>
                                             )}
-                                            <Button asChild variant={period.self_assessment_id ? 'secondary' : 'default'}>
+                                            <Button asChild variant={period.self_assessment_id ? 'secondary' : 'primary'}>
                                                 <Link href={route('self-assessment.create', period.id)}>
                                                     {period.self_assessment_id ? 'Buka Penilaian' : 'Mulai Penilaian'}
                                                 </Link>

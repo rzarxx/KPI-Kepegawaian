@@ -24,6 +24,9 @@ export type PageProps<
             organizationView?: boolean;
             userView?: boolean;
             settingsManage?: boolean;
+            selfAssess?: boolean;
+            calibrationView?: boolean;
+            goalView?: boolean;
         };
         unreadNotifications: number;
     };

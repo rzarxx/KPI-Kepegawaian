@@ -16,10 +16,45 @@ return new class extends Migration
         DB::statement('DELETE FROM employee_evaluations WHERE period_id IS NULL');
 
         Schema::table('employee_evaluations', function (Blueprint $table): void {
-            // Drop nullable + old foreign key
+            // Drop old foreign key on period_id so we can change the column
             $table->dropForeign(['period_id']);
-            $table->dropIndex(['employee_id', 'evaluator_id']);
         });
+
+        // Safely drop composite index only if it exists and isn't needed by a FK.
+        // On some MySQL installations this index backs the evaluator_id FK,
+        // so we must drop that FK first, remove the index, then re-add the FK.
+        $indexName = 'employee_evaluations_employee_id_evaluator_id_index';
+        $hasIndex = collect(DB::select("SHOW INDEX FROM employee_evaluations WHERE Key_name = ?", [$indexName]))->isNotEmpty();
+
+        if ($hasIndex) {
+            // Check if a FK depends on this index
+            $fkDeps = DB::select(
+                "SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND TABLE_NAME = 'employee_evaluations'
+                   AND COLUMN_NAME = 'evaluator_id'
+                   AND REFERENCED_TABLE_NAME IS NOT NULL"
+            );
+
+            $droppedFks = [];
+            foreach ($fkDeps as $fk) {
+                Schema::table('employee_evaluations', function (Blueprint $table) use ($fk) {
+                    $table->dropForeign($fk->CONSTRAINT_NAME);
+                });
+                $droppedFks[] = $fk->CONSTRAINT_NAME;
+            }
+
+            Schema::table('employee_evaluations', function (Blueprint $table) use ($indexName) {
+                $table->dropIndex($indexName);
+            });
+
+            // Re-add evaluator_id FK
+            if (! empty($droppedFks)) {
+                Schema::table('employee_evaluations', function (Blueprint $table) {
+                    $table->foreign('evaluator_id')->references('id')->on('users')->restrictOnDelete();
+                });
+            }
+        }
 
         Schema::table('employee_evaluations', function (Blueprint $table): void {
             // Make period_id required
