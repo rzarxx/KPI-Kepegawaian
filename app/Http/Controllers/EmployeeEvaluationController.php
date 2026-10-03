@@ -26,13 +26,18 @@ class EmployeeEvaluationController extends Controller
             $this->authorize('view', $period);
         }
 
-        $lookupAttributes = ['employee_id' => $employee->id, 'evaluator_id' => $request->user()->id];
-        if ($period) {
-            $lookupAttributes['period_id'] = $period->id;
-        } else {
-            $lookupAttributes['period_id'] = null;
+        // Period is required — redirect to employee page if none provided
+        if (! $period) {
+            return redirect()->route('employees.show', $employee)
+                ->with('error', 'Pilih periode penilaian terlebih dahulu.');
         }
 
+        $lookupAttributes = [
+            'employee_id' => $employee->id,
+            'evaluator_id' => $request->user()->id,
+            'period_id' => $period->id,
+            'evaluation_type' => EmployeeEvaluation::TYPE_SUPERVISOR,
+        ];
         $evaluation = EmployeeEvaluation::query()->where($lookupAttributes)->with('scores')->first();
 
         return Inertia::render('Evaluations/Form', $this->formData($request, $employee, $period, $evaluation));
@@ -43,11 +48,11 @@ class EmployeeEvaluationController extends Controller
         $this->authorize('evaluate', $employee);
 
         $periodId = $request->input('period_id');
-        $period = $periodId ? PerformancePeriod::findOrFail($periodId) : null;
-
-        if ($period) {
-            $this->authorize('view', $period);
+        if (! $periodId) {
+            return back()->withErrors(['period_id' => 'Periode penilaian wajib dipilih.']);
         }
+        $period = PerformancePeriod::findOrFail($periodId);
+        $this->authorize('view', $period);
 
         $data = $request->validated();
         $evaluation = $action->execute($request->user(), $employee, $period, $data);
@@ -77,6 +82,31 @@ class EmployeeEvaluationController extends Controller
             ->orderByDesc('start_date')
             ->get(['id', 'name', 'start_date', 'end_date']);
 
+        // Ambil self-assessment karyawan untuk periode ini (jika sudah diajukan)
+        $selfAssessment = null;
+        if ($period) {
+            $selfEval = EmployeeEvaluation::query()
+                ->where('employee_id', $employee->id)
+                ->where('period_id', $period->id)
+                ->where('evaluation_type', EmployeeEvaluation::TYPE_SELF)
+                ->whereIn('status', ['SUBMITTED', 'DRAFT'])
+                ->with('scores')
+                ->first();
+            if ($selfEval) {
+                $selfAssessment = [
+                    'id' => $selfEval->id,
+                    'status' => $selfEval->status,
+                    'total_score' => $selfEval->total_score,
+                    'notes' => $selfEval->notes,
+                    'scores' => $selfEval->scores->map(fn ($s) => [
+                        'component_id' => $s->component_id,
+                        'raw_score' => (string) $s->raw_score,
+                        'note' => $s->note,
+                    ])->values(),
+                ];
+            }
+        }
+
         return [
             'employee' => $employee->only('id', 'full_name', 'employee_number'),
             'period' => $period ? $period->only('id', 'name', 'start_date', 'end_date') : null,
@@ -89,6 +119,7 @@ class EmployeeEvaluationController extends Controller
                 'total_score' => $evaluation->total_score,
                 'scores' => $evaluation->scores->map(fn ($score) => ['component_id' => $score->component_id, 'raw_score' => (string) $score->raw_score, 'note' => $score->note])->values(),
             ] : null,
+            'selfAssessment' => $selfAssessment,
             'abilities' => [
                 'edit' => ! $evaluation || $request->user()->can('update', $evaluation),
                 'submit' => $evaluation && $request->user()->can('submit', $evaluation),

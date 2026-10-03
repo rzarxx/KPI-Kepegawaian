@@ -25,7 +25,7 @@ class EvaluationConfigurationController extends Controller
         $isImpersonating = $request->session()->has('impersonation.original_user_id');
 
         return Inertia::render('Evaluations/Configuration', [
-            'periods' => PerformancePeriod::query()->latest('end_date')->get(),
+            'periods' => PerformancePeriod::query()->latest('end_date')->get(['id', 'name', 'status', 'start_date', 'end_date', 'is_active', 'frequency', 'notify_before_days', 'auto_close']),
             'components' => EvaluationComponent::query()->with('rules')->orderBy('sort_order')->get(),
             'criteria' => EvaluationCriterion::query()->orderBy('sort_order')->get(),
             'attentionRules' => EmployeeAttentionRule::query()->orderBy('id')->get(),

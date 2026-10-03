@@ -1,4 +1,5 @@
 import Modal from '@/Components/Modal';
+import SecurePasswordInput from '@/Components/SecurePasswordInput';
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { DialogTitle } from '@headlessui/react';
@@ -134,7 +135,17 @@ export default function Index({
                     <form className="mt-5" onSubmit={(event: FormEvent) => { event.preventDefault(); create.post(route('users.store'), { preserveScroll: true, onSuccess: () => create.reset() }); }}>
                         <Field label="Nama lengkap" value={create.data.name} error={create.errors.name} onChange={(value) => create.setData('name', value)} />
                         <Field label="Alamat email" value={create.data.email} error={create.errors.email} onChange={(value) => create.setData('email', value)} type="email" />
-                        <Field label="Kata sandi" value={create.data.password} error={create.errors.password} onChange={(value) => create.setData('password', value)} type="password" />
+                        <div className="mt-4">
+                            <SecurePasswordInput
+                                id="create-password"
+                                label="Kata sandi"
+                                name="password"
+                                value={create.data.password}
+                                autoComplete="new-password"
+                                error={create.errors.password}
+                                onChange={(value) => create.setData('password', value)}
+                            />
+                        </div>
                         <Select label="Peran" value={create.data.role} error={create.errors.role} onChange={(value) => changeRole(value, create.data.scopes, (scopes) => create.setData('scopes', scopes), (role) => create.setData('role', role))} options={roles.map((role) => ({ id: role, name: role }))} />
                         <ScopeEditor rows={create.data.scopes} single={singleScopeRoles.includes(create.data.role)} errors={create.errors} onChange={(scopes) => create.setData('scopes', scopes)} branches={branches} divisions={divisions} subDivisions={subDivisions} />
                         <Button className="mt-5 w-full" type="submit" disabled={create.processing}>{create.processing ? 'Menyimpan...' : 'Simpan Pengguna'}</Button>
@@ -152,20 +163,26 @@ function ActionMenu({ user, canManageRoles, canImpersonate, toggling, onEdit, on
     onEdit: () => void; onToggle: () => void; onImpersonate: () => void; onClose: () => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
+    const isSuperAdmin = user.roles.includes('Super Admin');
 
     return (
         <>
             <div className="fixed inset-0 z-40" onClick={onClose} />
             <div ref={ref} className="absolute right-0 top-full z-50 mt-1 w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
-                {canManageRoles && (
+                {canManageRoles && !isSuperAdmin && (
                     <button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50" onClick={onEdit}>
                         <Pencil size={15} />Ubah akses
                     </button>
                 )}
-                <button type="button" disabled={toggling} className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${user.is_active ? 'text-amber-700 hover:bg-amber-50' : 'text-brand hover:bg-brand-subtle'}`} onClick={onToggle}>
-                    <Power size={15} />{user.is_active ? 'Nonaktifkan' : 'Aktifkan kembali'}
-                </button>
-                {canImpersonate && user.is_active && !user.roles.includes('Super Admin') && (
+                {!isSuperAdmin && (
+                    <button type="button" disabled={toggling} className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${user.is_active ? 'text-amber-700 hover:bg-amber-50' : 'text-brand hover:bg-brand-subtle'}`} onClick={onToggle}>
+                        <Power size={15} />{user.is_active ? 'Nonaktifkan' : 'Aktifkan kembali'}
+                    </button>
+                )}
+                {isSuperAdmin && (
+                    <p className="px-3 py-2 text-xs text-slate-400 italic">Akun Super Admin tidak dapat diubah.</p>
+                )}
+                {canImpersonate && user.is_active && !isSuperAdmin && (
                     <button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-blue-700 hover:bg-blue-50" onClick={onImpersonate}>
                         <ShieldCheck size={15} />Masuk sementara
                     </button>

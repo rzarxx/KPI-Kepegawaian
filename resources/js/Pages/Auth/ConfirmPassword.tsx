@@ -1,7 +1,6 @@
 import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import SecurePasswordInput from '@/Components/SecurePasswordInput';
+import { Button } from '@/Components/ui/button';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -23,34 +22,30 @@ export default function ConfirmPassword() {
         <GuestLayout>
             <Head title="Konfirmasi Kata Sandi" />
 
-            <div className="mb-4 text-sm text-gray-600">
+            <div className="mb-4 text-sm text-slate-600">
                 Halaman ini berisi tindakan sensitif. Konfirmasikan kata sandi
                 Anda sebelum melanjutkan.
             </div>
 
             <form onSubmit={submit}>
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Kata Sandi" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
+                <SecurePasswordInput
+                    id="password"
+                    label="Kata Sandi"
+                    name="password"
+                    value={data.password}
+                    autoComplete="current-password"
+                    isFocused={true}
+                    error={errors.password}
+                    onChange={(value) => setData('password', value)}
+                />
 
                 <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
+                    <Button className="ms-4" disabled={processing}>
                         Konfirmasi
-                    </PrimaryButton>
+                    </Button>
                 </div>
             </form>
         </GuestLayout>
     );
 }
+

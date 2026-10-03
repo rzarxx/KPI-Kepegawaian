@@ -17,6 +17,15 @@ class StorePerformancePeriodRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['name' => ['required', 'string', 'max:255'], 'start_date' => ['required', 'date'], 'end_date' => ['required', 'date', 'after_or_equal:start_date'], 'status' => ['required', Rule::in(['DRAFT'])], 'is_active' => ['boolean']];
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'status' => ['required', Rule::in(['DRAFT'])],
+            'is_active' => ['boolean'],
+            'frequency' => ['required', Rule::in(['ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'QUARTERLY', 'YEARLY'])],
+            'notify_before_days' => ['required', 'integer', 'min:0', 'max:30'],
+            'auto_close' => ['boolean'],
+        ];
     }
 }

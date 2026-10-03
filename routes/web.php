@@ -3,17 +3,20 @@
 use App\Http\Controllers\AppSettingsController;
 use App\Http\Controllers\AttentionRuleController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\CalibrationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeDocumentController;
 use App\Http\Controllers\EmployeeEvaluationController;
 use App\Http\Controllers\EmployeeIncidentController;
 use App\Http\Controllers\EvaluationConfigurationController;
+use App\Http\Controllers\GoalController;
 use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SelfAssessmentController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -51,12 +54,32 @@ Route::middleware(['auth', 'active-user', 'impersonation-valid'])->group(functio
         Route::put('/penilaian/konfigurasi/aturan-perhatian/{rule}', [AttentionRuleController::class, 'update'])->name('attention-rules.update');
         Route::get('/pengaturan/tampilan', [AppSettingsController::class, 'index'])->name('settings.appearance');
         Route::put('/pengaturan/tampilan', [AppSettingsController::class, 'update'])->name('settings.appearance.update');
+        // Kalibrasi — operasi mutasi (tidak boleh saat impersonasi)
+        Route::post('/kalibrasi', [CalibrationController::class, 'store'])->name('calibration.store');
+        Route::post('/kalibrasi/{session}/penyesuaian', [CalibrationController::class, 'adjust'])->name('calibration.adjust');
+        Route::post('/kalibrasi/{session}/status', [CalibrationController::class, 'transition'])->name('calibration.transition');
+        Route::post('/kalibrasi/{session}/terapkan', [CalibrationController::class, 'apply'])->name('calibration.apply');
+        // Target/Goal — operasi mutasi (tidak boleh saat impersonasi)
+        Route::post('/target', [GoalController::class, 'store'])->name('goals.store');
+        Route::put('/target/{goal}', [GoalController::class, 'update'])->name('goals.update');
+        Route::post('/target/{goal}/status', [GoalController::class, 'transition'])->name('goals.transition');
     });
     Route::get('/penilaian/konfigurasi', [EvaluationConfigurationController::class, 'index'])->name('evaluations.configuration');
     Route::get('/penilaian/hasil/{evaluation}', [EmployeeEvaluationController::class, 'show'])->name('evaluations.show');
     Route::post('/penilaian/hasil/{evaluation}/status', [EmployeeEvaluationController::class, 'transition'])->name('evaluations.transition');
     Route::get('/penilaian/{employee}', [EmployeeEvaluationController::class, 'create'])->name('evaluations.create');
     Route::post('/penilaian/{employee}', [EmployeeEvaluationController::class, 'store'])->name('evaluations.store');
+    // Self-Assessment
+    Route::get('/penilaian-diri', [SelfAssessmentController::class, 'index'])->name('self-assessment.index');
+    Route::get('/penilaian-diri/{period}', [SelfAssessmentController::class, 'create'])->name('self-assessment.create');
+    Route::post('/penilaian-diri/{period}', [SelfAssessmentController::class, 'store'])->name('self-assessment.store');
+    Route::post('/penilaian-diri/{evaluation}/ajukan', [SelfAssessmentController::class, 'submit'])->name('self-assessment.submit');
+    Route::get('/penilaian-diri/hasil/{evaluation}', [SelfAssessmentController::class, 'show'])->name('self-assessment.show');
+    // Kalibrasi — operasi baca (boleh saat impersonasi)
+    Route::get('/kalibrasi', [CalibrationController::class, 'index'])->name('calibration.index');
+    Route::get('/kalibrasi/{session}', [CalibrationController::class, 'show'])->name('calibration.show');
+    // Target / Goal — operasi baca (boleh saat impersonasi)
+    Route::get('/target', [GoalController::class, 'index'])->name('goals.index');
     Route::resource('karyawan', EmployeeController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update'])->parameters(['karyawan' => 'employee'])->names('employees');
     Route::post('/karyawan/{employee}/mutasi', [EmployeeController::class, 'transfer'])->name('employees.transfer');
     Route::post('/karyawan/{employee}/status', [EmployeeController::class, 'changeStatus'])->name('employees.status');
@@ -73,6 +96,7 @@ Route::middleware(['auth', 'active-user', 'impersonation-valid'])->group(functio
     Route::post('/masalah-karyawan/{incident}/selesaikan', [EmployeeIncidentController::class, 'resolve'])->name('employees.incidents.resolve');
     Route::post('/karyawan/{employee}/dokumen', [EmployeeDocumentController::class, 'store'])->name('employees.documents.store');
     Route::get('/dokumen-karyawan/{document}', [EmployeeDocumentController::class, 'download'])->name('employees.documents.download');
+    Route::get('/dokumen-karyawan/{document}/lihat', [EmployeeDocumentController::class, 'preview'])->name('employees.documents.preview');
     Route::delete('/dokumen-karyawan/{document}', [EmployeeDocumentController::class, 'destroy'])->name('employees.documents.destroy');
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifikasi/baca-semua', [NotificationController::class, 'readAll'])->name('notifications.read-all');
