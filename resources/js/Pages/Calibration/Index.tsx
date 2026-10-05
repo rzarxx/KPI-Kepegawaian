@@ -1,7 +1,7 @@
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { Plus, Scale, X } from 'lucide-react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Plus, Scale, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
 type Session = {
@@ -176,6 +176,19 @@ export default function Index({
                                         <Button asChild variant="secondary">
                                             <Link href={route('calibration.show', session.id)}>Buka</Link>
                                         </Button>
+                                        {canManage && session.status === 'DRAFT' && (
+                                            <button
+                                                className="flex size-8 items-center justify-center rounded-lg border border-red-200 text-red-500 hover:bg-red-50"
+                                                onClick={() => {
+                                                    if (window.confirm('Hapus sesi kalibrasi ini?'))
+                                                        router.delete(route('calibration.destroy', session.id), { preserveScroll: true });
+                                                }}
+                                                title="Hapus sesi"
+                                                type="button"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}

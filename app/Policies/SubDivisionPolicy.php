@@ -34,4 +34,10 @@ class SubDivisionPolicy
         return $user->can('organization.manage')
             && $this->view($user, $subDivision);
     }
+
+    public function delete(User $user, SubDivision $subDivision): bool
+    {
+        return $user->can('organization.manage')
+            && $this->view($user, $subDivision);
+    }
 }

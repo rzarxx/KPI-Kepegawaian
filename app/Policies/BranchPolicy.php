@@ -29,4 +29,10 @@ class BranchPolicy
         return $user->can('organization.manage')
             && app(OrganizationalScopeResolver::class)->allows($user, $branch->id);
     }
+
+    public function delete(User $user, Branch $branch): bool
+    {
+        return $user->can('organization.manage')
+            && app(OrganizationalScopeResolver::class)->allows($user, $branch->id);
+    }
 }

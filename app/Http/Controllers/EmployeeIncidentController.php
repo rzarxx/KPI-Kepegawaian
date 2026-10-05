@@ -95,6 +95,17 @@ class EmployeeIncidentController extends Controller
         return back()->with('success', 'Catatan masalah berhasil diperbarui.');
     }
 
+    public function destroy(EmployeeIncident $incident, Request $request, AuditLogger $audit)
+    {
+        $this->authorize('delete', $incident);
+
+        $snapshot = $incident->toArray();
+        $incident->delete();
+        $audit->log('employee.incident.delete', $request->user(), $incident, $snapshot, null);
+
+        return back()->with('success', 'Catatan masalah berhasil dihapus.');
+    }
+
     public function resolve(EmployeeIncident $incident, ResolveEmployeeIncidentRequest $request, AuditLogger $audit)
     {
         $before = $incident->toArray();

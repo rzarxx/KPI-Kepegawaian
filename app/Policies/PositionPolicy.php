@@ -26,4 +26,9 @@ class PositionPolicy
     {
         return $user->can('organization.manage');
     }
+
+    public function delete(User $user, Position $position): bool
+    {
+        return $user->can('organization.manage');
+    }
 }

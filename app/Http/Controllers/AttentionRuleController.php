@@ -25,4 +25,13 @@ class AttentionRuleController extends Controller
 
         return back()->with('success', 'Aturan perhatian berhasil diperbarui.');
     }
+
+    public function destroy(EmployeeAttentionRule $rule, AuditLogger $audit): RedirectResponse
+    {
+        $snapshot = $rule->toArray();
+        $rule->delete();
+        $audit->log('attention_rule.delete', request()->user(), $rule, $snapshot, null);
+
+        return back()->with('success', 'Aturan perhatian berhasil dihapus.');
+    }
 }

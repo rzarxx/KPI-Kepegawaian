@@ -76,6 +76,12 @@ export default function Index({
         });
     };
 
+    const deleteUser = (user: UserRow) => {
+        setOpenMenu(null);
+        if (!window.confirm(`Hapus pengguna "${user.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+        router.delete(route('users.destroy', user.id), { preserveScroll: true });
+    };
+
     const beginImpersonate = (user: UserRow) => {
         setOpenMenu(null);
         setTarget(user);
@@ -120,6 +126,7 @@ export default function Index({
                                             toggling={toggling === user.id}
                                             onEdit={() => beginEdit(user)}
                                             onToggle={() => toggleUser(user)}
+                                            onDelete={() => deleteUser(user)}
                                             onImpersonate={() => beginImpersonate(user)}
                                             onClose={() => setOpenMenu(null)}
                                         />
@@ -158,9 +165,9 @@ export default function Index({
     );
 }
 
-function ActionMenu({ user, canManageRoles, canImpersonate, toggling, onEdit, onToggle, onImpersonate, onClose }: {
+function ActionMenu({ user, canManageRoles, canImpersonate, toggling, onEdit, onToggle, onDelete, onImpersonate, onClose }: {
     user: UserRow; canManageRoles: boolean; canImpersonate: boolean; toggling: boolean;
-    onEdit: () => void; onToggle: () => void; onImpersonate: () => void; onClose: () => void;
+    onEdit: () => void; onToggle: () => void; onDelete: () => void; onImpersonate: () => void; onClose: () => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const isSuperAdmin = user.roles.includes('Super Admin');
@@ -177,6 +184,11 @@ function ActionMenu({ user, canManageRoles, canImpersonate, toggling, onEdit, on
                 {!isSuperAdmin && (
                     <button type="button" disabled={toggling} className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${user.is_active ? 'text-amber-700 hover:bg-amber-50' : 'text-brand hover:bg-brand-subtle'}`} onClick={onToggle}>
                         <Power size={15} />{user.is_active ? 'Nonaktifkan' : 'Aktifkan kembali'}
+                    </button>
+                )}
+                {canManageRoles && !isSuperAdmin && (
+                    <button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50" onClick={onDelete}>
+                        <Trash2 size={15} />Hapus pengguna
                     </button>
                 )}
                 {isSuperAdmin && (

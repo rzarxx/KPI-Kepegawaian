@@ -9,6 +9,7 @@ use App\Models\CalibrationSession;
 use App\Models\EmployeeEvaluation;
 use App\Models\EvaluationCriterion;
 use App\Models\PerformancePeriod;
+use App\Services\AuditLogger;
 use App\Services\OrganizationalScopeResolver;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -140,5 +141,16 @@ class CalibrationController extends Controller
         $action->applyCalibration($request->user(), $session);
 
         return back()->with('success', 'Hasil kalibrasi berhasil diterapkan ke semua penilaian terkait.');
+    }
+
+    public function destroy(CalibrationSession $session, Request $request, AuditLogger $audit)
+    {
+        $this->authorize('delete', $session);
+
+        $snapshot = $session->toArray();
+        $session->delete();
+        $audit->log('calibration.deleted', $request->user(), $session, $snapshot, null);
+
+        return redirect()->route('calibration.index')->with('success', 'Sesi kalibrasi berhasil dihapus.');
     }
 }

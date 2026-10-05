@@ -1,7 +1,7 @@
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
-import { BellRing, CheckCircle2, ClipboardList, Pencil, Plus, SlidersHorizontal, Target, X } from 'lucide-react';
+import { BellRing, CheckCircle2, ClipboardList, Pencil, Plus, SlidersHorizontal, Target, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
 type Period = {
@@ -40,26 +40,43 @@ export default function Configuration({
     const [editingCriterion, setEditingCriterion] = useState<Criterion | null>(null);
     const [editingAttention, setEditingAttention] = useState<AttentionRule | null>(null);
 
+    const destroyPeriod = (period: Period) => {
+        if (!window.confirm(`Hapus periode "${period.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+        router.delete(route('evaluation-periods.destroy', period.id), { preserveScroll: true });
+    };
+    const destroyComponent = (component: Component) => {
+        if (!window.confirm(`Hapus komponen "${component.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+        router.delete(route('evaluation-components.destroy', component.id), { preserveScroll: true });
+    };
+    const destroyCriterion = (criterion: Criterion) => {
+        if (!window.confirm(`Hapus kriteria "${criterion.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+        router.delete(route('evaluation-criteria.destroy', criterion.id), { preserveScroll: true });
+    };
+    const destroyAttentionRule = (rule: AttentionRule) => {
+        if (!window.confirm(`Hapus aturan "${rule.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+        router.delete(route('attention-rules.destroy', rule.id), { preserveScroll: true });
+    };
+
     return (
         <AuthenticatedLayout header={<div><p className="text-sm text-slate-500">Penilaian</p><h1 className="text-[26px] font-bold text-slate-900">Konfigurasi Penilaian</h1></div>}>
             <Head title="Konfigurasi Penilaian" />
             <div className="mx-auto max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8">
                 <Panel title="Periode Penilaian" icon={<ClipboardList size={18} />}>
-                    <div className="divide-y divide-slate-100">{periods.length ? periods.map((period) => <div className="flex flex-col justify-between gap-3 py-3 text-sm sm:flex-row sm:items-center" key={period.id}><div><p className="font-medium text-slate-800">{period.name}</p><p className="text-slate-500">{dateOnly(period.start_date)} s/d {dateOnly(period.end_date)} · <span className="font-medium">{frequencyLabels[period.frequency] ?? period.frequency}</span>{period.auto_close && <span className="ml-1 text-xs text-amber-600">· tutup otomatis</span>}</p></div><div className="flex flex-wrap items-center gap-2"><span className={'rounded-full px-2 py-1 text-xs font-semibold ' + periodStyles[period.status]}>{periodLabels[period.status]}</span>{canManage && period.status === 'DRAFT' && <IconButton label="Ubah periode" onClick={() => setEditingPeriod(period)}><Pencil size={15} /></IconButton>}{canManage && nextPeriod[period.status] && <Button type="button" variant="secondary" onClick={() => transitionPeriod(period)}><CheckCircle2 size={15} />{periodAction[period.status]}</Button>}</div></div>) : <Empty label="periode penilaian" />}</div>
+                    <div className="divide-y divide-slate-100">{periods.length ? periods.map((period) => <div className="flex flex-col justify-between gap-3 py-3 text-sm sm:flex-row sm:items-center" key={period.id}><div><p className="font-medium text-slate-800">{period.name}</p><p className="text-slate-500">{dateOnly(period.start_date)} s/d {dateOnly(period.end_date)} · <span className="font-medium">{frequencyLabels[period.frequency] ?? period.frequency}</span>{period.auto_close && <span className="ml-1 text-xs text-amber-600">· tutup otomatis</span>}</p></div><div className="flex flex-wrap items-center gap-2"><span className={'rounded-full px-2 py-1 text-xs font-semibold ' + periodStyles[period.status]}>{periodLabels[period.status]}</span>{canManage && period.status === 'DRAFT' && <IconButton label="Ubah periode" onClick={() => setEditingPeriod(period)}><Pencil size={15} /></IconButton>}{canManage && nextPeriod[period.status] && <Button type="button" variant="secondary" onClick={() => transitionPeriod(period)}><CheckCircle2 size={15} />{periodAction[period.status]}</Button>}{canManage && period.status === 'DRAFT' && <IconButton label="Hapus periode" className="text-red-500 hover:bg-red-50" onClick={() => destroyPeriod(period)}><Trash2 size={15} /></IconButton>}</div></div>) : <Empty label="periode penilaian" />}</div>
                     {canManage && <PeriodForm initial={editingPeriod} key={editingPeriod?.id ?? 'new-period'} onDone={() => setEditingPeriod(null)} />}
                 </Panel>
                 <div className="grid gap-6 xl:grid-cols-2">
                     <Panel title="Komponen dan Bobot" icon={<SlidersHorizontal size={18} />}>
-                        <div className="space-y-3">{components.length ? components.map((component) => <div className="rounded-lg bg-slate-50 p-3" key={component.id}><div className="flex items-start justify-between gap-3 text-sm"><div><span className="font-semibold text-slate-800">{component.name}</span><p className="mt-1 text-xs text-slate-500">{component.measurement_type === 'TENURE' ? component.rules.length + ' aturan masa kerja' : 'Input manual'} · {component.is_active ? 'Aktif' : 'Nonaktif'}</p></div><div className="flex items-center gap-2"><span className="text-brand">{component.default_weight}%</span>{canManage && <IconButton label="Ubah komponen" onClick={() => setEditingComponent(component)}><Pencil size={15} /></IconButton>}</div></div></div>) : <Empty label="komponen penilaian" />}</div>
+                        <div className="space-y-3">{components.length ? components.map((component) => <div className="rounded-lg bg-slate-50 p-3" key={component.id}><div className="flex items-start justify-between gap-3 text-sm"><div><span className="font-semibold text-slate-800">{component.name}</span><p className="mt-1 text-xs text-slate-500">{component.measurement_type === 'TENURE' ? component.rules.length + ' aturan masa kerja' : 'Input manual'} · {component.is_active ? 'Aktif' : 'Nonaktif'}</p></div><div className="flex items-center gap-2"><span className="text-brand">{component.default_weight}%</span>{canManage && <IconButton label="Ubah komponen" onClick={() => setEditingComponent(component)}><Pencil size={15} /></IconButton>}{canManage && <IconButton label="Hapus komponen" className="text-red-500 hover:bg-red-50" onClick={() => destroyComponent(component)}><Trash2 size={15} /></IconButton>}</div></div></div>) : <Empty label="komponen penilaian" />}</div>
                         {canManage && <ComponentForm initial={editingComponent} key={editingComponent?.id ?? 'new-component'} onDone={() => setEditingComponent(null)} />}
                     </Panel>
                     <Panel title="Kriteria Hasil" icon={<Target size={18} />}>
-                        <div className="space-y-3">{criteria.length ? criteria.map((criterion) => <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3 text-sm" key={criterion.id}><div><span className="font-medium text-slate-800">{criterion.name}</span><p className="text-xs text-slate-500">{criterion.min_score}–{criterion.max_score}</p></div>{canManage && <IconButton label="Ubah kriteria" onClick={() => setEditingCriterion(criterion)}><Pencil size={15} /></IconButton>}</div>) : <Empty label="kriteria hasil" />}</div>
+                        <div className="space-y-3">{criteria.length ? criteria.map((criterion) => <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3 text-sm" key={criterion.id}><div><span className="font-medium text-slate-800">{criterion.name}</span><p className="text-xs text-slate-500">{criterion.min_score}–{criterion.max_score}</p></div><div className="flex items-center gap-2">{canManage && <IconButton label="Ubah kriteria" onClick={() => setEditingCriterion(criterion)}><Pencil size={15} /></IconButton>}{canManage && <IconButton label="Hapus kriteria" className="text-red-500 hover:bg-red-50" onClick={() => destroyCriterion(criterion)}><Trash2 size={15} /></IconButton>}</div></div>) : <Empty label="kriteria hasil" />}</div>
                         {canManage && <CriterionForm initial={editingCriterion} key={editingCriterion?.id ?? 'new-criterion'} onDone={() => setEditingCriterion(null)} />}
                     </Panel>
                 </div>
                 <Panel title="Aturan Perlu Perhatian" icon={<BellRing size={18} />}>
-                    <div className="grid gap-3 md:grid-cols-2">{attentionRules.length ? attentionRules.map((rule) => <div className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 p-4" key={rule.id}><div><p className="text-sm font-semibold text-slate-800">{rule.name}</p><p className="mt-1 text-xs text-slate-500">{attentionDescriptions[rule.rule_type] || rule.rule_type} {rule.operator} {rule.threshold} · {rule.is_active ? 'Aktif' : 'Nonaktif'}</p></div>{canManageSettings && <IconButton label="Ubah aturan perhatian" onClick={() => setEditingAttention(rule)}><Pencil size={15} /></IconButton>}</div>) : <Empty label="aturan perhatian" />}</div>
+                    <div className="grid gap-3 md:grid-cols-2">{attentionRules.length ? attentionRules.map((rule) => <div className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 p-4" key={rule.id}><div><p className="text-sm font-semibold text-slate-800">{rule.name}</p><p className="mt-1 text-xs text-slate-500">{attentionDescriptions[rule.rule_type] || rule.rule_type} {rule.operator} {rule.threshold} · {rule.is_active ? 'Aktif' : 'Nonaktif'}</p></div><div className="flex items-center gap-2">{canManageSettings && <IconButton label="Ubah aturan perhatian" onClick={() => setEditingAttention(rule)}><Pencil size={15} /></IconButton>}{canManageSettings && <IconButton label="Hapus aturan perhatian" className="text-red-500 hover:bg-red-50" onClick={() => destroyAttentionRule(rule)}><Trash2 size={15} /></IconButton>}</div></div>) : <Empty label="aturan perhatian" />}</div>
                     {canManageSettings && <AttentionRuleForm initial={editingAttention} key={editingAttention?.id ?? 'new-attention'} onDone={() => setEditingAttention(null)} />}
                 </Panel>
             </div>
@@ -158,7 +175,7 @@ function transitionPeriod(period: Period) {
 }
 function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) { return <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><h2 className="flex items-center gap-2 font-semibold text-slate-900">{icon}{title}</h2><div className="mt-4">{children}</div></section>; }
 function Editor({ title, editing, onCancel, children }: { title: string; editing: boolean; onCancel: () => void; children: React.ReactNode }) { return <div className="mt-5 border-t border-slate-100 pt-5"><div className="mb-3 flex items-center justify-between"><p className="text-sm font-semibold text-slate-800">{title}</p>{editing && <IconButton label="Batal mengubah" onClick={onCancel}><X size={15} /></IconButton>}</div>{children}</div>; }
-function IconButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) { return <button aria-label={label} className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-white" onClick={onClick} type="button">{children}</button>; }
+function IconButton({ label, onClick, children, className }: { label: string; onClick: () => void; children: React.ReactNode; className?: string }) { return <button aria-label={label} className={`flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-white ${className ?? ''}`} onClick={onClick} type="button">{children}</button>; }
 function SubmitButton({ editing, processing }: { editing: boolean; processing: boolean }) { return <div className="flex items-end"><Button disabled={processing} type="submit">{editing ? <Pencil size={16} /> : <Plus size={16} />}{processing ? 'Menyimpan...' : editing ? 'Simpan Perubahan' : 'Tambah'}</Button></div>; }
 function Empty({ label }: { label: string }) { return <p className="py-6 text-sm text-slate-500">Belum ada {label}.</p>; }
 function Input({ label, value, error, onChange, type = 'text', optional = false }: { label: string; value: string | number; error?: string; onChange: (value: string) => void; type?: string; optional?: boolean }) { return <label className="text-sm font-medium text-slate-700">{label}<input className={inputClass} type={type} value={value} onChange={(event) => onChange(event.target.value)} required={!optional} />{error && <span className="mt-1 block text-xs text-red-600">{error}</span>}</label>; }

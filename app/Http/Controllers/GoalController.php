@@ -129,4 +129,15 @@ class GoalController extends Controller
 
         return back()->with('success', 'Status target berhasil diperbarui.');
     }
+
+    public function destroy(Goal $goal, Request $request, AuditLogger $audit)
+    {
+        $this->authorize('delete', $goal);
+
+        $snapshot = $goal->toArray();
+        $goal->delete();
+        $audit->log('goal.deleted', $request->user(), $goal, $snapshot, null);
+
+        return back()->with('success', 'Target berhasil dihapus.');
+    }
 }

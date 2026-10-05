@@ -29,4 +29,10 @@ class DivisionPolicy
         return $user->can('organization.manage')
             && app(OrganizationalScopeResolver::class)->allows($user, $division->branch_id);
     }
+
+    public function delete(User $user, Division $division): bool
+    {
+        return $user->can('organization.manage')
+            && app(OrganizationalScopeResolver::class)->allows($user, $division->branch_id);
+    }
 }
