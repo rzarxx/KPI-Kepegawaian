@@ -26,4 +26,9 @@ class EvaluationCriterionPolicy
     {
         return $user->can('organization.manage');
     }
+
+    public function delete(User $user, EvaluationCriterion $criterion): bool
+    {
+        return $user->can('organization.manage');
+    }
 }

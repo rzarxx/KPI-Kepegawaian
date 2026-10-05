@@ -1,4 +1,4 @@
-import { Button } from "@/Components/ui/button";
+﻿import { Button } from "@/Components/ui/button";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router, useForm } from "@inertiajs/react";
 import {
@@ -133,16 +133,16 @@ export default function Show({
                 <div className="flex items-center gap-3">
                     <Button asChild variant="ghost">
                         <Link
-                            aria-label="Kembali ke daftar karyawan"
+                            aria-label="Kembali ke daftar pejuang"
                             href={route("employees.index")}
                         >
                             <ArrowLeft size={18} />
                         </Link>
                     </Button>
                     <div>
-                        <p className="text-sm text-slate-500">Karyawan</p>
+                        <p className="text-sm text-slate-500">Pejuang</p>
                         <h1 className="text-[26px] font-bold text-slate-900">
-                            Detail Karyawan
+                            Detail Pejuang
                         </h1>
                     </div>
                 </div>
@@ -222,7 +222,7 @@ export default function Show({
                 {(canTransfer || canChangeStatus || canRehire) && (
                     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <h2 className="text-base font-semibold text-slate-900">
-                            Tindakan Karyawan
+                            Tindakan Pejuang
                         </h2>
                         <p className="mt-1 text-sm text-slate-500">
                             Setiap tindakan menambah riwayat dan tidak menghapus
@@ -330,7 +330,7 @@ function EvaluationCard({
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
                 <ClipboardCheck size={18} />
-                Penilaian Karyawan
+                Penilaian Pejuang
             </h2>
             <p className="mt-1 text-sm text-slate-500">
                 Pilih periode untuk memulai atau melanjutkan penilaian.
@@ -764,7 +764,7 @@ function ActivityTimeline({ activities }: { activities: Activity[] }) {
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="flex items-center gap-2 font-semibold text-slate-900">
                 <History size={18} />
-                Aktivitas Karyawan
+                Aktivitas Pejuang
             </h2>
             <p className="mt-1 text-sm text-slate-500">
                 Rangkaian penempatan, status, penilaian, dan catatan masalah
@@ -859,7 +859,7 @@ function DocumentsCard({
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
                     Dokumen hanya dapat diakses pengguna yang memiliki izin dan
-                    cakupan karyawan ini.
+                    cakupan pejuang ini.
                 </p>
             </div>
             {canUpload && (

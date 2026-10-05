@@ -119,6 +119,51 @@ class EvaluationConfigurationController extends Controller
         return back()->with('success', 'Kriteria hasil berhasil diperbarui.');
     }
 
+    public function destroyPeriod(PerformancePeriod $period, AuditLogger $audit)
+    {
+        $this->authorize('delete', $period);
+
+        try {
+            $snapshot = $period->toArray();
+            $period->delete();
+            $audit->log('evaluation.period.delete', request()->user(), $period, $snapshot, null);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return back()->withErrors(['delete' => 'Periode tidak dapat dihapus karena sudah memiliki penilaian terkait.']);
+        }
+
+        return back()->with('success', 'Periode penilaian berhasil dihapus.');
+    }
+
+    public function destroyComponent(EvaluationComponent $component, AuditLogger $audit)
+    {
+        $this->authorize('delete', $component);
+
+        try {
+            $snapshot = $component->toArray();
+            $component->delete();
+            $audit->log('evaluation.component.delete', request()->user(), $component, $snapshot, null);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return back()->withErrors(['delete' => 'Komponen tidak dapat dihapus karena sudah digunakan dalam penilaian.']);
+        }
+
+        return back()->with('success', 'Komponen penilaian berhasil dihapus.');
+    }
+
+    public function destroyCriterion(EvaluationCriterion $criterion, AuditLogger $audit)
+    {
+        $this->authorize('delete', $criterion);
+
+        try {
+            $snapshot = $criterion->toArray();
+            $criterion->delete();
+            $audit->log('evaluation.criterion.delete', request()->user(), $criterion, $snapshot, null);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return back()->withErrors(['delete' => 'Kriteria tidak dapat dihapus karena masih digunakan.']);
+        }
+
+        return back()->with('success', 'Kriteria hasil berhasil dihapus.');
+    }
+
     private function ensureActiveWeight(array $data, ?EvaluationComponent $except = null): void
     {
         if (! ($data['is_active'] ?? false)) {

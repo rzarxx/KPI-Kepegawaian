@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace Tests\Feature;
 
@@ -86,7 +86,7 @@ class EmployeeScopeAndEvaluationTest extends TestCase
     private function employeeAt(Branch $branch): Employee
     {
         $division = Division::query()->create(['branch_id' => $branch->id, 'code' => 'DIV-'.$branch->id, 'name' => 'Divisi '.$branch->name]);
-        $employee = Employee::query()->create(['employee_number' => 'EMP-'.$branch->id.'-'.Employee::query()->count(), 'full_name' => 'Karyawan '.$branch->name, 'join_date' => now()->subYear(), 'current_status' => 'ACTIVE']);
+        $employee = Employee::query()->create(['employee_number' => 'EMP-'.$branch->id.'-'.Employee::query()->count(), 'full_name' => 'Pejuang '.$branch->name, 'join_date' => now()->subYear(), 'current_status' => 'ACTIVE']);
         $employee->assignments()->create(['branch_id' => $branch->id, 'division_id' => $division->id, 'start_date' => now()->subYear(), 'status' => 'ACTIVE']);
 
         return $employee;

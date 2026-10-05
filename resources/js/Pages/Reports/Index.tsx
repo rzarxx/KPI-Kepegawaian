@@ -1,9 +1,9 @@
-import { Button } from '@/Components/ui/button';
+﻿import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table';
 import { Head, Link, router } from '@inertiajs/react';
-import { Download, FileSpreadsheet, Filter, LoaderCircle } from 'lucide-react';
+import { Download, FileSpreadsheet, Filter, LoaderCircle, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -53,7 +53,7 @@ export default function Index({
     const divisions = filterOptions.divisions.filter((option) => !branchId || option.branch_id === Number(branchId));
     const subDivisions = filterOptions.subDivisions.filter((option) => !divisionId || option.division_id === Number(divisionId));
     const columns = useMemo<ColumnDef<Row>[]>(() => [
-        { accessorKey: 'name', header: 'Karyawan', cell: ({ row }) => <div><p className="font-semibold text-slate-800">{row.original.name}</p><p className="text-xs text-slate-500">{row.original.number}</p></div> },
+        { accessorKey: 'name', header: 'Pejuang', cell: ({ row }) => <div><p className="font-semibold text-slate-800">{row.original.name}</p><p className="text-xs text-slate-500">{row.original.number}</p></div> },
         { accessorKey: 'status', header: 'Status' },
         { accessorKey: 'branch', header: 'Cabang', cell: ({ getValue }) => getValue<string>() || '-' },
         { accessorKey: 'division', header: 'Divisi', cell: ({ getValue }) => getValue<string>() || '-' },
@@ -81,7 +81,7 @@ export default function Index({
                         <Field label="Cabang"><select className={input} {...register('branch_id', { onChange: () => { setValue('division_id', ''); setValue('sub_division_id', ''); } })}><option value="">Semua cabang</option>{filterOptions.branches.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}</select></Field>
                         <Field label="Divisi"><select className={input} {...register('division_id', { onChange: () => setValue('sub_division_id', '') })}><option value="">Semua divisi</option>{divisions.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}</select></Field>
                         <Field label="Sub Divisi"><select className={input} {...register('sub_division_id')}><option value="">Semua sub divisi</option>{subDivisions.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}</select></Field>
-                        <Field label="Status karyawan"><select className={input} {...register('status')}><option value="">Semua status</option><option value="ACTIVE">Aktif</option><option value="PROBATION">Masa Percobaan</option><option value="MUTATED">Mutasi</option><option value="RESIGNED">Resign</option><option value="TERMINATED">Terminasi</option><option value="INACTIVE">Tidak Aktif</option></select></Field>
+                        <Field label="Status pejuang"><select className={input} {...register('status')}><option value="">Semua status</option><option value="ACTIVE">Aktif</option><option value="PROBATION">Masa Percobaan</option><option value="MUTATED">Mutasi</option><option value="RESIGNED">Resign</option><option value="TERMINATED">Terminasi</option><option value="INACTIVE">Tidak Aktif</option></select></Field>
                         <Field label="Kriteria penilaian"><select className={input} {...register('criteria_id')}><option value="">Semua kriteria</option>{filterOptions.criteria.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}</select></Field>
                         <Field label="Status masalah"><select className={input} {...register('problem_status')}><option value="">Semua status</option><option value="OPEN">Terbuka</option><option value="UNDER_REVIEW">Ditinjau</option><option value="RESOLVED">Selesai</option><option value="CLOSED">Ditutup</option></select></Field>
                     </div>
@@ -89,7 +89,7 @@ export default function Index({
                 </form>
 
                 <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className="flex items-center justify-between border-b border-slate-100 p-5"><div><h2 className="font-semibold text-slate-900">Hasil laporan</h2><p className="mt-1 text-sm text-slate-500">{rows.total} karyawan sesuai filter dan cakupan Anda.</p></div></div>
+                    <div className="flex items-center justify-between border-b border-slate-100 p-5"><div><h2 className="font-semibold text-slate-900">Hasil laporan</h2><p className="mt-1 text-sm text-slate-500">{rows.total} pejuang sesuai filter dan cakupan Anda.</p></div></div>
                     <div className="overflow-x-auto"><table className="w-full min-w-[900px] text-sm"><thead className="bg-slate-50">{table.getHeaderGroups().map((group) => <tr key={group.id}>{group.headers.map((header) => <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500" key={header.id}>{flexRender(header.column.columnDef.header, header.getContext())}</th>)}</tr>)}</thead><tbody className="divide-y divide-slate-100">{table.getRowModel().rows.length ? table.getRowModel().rows.map((row) => <tr className="hover:bg-slate-50" key={row.id}>{row.getVisibleCells().map((cell) => <td className="px-5 py-3 text-slate-600" key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>)}</tr>) : <tr><td className="px-5 py-12 text-center text-slate-500" colSpan={columns.length}>Tidak ada data yang sesuai dengan filter.</td></tr>}</tbody></table></div>
                     {rows.links.length > 3 && <Pagination links={rows.links} />}
                 </section>
@@ -97,7 +97,7 @@ export default function Index({
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <h2 className="font-semibold text-slate-900">Riwayat ekspor</h2>
                     <p className="mt-1 text-sm text-slate-500">File disimpan privat dan otomatis kedaluwarsa setelah 24 jam.</p>
-                    <div className="mt-4 divide-y divide-slate-100">{exports.length ? exports.map((item) => <div className="flex items-center justify-between gap-4 py-3 text-sm" key={item.id}><div><p className="font-medium text-slate-800">{exportLabels[item.status] || item.status}</p><p className="text-xs text-slate-500">{item.row_count !== null && item.row_count !== undefined ? item.row_count + ' baris' : 'Menunggu proses'}</p></div>{item.status === 'COMPLETED' && <Link aria-label="Unduh laporan" className="flex size-10 items-center justify-center rounded-lg border border-slate-200 text-brand hover:bg-brand-subtle" href={route('reports.download', item.id)}><Download size={17} /></Link>}</div>) : <p className="py-8 text-center text-sm text-slate-500">Belum ada riwayat ekspor.</p>}</div>
+                    <div className="mt-4 divide-y divide-slate-100">{exports.length ? exports.map((item) => <div className="flex items-center justify-between gap-4 py-3 text-sm" key={item.id}><div><p className="font-medium text-slate-800">{exportLabels[item.status] || item.status}</p><p className="text-xs text-slate-500">{item.row_count !== null && item.row_count !== undefined ? item.row_count + ' baris' : 'Menunggu proses'}</p></div><div className="flex items-center gap-2">{item.status === 'COMPLETED' && <Link aria-label="Unduh laporan" className="flex size-10 items-center justify-center rounded-lg border border-slate-200 text-brand hover:bg-brand-subtle" href={route('reports.download', item.id)}><Download size={17} /></Link>}<button aria-label="Hapus laporan" className="flex size-10 items-center justify-center rounded-lg border border-red-200 text-red-500 hover:bg-red-50" onClick={() => { if (window.confirm('Hapus laporan ini?')) router.delete(route('reports.export.destroy', item.id), { preserveScroll: true }); }} type="button"><Trash2 size={15} /></button></div></div>) : <p className="py-8 text-center text-sm text-slate-500">Belum ada riwayat ekspor.</p>}</div>
                 </section>
             </div>
         </AuthenticatedLayout>

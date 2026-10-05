@@ -36,4 +36,9 @@ class CalibrationSessionPolicy
     {
         return $user->can('calibration.manage') && $session->status === 'FINALIZED';
     }
+
+    public function delete(User $user, CalibrationSession $session): bool
+    {
+        return $user->can('calibration.manage') && $session->status === 'DRAFT';
+    }
 }

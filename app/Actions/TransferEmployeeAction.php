@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Actions;
 
@@ -21,7 +21,7 @@ class TransferEmployeeAction
     {
         $current = $employee->currentAssignment;
         if (! $current) {
-            throw ValidationException::withMessages(['employee' => 'Karyawan tidak memiliki penempatan aktif.']);
+            throw ValidationException::withMessages(['employee' => 'Pejuang tidak memiliki penempatan aktif.']);
         } $division = Division::findOrFail($data['division_id']);
         if ($division->branch_id !== null && $division->branch_id !== (int) $data['branch_id']) {
             throw ValidationException::withMessages(['division_id' => 'Divisi tidak berada pada cabang yang dipilih.']);

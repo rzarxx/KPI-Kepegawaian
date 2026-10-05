@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace Tests\Feature;
 
@@ -23,7 +23,7 @@ class EmployeeIncidentTest extends TestCase
             'category' => 'discipline',
             'title' => 'Keterlambatan berulang',
             'severity' => 'HIGH',
-            'description' => 'Karyawan terlambat lebih dari tiga kali dalam satu pekan.',
+            'description' => 'Pejuang terlambat lebih dari tiga kali dalam satu pekan.',
             'occurred_at' => now()->toDateString(),
         ])->assertSessionHasNoErrors();
         $incident = $employee->incidents()->sole();

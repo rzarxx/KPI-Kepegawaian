@@ -55,4 +55,19 @@ class UserManagementController extends Controller
 
         return back()->with('success', 'Status pengguna diperbarui.');
     }
+
+    public function destroy(User $user, Request $request, AuditLogger $audit)
+    {
+        $this->authorize('delete', $user);
+
+        try {
+            $snapshot = ['id' => $user->id, 'name' => $user->name, 'email' => $user->email];
+            $user->delete();
+            $audit->log('user.delete', $request->user(), $user, $snapshot, null);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return back()->withErrors(['delete' => 'Pengguna tidak dapat dihapus karena masih memiliki data terkait.']);
+        }
+
+        return back()->with('success', 'Pengguna berhasil dihapus.');
+    }
 }

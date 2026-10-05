@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace Tests\Feature;
 
@@ -98,7 +98,7 @@ class EmployeeLifecycleTest extends TestCase
         $branch = Branch::query()->create(['code' => 'JKT', 'name' => 'Jakarta']);
         $division = Division::query()->create(['branch_id' => $branch->id, 'code' => 'TI', 'name' => 'Teknologi Informasi']);
         $actor->organizationalScopes()->create(['branch_id' => $branch->id, 'scope_type' => 'branch', 'is_active' => true]);
-        $employee = Employee::query()->create(['employee_number' => 'EMP-001', 'full_name' => 'Rina Karyawan', 'join_date' => now()->subYear(), 'current_status' => 'ACTIVE']);
+        $employee = Employee::query()->create(['employee_number' => 'EMP-001', 'full_name' => 'Rina Pejuang', 'join_date' => now()->subYear(), 'current_status' => 'ACTIVE']);
         $employee->assignments()->create(['branch_id' => $branch->id, 'division_id' => $division->id, 'start_date' => now()->subYear(), 'status' => 'ACTIVE']);
 
         return [$actor, $employee, $branch, $division];

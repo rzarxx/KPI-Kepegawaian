@@ -42,4 +42,11 @@ class EmployeeIncidentPolicy
             && $user->can('view', $incident->employee)
             && $incident->status !== 'CLOSED';
     }
+
+    public function delete(User $user, EmployeeIncident $incident): bool
+    {
+        return $user->can('employee_incident.update')
+            && $user->can('view', $incident->employee)
+            && in_array($incident->status, ['OPEN', 'UNDER_REVIEW'], true);
+    }
 }

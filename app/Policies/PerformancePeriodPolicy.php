@@ -31,4 +31,9 @@ class PerformancePeriodPolicy
     {
         return $user->can('organization.manage') && $period->status !== 'CLOSED';
     }
+
+    public function delete(User $user, PerformancePeriod $period): bool
+    {
+        return $user->can('organization.manage') && $period->status === 'DRAFT';
+    }
 }

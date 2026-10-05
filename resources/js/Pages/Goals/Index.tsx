@@ -1,7 +1,7 @@
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
-import { ArrowDown, CheckCircle2, Crosshair, Pencil, Plus, Target, X } from 'lucide-react';
+import { ArrowDown, CheckCircle2, Crosshair, Pencil, Plus, Target, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
 type GoalItem = {
@@ -191,6 +191,19 @@ export default function Index({
                                                         type="button"
                                                     >
                                                         <Pencil size={14} />
+                                                    </button>
+                                                )}
+                                                {canUpdate && goal.status === 'DRAFT' && (
+                                                    <button
+                                                        className="flex size-8 items-center justify-center rounded-lg border border-red-200 text-red-500 hover:bg-red-50"
+                                                        onClick={() => {
+                                                            if (window.confirm('Hapus target ini? Tindakan tidak dapat dibatalkan.'))
+                                                                router.delete(route('goals.destroy', goal.id), { preserveScroll: true });
+                                                        }}
+                                                        title="Hapus target"
+                                                        type="button"
+                                                    >
+                                                        <Trash2 size={14} />
                                                     </button>
                                                 )}
                                                 {canUpdate && goal.status === 'DRAFT' && (

@@ -30,4 +30,11 @@ class UserPolicy
     {
         return ! $user->is($target) && $user->can('user.disable') && (! $target->hasRole('Super Admin') || $user->hasRole('Super Admin'));
     }
+
+    public function delete(User $user, User $target): bool
+    {
+        return ! $user->is($target)
+            && $user->can('user.disable')
+            && ! $target->hasRole('Super Admin');
+    }
 }

@@ -1,4 +1,4 @@
-import { Button } from '@/Components/ui/button';
+﻿import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDistanceToNow } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -18,7 +18,7 @@ type Paginated<T> = { data: T[]; links: { url?: string; label: string; active: b
 
 /** Returns true when the URL points to a file download (not a page navigation) */
 function isDownloadUrl(url: string): boolean {
-    return url.includes('/laporan/ekspor/') || url.includes('/dokumen-karyawan/');
+    return url.includes('/laporan/ekspor/') || url.includes('/dokumen-pejuang/');
 }
 
 export default function Index({ notifications }: { notifications: Paginated<Notification> }) {

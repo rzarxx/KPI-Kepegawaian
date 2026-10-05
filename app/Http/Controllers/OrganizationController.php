@@ -50,6 +50,22 @@ class OrganizationController extends Controller
         return back()->with('success', 'Data organisasi berhasil diperbarui.');
     }
 
+    public function destroy(Request $request, string $type, int $unit, AuditLogger $audit)
+    {
+        $model = $this->model($type)->newQuery()->findOrFail($unit);
+        $this->authorize('delete', $model);
+
+        try {
+            $snapshot = $model->toArray();
+            $model->delete();
+            $audit->log("organization.{$type}.delete", $request->user(), $model, $snapshot, null);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return back()->withErrors(['delete' => 'Tidak dapat dihapus karena masih digunakan oleh data lain.']);
+        }
+
+        return back()->with('success', 'Data organisasi berhasil dihapus.');
+    }
+
     private function model(string $type): Model
     {
         return match ($type) {

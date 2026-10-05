@@ -26,4 +26,9 @@ class EvaluationComponentPolicy
     {
         return $user->can('organization.manage');
     }
+
+    public function delete(User $user, EvaluationComponent $component): bool
+    {
+        return $user->can('organization.manage');
+    }
 }

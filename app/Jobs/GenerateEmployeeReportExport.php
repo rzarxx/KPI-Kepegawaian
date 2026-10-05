@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Jobs;
 
@@ -36,7 +36,7 @@ class GenerateEmployeeReportExport implements ShouldQueue
         $export->update(['status' => 'PROCESSING', 'error_message' => null]);
 
         try {
-            $path = 'reports/karyawan-'.$export->id.'.xlsx';
+            $path = 'reports/pejuang-'.$export->id.'.xlsx';
             $rowCount = $reports->query($export->requestedBy, $export->filters, $export->scope_snapshot)->count();
             Excel::store(
                 new EmployeeReportExport($export->requestedBy, $export->filters, $export->scope_snapshot ?? []),

@@ -1,9 +1,9 @@
-import { Button } from '@/Components/ui/button';
+﻿import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Head, Link, router, useForm as useInertiaForm } from '@inertiajs/react';
 import { useForm } from 'react-hook-form';
-import { AlertTriangle, ArrowLeft, CheckCircle2, Clock3, Plus, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, CheckCircle2, Clock3, Plus, ShieldCheck, Trash2 } from 'lucide-react';
 import { z } from 'zod';
 
 type Category = { code: string; name: string };
@@ -35,16 +35,18 @@ export default function Incidents({
     incidents,
     categories,
     canCreate,
+    canUpdate,
     canResolve,
 }: {
     employee: { id: number; full_name: string; employee_number: string };
     incidents: Incident[];
     categories: Category[];
     canCreate: boolean;
+    canUpdate: boolean;
     canResolve: boolean;
 }) {
     return (
-        <AuthenticatedLayout header={<div className="flex items-center gap-3"><Button asChild variant="ghost"><Link aria-label="Kembali ke detail karyawan" href={route('employees.show', employee.id)}><ArrowLeft size={18} /></Link></Button><div><p className="text-sm text-slate-500">Karyawan Bermasalah</p><h1 className="text-[26px] font-bold text-slate-900">Catatan Masalah</h1></div></div>}>
+        <AuthenticatedLayout header={<div className="flex items-center gap-3"><Button asChild variant="ghost"><Link aria-label="Kembali ke detail pejuang" href={route('employees.show', employee.id)}><ArrowLeft size={18} /></Link></Button><div><p className="text-sm text-slate-500">Pejuang Bermasalah</p><h1 className="text-[26px] font-bold text-slate-900">Catatan Masalah</h1></div></div>}>
             <Head title="Catatan Masalah" />
             <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6 lg:p-8">
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -55,7 +57,7 @@ export default function Incidents({
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <h2 className="flex items-center gap-2 font-semibold text-slate-900"><AlertTriangle size={18} />Riwayat Catatan</h2>
                     <div className="mt-4 space-y-3">
-                        {incidents.length ? incidents.map((incident) => <IncidentCard incident={incident} canResolve={canResolve} key={incident.id} />) : <div className="rounded-lg border border-dashed border-slate-200 py-10 text-center"><ShieldCheck className="mx-auto text-brand" size={28} /><p className="mt-3 text-sm font-medium text-slate-700">Belum ada catatan masalah</p><p className="mt-1 text-sm text-slate-500">Riwayat masalah dan tindak lanjut akan tampil di sini.</p></div>}
+                        {incidents.length ? incidents.map((incident) => <IncidentCard incident={incident} canResolve={canResolve} canUpdate={canUpdate} key={incident.id} />) : <div className="rounded-lg border border-dashed border-slate-200 py-10 text-center"><ShieldCheck className="mx-auto text-brand" size={28} /><p className="mt-3 text-sm font-medium text-slate-700">Belum ada catatan masalah</p><p className="mt-1 text-sm text-slate-500">Riwayat masalah dan tindak lanjut akan tampil di sini.</p></div>}
                     </div>
                 </section>
             </div>
@@ -87,8 +89,15 @@ function IncidentForm({ employeeId, categories }: { employeeId: number; categori
     );
 }
 
-function IncidentCard({ incident, canResolve }: { incident: Incident; canResolve: boolean }) {
+function IncidentCard({ incident, canResolve, canUpdate }: { incident: Incident; canResolve: boolean; canUpdate: boolean }) {
     const status = statusLabels[incident.status];
+    const canDelete = canUpdate && ['OPEN', 'UNDER_REVIEW'].includes(incident.status);
+
+    const destroy = () => {
+        if (!window.confirm('Hapus catatan masalah ini? Tindakan tidak dapat dibatalkan.')) return;
+        router.delete(route('employees.incidents.destroy', incident.id), { preserveScroll: true });
+    };
+
     return (
         <article className="rounded-lg border border-slate-200 p-4">
             <div className="flex flex-col justify-between gap-3 sm:flex-row">
@@ -97,7 +106,19 @@ function IncidentCard({ incident, canResolve }: { incident: Incident; canResolve
                     <p className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-400">{incident.category_name}</p>
                     <p className="mt-3 text-sm leading-6 text-slate-600">{incident.description}</p>
                 </div>
-                <span className={'h-fit whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ' + status.className}>{status.label}</span>
+                <div className="flex shrink-0 items-start gap-2">
+                    <span className={'whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ' + status.className}>{status.label}</span>
+                    {canDelete && (
+                        <button
+                            className="flex size-7 items-center justify-center rounded-lg border border-red-200 text-red-500 hover:bg-red-50"
+                            onClick={destroy}
+                            title="Hapus catatan"
+                            type="button"
+                        >
+                            <Trash2 size={13} />
+                        </button>
+                    )}
+                </div>
             </div>
             <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-500"><Clock3 size={14} />{incident.occurred_at}{incident.reporter ? ' · Dicatat oleh ' + incident.reporter : ''}</p>
             {incident.resolution && <p className="mt-3 rounded-lg bg-brand-subtle p-3 text-sm text-brand-dark">Tindak lanjut: {incident.resolution}</p>}

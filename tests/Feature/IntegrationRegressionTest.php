@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace Tests\Feature;
 
@@ -198,7 +198,7 @@ class IntegrationRegressionTest extends TestCase
     {
         $employee = Employee::query()->create([
             'employee_number' => $number,
-            'full_name' => 'Karyawan '.$number,
+            'full_name' => 'Pejuang '.$number,
             'join_date' => now()->subYear(),
             'current_status' => 'ACTIVE',
         ]);

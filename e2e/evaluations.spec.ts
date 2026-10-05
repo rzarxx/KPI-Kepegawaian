@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures';
+﻿import { test, expect } from './fixtures';
 
 test.describe('Penilaian / Evaluasi', () => {
     test('halaman konfigurasi menampilkan komponen penilaian', async ({ page }) => {
@@ -25,9 +25,9 @@ test.describe('Penilaian / Evaluasi', () => {
         }
     });
 
-    test('bisa menilai karyawan dari halaman detail', async ({ page }) => {
-        await page.goto('/karyawan');
-        const employeeLink = page.locator('a[href*="/karyawan/"]').first();
+    test('bisa menilai pejuang dari halaman detail', async ({ page }) => {
+        await page.goto('/pejuang');
+        const employeeLink = page.locator('a[href*="/pejuang/"]').first();
         if (await employeeLink.isVisible({ timeout: 5_000 })) {
             const href = await employeeLink.getAttribute('href');
             if (href) {
