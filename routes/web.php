@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Http\Controllers\AppSettingsController;
 use App\Http\Controllers\AttentionRuleController;
@@ -80,24 +80,24 @@ Route::middleware(['auth', 'active-user', 'impersonation-valid'])->group(functio
     Route::get('/kalibrasi/{session}', [CalibrationController::class, 'show'])->name('calibration.show');
     // Target / Goal — operasi baca (boleh saat impersonasi)
     Route::get('/target', [GoalController::class, 'index'])->name('goals.index');
-    Route::resource('karyawan', EmployeeController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update'])->parameters(['karyawan' => 'employee'])->names('employees');
-    Route::post('/karyawan/{employee}/mutasi', [EmployeeController::class, 'transfer'])->name('employees.transfer');
-    Route::post('/karyawan/{employee}/status', [EmployeeController::class, 'changeStatus'])->name('employees.status');
-    Route::post('/karyawan/{employee}/aktifkan-kembali', [EmployeeController::class, 'rehire'])->name('employees.rehire');
+    Route::resource('pejuang', EmployeeController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update'])->parameters(['pejuang' => 'employee'])->names('employees');
+    Route::post('/pejuang/{employee}/mutasi', [EmployeeController::class, 'transfer'])->name('employees.transfer');
+    Route::post('/pejuang/{employee}/status', [EmployeeController::class, 'changeStatus'])->name('employees.status');
+    Route::post('/pejuang/{employee}/aktifkan-kembali', [EmployeeController::class, 'rehire'])->name('employees.rehire');
     Route::get('/laporan', [ReportController::class, 'index'])->name('reports.index');
     Route::post('/laporan/ekspor', [ReportController::class, 'export'])->name('reports.export');
     Route::get('/laporan/ekspor/{export}', [ReportController::class, 'download'])->name('reports.download');
     Route::get('/audit-aktivitas', AuditLogController::class)->name('audit.index');
-    Route::get('/karyawan/{employee}/masalah', [EmployeeIncidentController::class, 'index'])->name('employees.incidents.index');
-    Route::post('/karyawan/{employee}/masalah', [EmployeeIncidentController::class, 'store'])->name('employees.incidents.store');
-    Route::get('/karyawan-bermasalah', [EmployeeIncidentController::class, 'overview'])->name('employees.incidents.overview');
-    Route::put('/masalah-karyawan/{incident}', [EmployeeIncidentController::class, 'update'])->name('employees.incidents.update');
-    Route::post('/masalah-karyawan/{incident}/status', [EmployeeIncidentController::class, 'transition'])->name('employees.incidents.transition');
-    Route::post('/masalah-karyawan/{incident}/selesaikan', [EmployeeIncidentController::class, 'resolve'])->name('employees.incidents.resolve');
-    Route::post('/karyawan/{employee}/dokumen', [EmployeeDocumentController::class, 'store'])->name('employees.documents.store');
-    Route::get('/dokumen-karyawan/{document}', [EmployeeDocumentController::class, 'download'])->name('employees.documents.download');
-    Route::get('/dokumen-karyawan/{document}/lihat', [EmployeeDocumentController::class, 'preview'])->name('employees.documents.preview');
-    Route::delete('/dokumen-karyawan/{document}', [EmployeeDocumentController::class, 'destroy'])->name('employees.documents.destroy');
+    Route::get('/pejuang/{employee}/masalah', [EmployeeIncidentController::class, 'index'])->name('employees.incidents.index');
+    Route::post('/pejuang/{employee}/masalah', [EmployeeIncidentController::class, 'store'])->name('employees.incidents.store');
+    Route::get('/pejuang-bermasalah', [EmployeeIncidentController::class, 'overview'])->name('employees.incidents.overview');
+    Route::put('/masalah-pejuang/{incident}', [EmployeeIncidentController::class, 'update'])->name('employees.incidents.update');
+    Route::post('/masalah-pejuang/{incident}/status', [EmployeeIncidentController::class, 'transition'])->name('employees.incidents.transition');
+    Route::post('/masalah-pejuang/{incident}/selesaikan', [EmployeeIncidentController::class, 'resolve'])->name('employees.incidents.resolve');
+    Route::post('/pejuang/{employee}/dokumen', [EmployeeDocumentController::class, 'store'])->name('employees.documents.store');
+    Route::get('/dokumen-pejuang/{document}', [EmployeeDocumentController::class, 'download'])->name('employees.documents.download');
+    Route::get('/dokumen-pejuang/{document}/lihat', [EmployeeDocumentController::class, 'preview'])->name('employees.documents.preview');
+    Route::delete('/dokumen-pejuang/{document}', [EmployeeDocumentController::class, 'destroy'])->name('employees.documents.destroy');
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifikasi/baca-semua', [NotificationController::class, 'readAll'])->name('notifications.read-all');
     Route::post('/notifikasi/{notification}/baca', [NotificationController::class, 'read'])->name('notifications.read');

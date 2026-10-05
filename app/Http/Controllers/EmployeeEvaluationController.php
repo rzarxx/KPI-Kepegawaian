@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -82,7 +82,7 @@ class EmployeeEvaluationController extends Controller
             ->orderByDesc('start_date')
             ->get(['id', 'name', 'start_date', 'end_date']);
 
-        // Ambil self-assessment karyawan untuk periode ini (jika sudah diajukan)
+        // Ambil self-assessment pejuang untuk periode ini (jika sudah diajukan)
         $selfAssessment = null;
         if ($period) {
             $selfEval = EmployeeEvaluation::query()

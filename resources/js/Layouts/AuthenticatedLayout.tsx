@@ -1,4 +1,4 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
+﻿import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Button } from '@/Components/ui/button';
 import { toast, Toaster } from '@/Components/ui/toast';
 import { Link, usePage } from '@inertiajs/react';
@@ -55,7 +55,7 @@ export default function AuthenticatedLayout({
             ? [{ label: 'Beranda', href: route('dashboard'), active: route().current('dashboard'), icon: <Building2 size={18} /> }]
             : []),
         ...(abilities.employeeView
-            ? [{ label: 'Karyawan', href: route('employees.index'), active: route().current('employees.*'), icon: <UsersRound size={18} /> }]
+            ? [{ label: 'Pejuang', href: route('employees.index'), active: route().current('employees.*'), icon: <UsersRound size={18} /> }]
             : []),
         ...(abilities.incidentView
             ? [{ label: 'Catatan Khusus', href: route('employees.incidents.overview'), active: route().current('employees.incidents.*'), icon: <TriangleAlert size={18} /> }]

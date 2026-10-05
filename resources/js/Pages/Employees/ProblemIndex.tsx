@@ -1,4 +1,4 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+﻿import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import { AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react';
 
@@ -19,8 +19,8 @@ type Paginated<T> = { data: T[]; links: { url?: string; label: string; active: b
 
 export default function ProblemIndex({ incidents }: { incidents: Paginated<Incident> }) {
     return (
-        <AuthenticatedLayout header={<div><p className="text-sm text-slate-500">Karyawan</p><h1 className="text-[26px] font-bold text-slate-900">Karyawan Bermasalah</h1></div>}>
-            <Head title="Karyawan Bermasalah" />
+        <AuthenticatedLayout header={<div><p className="text-sm text-slate-500">Pejuang</p><h1 className="text-[26px] font-bold text-slate-900">Pejuang Bermasalah</h1></div>}>
+            <Head title="Pejuang Bermasalah" />
             <div className="mx-auto max-w-6xl space-y-5 p-4 sm:p-6 lg:p-8">
                 <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                     <p className="flex items-center gap-2 font-semibold"><AlertTriangle size={18} />Catatan privat dan terbatas sesuai cakupan organisasi</p>

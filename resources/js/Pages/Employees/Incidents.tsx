@@ -1,4 +1,4 @@
-import { Button } from '@/Components/ui/button';
+﻿import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Head, Link, router, useForm as useInertiaForm } from '@inertiajs/react';
@@ -44,7 +44,7 @@ export default function Incidents({
     canResolve: boolean;
 }) {
     return (
-        <AuthenticatedLayout header={<div className="flex items-center gap-3"><Button asChild variant="ghost"><Link aria-label="Kembali ke detail karyawan" href={route('employees.show', employee.id)}><ArrowLeft size={18} /></Link></Button><div><p className="text-sm text-slate-500">Karyawan Bermasalah</p><h1 className="text-[26px] font-bold text-slate-900">Catatan Masalah</h1></div></div>}>
+        <AuthenticatedLayout header={<div className="flex items-center gap-3"><Button asChild variant="ghost"><Link aria-label="Kembali ke detail pejuang" href={route('employees.show', employee.id)}><ArrowLeft size={18} /></Link></Button><div><p className="text-sm text-slate-500">Pejuang Bermasalah</p><h1 className="text-[26px] font-bold text-slate-900">Catatan Masalah</h1></div></div>}>
             <Head title="Catatan Masalah" />
             <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6 lg:p-8">
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -80,7 +80,7 @@ class EmployeeIncidentController extends Controller
         if (in_array($incident->severity, ['HIGH', 'CRITICAL'], true)) {
             User::permission('employee_incident.resolve')->where('is_active', true)->get()
                 ->filter(fn (User $user) => $user->id !== $request->user()->id && $user->can('view', $employee))
-                ->each->notify(new SystemNotification('Karyawan memerlukan perhatian', 'Terdapat catatan masalah prioritas yang perlu ditinjau.', route('employees.incidents.index', $employee), 'warning'));
+                ->each->notify(new SystemNotification('Pejuang memerlukan perhatian', 'Terdapat catatan masalah prioritas yang perlu ditinjau.', route('employees.incidents.index', $employee), 'warning'));
         }
 
         return back()->with('success', 'Catatan masalah berhasil ditambahkan.');

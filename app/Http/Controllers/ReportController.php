@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -89,6 +89,6 @@ class ReportController extends Controller
         $this->authorize('download', $export);
         abort_unless($export->file_path && Storage::disk('local')->exists($export->file_path), 404);
 
-        return Storage::disk('local')->download($export->file_path, 'laporan-karyawan-'.$export->id.'.xlsx');
+        return Storage::disk('local')->download($export->file_path, 'laporan-pejuang-'.$export->id.'.xlsx');
     }
 }

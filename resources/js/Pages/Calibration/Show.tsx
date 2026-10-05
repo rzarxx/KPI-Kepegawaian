@@ -1,4 +1,4 @@
-import { Button } from '@/Components/ui/button';
+﻿import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
 import { ArrowRight, Check, CheckCircle2, Pencil, Scale, Send, X } from 'lucide-react';
@@ -151,7 +151,7 @@ export default function Show({
                                             {c.min_score}–{c.max_score}
                                         </p>
                                         <p className="mt-2 text-2xl font-bold">{count}</p>
-                                        <p className="text-xs text-slate-500">karyawan</p>
+                                        <p className="text-xs text-slate-500">pejuang</p>
                                     </div>
                                 );
                             })}
@@ -168,7 +168,7 @@ export default function Show({
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
-                                    <th className="px-5 py-3">Karyawan</th>
+                                    <th className="px-5 py-3">Pejuang</th>
                                     <th className="px-5 py-3 text-right">Nilai Asli</th>
                                     <th className="px-5 py-3">Kriteria</th>
                                     <th className="px-5 py-3 text-right">Nilai Disesuaikan</th>

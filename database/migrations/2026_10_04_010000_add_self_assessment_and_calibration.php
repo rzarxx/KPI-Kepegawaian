@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,7 +15,7 @@ return new class extends Migration
             $table->index(['employee_id', 'period_id', 'evaluation_type']);
         });
 
-        // Update unique constraint: satu karyawan hanya satu penilaian per tipe per periode per evaluator
+        // Update unique constraint: satu pejuang hanya satu penilaian per tipe per periode per evaluator
         Schema::table('employee_evaluations', function (Blueprint $table): void {
             $table->dropUnique('evaluations_employee_period_evaluator_unique');
             $table->unique(
@@ -40,7 +40,7 @@ return new class extends Migration
             $table->index(['period_id', 'status']);
         });
 
-        // 3. Penyesuaian nilai per karyawan dalam sesi kalibrasi
+        // 3. Penyesuaian nilai per pejuang dalam sesi kalibrasi
         Schema::create('calibration_adjustments', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('session_id')->constrained('calibration_sessions')->cascadeOnDelete();

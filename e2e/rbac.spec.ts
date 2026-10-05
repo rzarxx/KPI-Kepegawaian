@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 
 const BASE_URL = process.env.E2E_BASE_URL || 'https://kpi.albahjah.or.id';
 
@@ -14,13 +14,13 @@ const ROLES = [
 
 // Expected menu visibility per role
 const MENU_VISIBILITY: Record<string, string[]> = {
-    'Super Admin': ['Beranda', 'Karyawan', 'Catatan Khusus', 'Penilaian', 'Laporan', 'Riwayat Aktivitas', 'Notifikasi', 'Organisasi', 'Pengguna', 'Tampilan'],
-    'HR Admin': ['Beranda', 'Karyawan', 'Catatan Khusus', 'Penilaian', 'Laporan', 'Notifikasi', 'Organisasi', 'Pengguna', 'Tampilan'],
-    'HR Manager': ['Beranda', 'Karyawan', 'Catatan Khusus', 'Penilaian', 'Laporan', 'Riwayat Aktivitas', 'Notifikasi', 'Organisasi'],
-    'Branch Head': ['Beranda', 'Karyawan', 'Catatan Khusus', 'Penilaian', 'Laporan', 'Notifikasi', 'Organisasi'],
-    'Division Head': ['Beranda', 'Karyawan', 'Catatan Khusus', 'Penilaian', 'Notifikasi', 'Organisasi'],
-    'Sub Division Head': ['Beranda', 'Karyawan', 'Catatan Khusus', 'Penilaian', 'Notifikasi', 'Organisasi'],
-    'Auditor': ['Beranda', 'Karyawan', 'Catatan Khusus', 'Penilaian', 'Laporan', 'Riwayat Aktivitas', 'Notifikasi', 'Organisasi'],
+    'Super Admin': ['Beranda', 'Pejuang', 'Catatan Khusus', 'Penilaian', 'Laporan', 'Riwayat Aktivitas', 'Notifikasi', 'Organisasi', 'Pengguna', 'Tampilan'],
+    'HR Admin': ['Beranda', 'Pejuang', 'Catatan Khusus', 'Penilaian', 'Laporan', 'Notifikasi', 'Organisasi', 'Pengguna', 'Tampilan'],
+    'HR Manager': ['Beranda', 'Pejuang', 'Catatan Khusus', 'Penilaian', 'Laporan', 'Riwayat Aktivitas', 'Notifikasi', 'Organisasi'],
+    'Branch Head': ['Beranda', 'Pejuang', 'Catatan Khusus', 'Penilaian', 'Laporan', 'Notifikasi', 'Organisasi'],
+    'Division Head': ['Beranda', 'Pejuang', 'Catatan Khusus', 'Penilaian', 'Notifikasi', 'Organisasi'],
+    'Sub Division Head': ['Beranda', 'Pejuang', 'Catatan Khusus', 'Penilaian', 'Notifikasi', 'Organisasi'],
+    'Auditor': ['Beranda', 'Pejuang', 'Catatan Khusus', 'Penilaian', 'Laporan', 'Riwayat Aktivitas', 'Notifikasi', 'Organisasi'],
 };
 
 // Pages that should NOT be accessible (should return 403)

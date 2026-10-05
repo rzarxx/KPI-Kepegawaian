@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Actions;
 
@@ -22,7 +22,7 @@ class RehireEmployeeAction
     public function execute(User $actor, Employee $employee, array $data): Employee
     {
         if (! in_array($employee->current_status->value, ['RESIGNED', 'TERMINATED', 'INACTIVE'], true)) {
-            throw ValidationException::withMessages(['employee' => 'Rehire hanya tersedia untuk karyawan yang sudah tidak aktif.']);
+            throw ValidationException::withMessages(['employee' => 'Rehire hanya tersedia untuk pejuang yang sudah tidak aktif.']);
         }
 
         $division = Division::findOrFail($data['division_id']);
