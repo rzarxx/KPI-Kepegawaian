@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Http\Requests;
 
@@ -28,8 +28,8 @@ class StoreEmployeeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'employee_number.unique' => 'Nomor pejuang sudah digunakan. Periksa data pejuang lama dan gunakan proses rehire bila orang yang sama kembali bekerja.',
-            'national_id.unique' => 'NIK sudah terhubung ke pejuang lama. Verifikasi identitas lalu gunakan proses rehire pada profil pejuang tersebut.',
+            'employee_number.unique' => 'Nomor karyawan sudah digunakan. Periksa data karyawan lama dan gunakan proses rehire bila orang yang sama kembali bekerja.',
+            'national_id.unique' => 'NIK sudah terhubung ke karyawan lama. Verifikasi identitas lalu gunakan proses rehire pada profil karyawan tersebut.',
         ];
     }
 }

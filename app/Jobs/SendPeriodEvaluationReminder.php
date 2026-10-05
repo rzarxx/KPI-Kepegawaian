@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Jobs;
 
@@ -49,7 +49,7 @@ class SendPeriodEvaluationReminder implements ShouldQueue
             ->get();
 
         foreach ($evaluators as $evaluator) {
-            // Cek apakah evaluator ini punya pejuang yang belum dinilai
+            // Cek apakah evaluator ini punya karyawan yang belum dinilai
             $pendingCount = $this->countPendingEvaluations($evaluator, $period, $scopeResolver);
             if ($pendingCount === 0) {
                 continue;
@@ -57,7 +57,7 @@ class SendPeriodEvaluationReminder implements ShouldQueue
 
             $evaluator->notify(new SystemNotification(
                 $title,
-                "{$message} ({$pendingCount} pejuang belum dinilai).",
+                "{$message} ({$pendingCount} karyawan belum dinilai).",
                 route('evaluations.configuration'),
                 $isOverdue ? 'warning' : 'info',
             ));
@@ -69,13 +69,13 @@ class SendPeriodEvaluationReminder implements ShouldQueue
 
     private function countPendingEvaluations(User $evaluator, PerformancePeriod $period, OrganizationalScopeResolver $scopeResolver): int
     {
-        // Pejuang yang sudah dinilai oleh evaluator ini di periode ini
+        // Karyawan yang sudah dinilai oleh evaluator ini di periode ini
         $alreadyEvaluatedIds = EmployeeEvaluation::query()
             ->where('evaluator_id', $evaluator->id)
             ->where('period_id', $period->id)
             ->pluck('employee_id');
 
-        // Pejuang aktif dalam scope evaluator yang belum dinilai
+        // Karyawan aktif dalam scope evaluator yang belum dinilai
         $query = Employee::query()
             ->where('current_status', 'ACTIVE')
             ->whereNotIn('id', $alreadyEvaluatedIds)

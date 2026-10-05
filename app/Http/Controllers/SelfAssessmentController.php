@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Http\Controllers;
 
@@ -27,7 +27,7 @@ class SelfAssessmentController extends Controller
             return Inertia::render('SelfAssessment/Index', [
                 'periods' => [],
                 'employee' => null,
-                'error' => 'Akun Anda belum terhubung dengan data pejuang.',
+                'error' => 'Akun Anda belum terhubung dengan data karyawan.',
             ]);
         }
 

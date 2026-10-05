@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Http\Controllers;
 
@@ -63,7 +63,7 @@ class EmployeeController extends Controller
     {
         $employee = $action->execute($request->user(), $request->validated());
 
-        return redirect()->route('employees.show', $employee)->with('success', 'Pejuang berhasil ditambahkan.');
+        return redirect()->route('employees.show', $employee)->with('success', 'Karyawan berhasil ditambahkan.');
     }
 
     public function show(Employee $employee): Response
@@ -136,7 +136,7 @@ class EmployeeController extends Controller
                 ->whereIn('period_id', $evaluationPeriods->pluck('id'))
                 ->get(['id', 'period_id', 'status'])
                 ->keyBy('period_id');
-            // Self-assessment dari pejuang sendiri
+            // Self-assessment dari karyawan sendiri
             $selfAssessmentsByPeriod = EmployeeEvaluation::query()
                 ->where('employee_id', $employee->id)
                 ->where('evaluation_type', EmployeeEvaluation::TYPE_SELF)
@@ -213,7 +213,7 @@ class EmployeeController extends Controller
     {
         $action->execute($request->user(), $employee, $request->validated());
 
-        return redirect()->route('employees.show', $employee)->with('success', 'Data pejuang berhasil diperbarui.');
+        return redirect()->route('employees.show', $employee)->with('success', 'Data karyawan berhasil diperbarui.');
     }
 
     public function transfer(Employee $employee, TransferEmployeeRequest $request, TransferEmployeeAction $action): RedirectResponse
@@ -221,7 +221,7 @@ class EmployeeController extends Controller
         $this->authorize('transfer', $employee);
         $action->execute($request->user(), $employee, $request->validated());
 
-        return back()->with('success', 'Mutasi pejuang berhasil disimpan.');
+        return back()->with('success', 'Mutasi karyawan berhasil disimpan.');
     }
 
     public function changeStatus(Employee $employee, ChangeEmployeeStatusRequest $request, ChangeEmployeeStatusAction $action): RedirectResponse
@@ -230,14 +230,14 @@ class EmployeeController extends Controller
         $data = $request->validated();
         $action->execute($request->user(), $employee, $data['status'], $data['effective_date'], $data['reason']);
 
-        return back()->with('success', 'Status pejuang berhasil diperbarui.');
+        return back()->with('success', 'Status karyawan berhasil diperbarui.');
     }
 
     public function rehire(Employee $employee, RehireEmployeeRequest $request, RehireEmployeeAction $action): RedirectResponse
     {
         $action->execute($request->user(), $employee, $request->validated());
 
-        return back()->with('success', 'Pejuang berhasil diaktifkan kembali dengan penempatan baru.');
+        return back()->with('success', 'Karyawan berhasil diaktifkan kembali dengan penempatan baru.');
     }
 
     private function employeeData(Employee $employee): array

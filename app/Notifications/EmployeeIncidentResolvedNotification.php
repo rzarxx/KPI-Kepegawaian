@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Notifications;
 
@@ -19,6 +19,6 @@ class EmployeeIncidentResolvedNotification extends Notification
 
     public function toArray(object $notifiable): array
     {
-        return ['type' => 'employee_incident_resolved', 'incident_id' => $this->incident->id, 'employee_id' => $this->incident->employee_id, 'message' => 'Catatan masalah pejuang telah diselesaikan.'];
+        return ['type' => 'employee_incident_resolved', 'incident_id' => $this->incident->id, 'employee_id' => $this->incident->employee_id, 'message' => 'Catatan masalah karyawan telah diselesaikan.'];
     }
 }

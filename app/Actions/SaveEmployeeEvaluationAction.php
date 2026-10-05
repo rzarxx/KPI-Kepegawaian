@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Actions;
 
@@ -31,7 +31,7 @@ class SaveEmployeeEvaluationAction
         return DB::transaction(function () use ($actor, $employee, $period, $data) {
             $assignment = $employee->currentAssignment;
             if (! $assignment) {
-                throw ValidationException::withMessages(['employee' => 'Pejuang tidak memiliki penempatan aktif.']);
+                throw ValidationException::withMessages(['employee' => 'Karyawan tidak memiliki penempatan aktif.']);
             }
             if (! in_array($period->status, ['DRAFT', 'ACTIVE'], true) || ! $period->is_active) {
                 throw ValidationException::withMessages(['period_id' => 'Periode penilaian tidak dapat digunakan saat ini.']);

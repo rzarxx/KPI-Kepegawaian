@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Exports;
 
@@ -37,7 +37,7 @@ class EmployeeReportExport implements FromQuery, WithColumnFormatting, WithColum
     {
         return [
             'No',
-            'NIK / ID Pejuang',
+            'NIK / ID Karyawan',
             'Nama',
             'Cabang',
             'Divisi',

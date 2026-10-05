@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Http\Controllers;
 
@@ -80,7 +80,7 @@ class EmployeeIncidentController extends Controller
         if (in_array($incident->severity, ['HIGH', 'CRITICAL'], true)) {
             User::permission('employee_incident.resolve')->where('is_active', true)->get()
                 ->filter(fn (User $user) => $user->id !== $request->user()->id && $user->can('view', $employee))
-                ->each->notify(new SystemNotification('Pejuang memerlukan perhatian', 'Terdapat catatan masalah prioritas yang perlu ditinjau.', route('employees.incidents.index', $employee), 'warning'));
+                ->each->notify(new SystemNotification('Karyawan memerlukan perhatian', 'Terdapat catatan masalah prioritas yang perlu ditinjau.', route('employees.incidents.index', $employee), 'warning'));
         }
 
         return back()->with('success', 'Catatan masalah berhasil ditambahkan.');
@@ -93,17 +93,6 @@ class EmployeeIncidentController extends Controller
         $audit->log('employee.incident.update', $request->user(), $incident, $before, $incident->fresh()->toArray());
 
         return back()->with('success', 'Catatan masalah berhasil diperbarui.');
-    }
-
-    public function destroy(EmployeeIncident $incident, Request $request, AuditLogger $audit)
-    {
-        $this->authorize('delete', $incident);
-
-        $snapshot = $incident->toArray();
-        $incident->delete();
-        $audit->log('employee.incident.delete', $request->user(), $incident, $snapshot, null);
-
-        return back()->with('success', 'Catatan masalah berhasil dihapus.');
     }
 
     public function resolve(EmployeeIncident $incident, ResolveEmployeeIncidentRequest $request, AuditLogger $audit)
