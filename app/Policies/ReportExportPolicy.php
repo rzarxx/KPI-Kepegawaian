@@ -19,4 +19,10 @@ class ReportExportPolicy
             && $export->status === 'COMPLETED'
             && $export->expires_at?->isFuture();
     }
+
+    public function delete(User $user, ReportExport $export): bool
+    {
+        return $user->can('report.export')
+            && $export->requested_by === $user->id;
+    }
 }

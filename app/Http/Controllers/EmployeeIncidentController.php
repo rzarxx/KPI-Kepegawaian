@@ -107,6 +107,21 @@ class EmployeeIncidentController extends Controller
         return back()->with('success', 'Catatan masalah berhasil diselesaikan.');
     }
 
+    public function destroy(EmployeeIncident $incident, AuditLogger $audit)
+    {
+        $this->authorize('delete', $incident);
+
+        try {
+            $snapshot = $incident->toArray();
+            $incident->delete();
+            $audit->log('employee.incident.delete', request()->user(), $incident, $snapshot, null);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return back()->withErrors(['delete' => 'Catatan masalah tidak dapat dihapus karena masih memiliki data terkait.']);
+        }
+
+        return back()->with('success', 'Catatan masalah berhasil dihapus.');
+    }
+
     public function transition(TransitionEmployeeIncidentRequest $request, EmployeeIncident $incident, AuditLogger $audit)
     {
         $this->authorize('transition', $incident);

@@ -91,4 +91,19 @@ class ReportController extends Controller
 
         return Storage::disk('local')->download($export->file_path, 'laporan-karyawan-'.$export->id.'.xlsx');
     }
+
+    public function destroyExport(ReportExport $export, AuditLogger $audit): RedirectResponse
+    {
+        $this->authorize('delete', $export);
+
+        if ($export->file_path && Storage::disk('local')->exists($export->file_path)) {
+            Storage::disk('local')->delete($export->file_path);
+        }
+
+        $snapshot = $export->toArray();
+        $export->delete();
+        $audit->log('report.export.delete', request()->user(), $export, $snapshot, null);
+
+        return back()->with('success', 'Laporan ekspor berhasil dihapus.');
+    }
 }
