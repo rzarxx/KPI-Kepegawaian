@@ -19,13 +19,14 @@ class OrganizationController extends Controller
     public function index(Request $request, OrganizationalScopeResolver $scope)
     {
         $this->authorize('viewAny', Branch::class);
+        $isImpersonating = $request->session()->has('impersonation.original_user_id');
         $branches = $scope->scopeBranches($request->user(), Branch::query())->orderBy('name')->get();
         $branchIds = $branches->pluck('id');
 
         return Inertia::render('Organization/Index', [
             'branches' => $branches, 'divisions' => Division::query()->where(fn ($q) => $q->whereNull('branch_id')->orWhereIn('branch_id', $branchIds))->orderBy('name')->get(),
             'subDivisions' => SubDivision::query()->whereHas('division', fn ($q) => $q->where(fn ($d) => $d->whereNull('branch_id')->orWhereIn('branch_id', $branchIds)))->orderBy('name')->get(),
-            'positions' => Position::query()->orderBy('name')->get(), 'canManage' => $request->user()->can('organization.manage'),
+            'positions' => Position::query()->orderBy('name')->get(), 'canManage' => ! $isImpersonating && $request->user()->can('organization.manage'),
         ]);
     }
 

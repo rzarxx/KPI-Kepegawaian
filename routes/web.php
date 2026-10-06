@@ -41,7 +41,6 @@ Route::middleware(['auth', 'active-user', 'impersonation-valid'])->group(functio
         Route::post('/pengaturan/pengguna/{user}/toggle', [UserManagementController::class, 'toggle'])->name('users.toggle');
         Route::delete('/pengaturan/pengguna/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
         Route::post('/pengaturan/pengguna/{user}/impersonasi', [ImpersonationController::class, 'start'])->name('impersonation.start');
-        Route::get('/pengaturan/organisasi', [OrganizationController::class, 'index'])->name('organization.index');
         Route::post('/pengaturan/organisasi/{type}', [OrganizationController::class, 'store'])->whereIn('type', ['cabang', 'divisi', 'sub-divisi', 'jabatan'])->name('organization.store');
         Route::put('/pengaturan/organisasi/{type}/{unit}', [OrganizationController::class, 'update'])->whereIn('type', ['cabang', 'divisi', 'sub-divisi', 'jabatan'])->name('organization.update');
         Route::delete('/pengaturan/organisasi/{type}/{unit}', [OrganizationController::class, 'destroy'])->whereIn('type', ['cabang', 'divisi', 'sub-divisi', 'jabatan'])->name('organization.destroy');
@@ -72,6 +71,7 @@ Route::middleware(['auth', 'active-user', 'impersonation-valid'])->group(functio
         Route::post('/target/{goal}/status', [GoalController::class, 'transition'])->name('goals.transition');
         Route::delete('/target/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
     });
+    Route::get('/pengaturan/organisasi', [OrganizationController::class, 'index'])->name('organization.index');
     Route::get('/penilaian/konfigurasi', [EvaluationConfigurationController::class, 'index'])->name('evaluations.configuration');
     Route::get('/penilaian/hasil/{evaluation}', [EmployeeEvaluationController::class, 'show'])->name('evaluations.show');
     Route::post('/penilaian/hasil/{evaluation}/status', [EmployeeEvaluationController::class, 'transition'])->name('evaluations.transition');
