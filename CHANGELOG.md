@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Perbaikan Instalasi Database MySQL -- 9 Oktober 2026
+
+- Menambahkan indeks `employee_id` sebelum melepas indeks unik evaluasi saat
+  migration mengubah periode menjadi opsional. Instalasi baru MySQL kini tidak
+  gagal karena foreign key pejuang bergantung pada indeks gabungan tersebut.
+
 ### Hardening Scope, Evaluasi, dan Konfirmasi Aksi -- 9 Oktober 2026
 
 - Menutup akses lintas cakupan pada Goal dan Kalibrasi melalui Policy, Action,

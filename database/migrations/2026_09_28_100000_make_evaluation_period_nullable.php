@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::table('employee_evaluations', function (Blueprint $table): void {
             $table->dropForeign(['period_id']);
+            $table->index('employee_id');
         });
 
         Schema::table('employee_evaluations', function (Blueprint $table): void {
