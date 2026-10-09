@@ -1,3 +1,4 @@
+import { confirmAction } from '@/Utils/confirmation';
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
@@ -59,7 +60,7 @@ export default function Index({
     canCreate,
     canUpdate,
 }: {
-    goals: { data: GoalItem[]; links: any[] };
+    goals: { data: GoalItem[]; links: unknown[] };
     periods: Period[];
     parentGoals: ParentGoal[];
     filters: { period_id: string | null; level: string | null };
@@ -196,8 +197,8 @@ export default function Index({
                                                 {canUpdate && goal.status === 'DRAFT' && (
                                                     <button
                                                         className="flex size-8 items-center justify-center rounded-lg border border-red-200 text-red-500 hover:bg-red-50"
-                                                        onClick={() => {
-                                                            if (window.confirm('Hapus target ini? Tindakan tidak dapat dibatalkan.'))
+                                                        onClick={async () => {
+                                                            if (await confirmAction({ title: 'Hapus Target', message: 'Hapus target ini? Tindakan tidak dapat dibatalkan.', confirmLabel: 'Ya, Hapus', variant: 'danger' }))
                                                                 router.delete(route('goals.destroy', goal.id), { preserveScroll: true });
                                                         }}
                                                         title="Hapus target"
@@ -218,8 +219,8 @@ export default function Index({
                                                 )}
                                                 {canUpdate && goal.status === 'ACTIVE' && (
                                                     <Button
-                                                        onClick={() => {
-                                                            if (window.confirm('Tandai target ini sebagai selesai?'))
+                                                        onClick={async () => {
+                                                            if (await confirmAction({ title: 'Selesaikan Target', message: 'Tandai target ini sebagai selesai?', confirmLabel: 'Ya, Selesaikan' }))
                                                                 router.post(route('goals.transition', goal.id), { status: 'COMPLETED' }, { preserveScroll: true });
                                                         }}
                                                         type="button"

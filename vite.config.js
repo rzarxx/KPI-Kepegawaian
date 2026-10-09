@@ -15,24 +15,6 @@ export default defineConfig({
         // Do not expose source maps in production
         sourcemap: false,
         chunkSizeWarningLimit: 1000,
-        rollupOptions: {
-            output: {
-                manualChunks: {
-                    // Core React runtime
-                    'vendor-react': ['react', 'react-dom'],
-                    // Inertia + routing
-                    'vendor-inertia': ['@inertiajs/react'],
-                    // Charts (heaviest single dep)
-                    'vendor-recharts': ['recharts'],
-                    // Form & validation
-                    'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
-                    // Table
-                    'vendor-table': ['@tanstack/react-table'],
-                    // UI utilities
-                    'vendor-ui': ['@headlessui/react', 'lucide-react', 'date-fns', 'clsx', 'tailwind-merge', 'class-variance-authority'],
-                },
-            },
-        },
     },
     plugins: [
         laravel({

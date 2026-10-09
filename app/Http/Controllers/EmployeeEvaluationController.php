@@ -27,15 +27,10 @@ class EmployeeEvaluationController extends Controller
         }
 
         // Period is required — redirect to employee page if none provided
-        if (! $period) {
-            return redirect()->route('employees.show', $employee)
-                ->with('error', 'Pilih periode penilaian terlebih dahulu.');
-        }
-
         $lookupAttributes = [
             'employee_id' => $employee->id,
             'evaluator_id' => $request->user()->id,
-            'period_id' => $period->id,
+            'period_id' => $period?->id,
             'evaluation_type' => EmployeeEvaluation::TYPE_SUPERVISOR,
         ];
         $evaluation = EmployeeEvaluation::query()->where($lookupAttributes)->with('scores')->first();
@@ -48,11 +43,10 @@ class EmployeeEvaluationController extends Controller
         $this->authorize('evaluate', $employee);
 
         $periodId = $request->input('period_id');
-        if (! $periodId) {
-            return back()->withErrors(['period_id' => 'Periode penilaian wajib dipilih.']);
+        $period = $periodId ? PerformancePeriod::findOrFail($periodId) : null;
+        if ($period) {
+            $this->authorize('view', $period);
         }
-        $period = PerformancePeriod::findOrFail($periodId);
-        $this->authorize('view', $period);
 
         $data = $request->validated();
         $evaluation = $action->execute($request->user(), $employee, $period, $data);

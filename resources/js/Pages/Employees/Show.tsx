@@ -1,4 +1,5 @@
 ﻿import { Button } from "@/Components/ui/button";
+import ConfirmDeleteDialog from "@/Components/ConfirmDeleteDialog";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router, useForm } from "@inertiajs/react";
 import {
@@ -33,6 +34,7 @@ type Employee = {
     email?: string;
     phone?: string;
     status_label: string;
+    status: string;
     assignment: {
         branch?: string;
         division?: string;
@@ -247,7 +249,9 @@ export default function Show({
                                     onClick={() => setShowStatus(!showStatus)}
                                 >
                                     <UserRoundX size={16} />
-                                    Ubah Status Akhir
+                                    {employee.status === "PROBATION"
+                                        ? "Selesaikan Masa Percobaan"
+                                        : "Ubah Status Akhir"}
                                 </Button>
                             )}
                             {canRehire && (
@@ -273,6 +277,7 @@ export default function Show({
                         {showStatus && (
                             <StatusForm
                                 employeeId={employee.id}
+                                currentStatus={employee.status}
                                 onDone={() => setShowStatus(false)}
                             />
                         )}
@@ -613,13 +618,16 @@ function RehireForm({
 }
 function StatusForm({
     employeeId,
+    currentStatus,
     onDone,
 }: {
     employeeId: number;
+    currentStatus: string;
     onDone: () => void;
 }) {
+    const [confirming, setConfirming] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
-        status: "RESIGNED",
+        status: currentStatus === "PROBATION" ? "ACTIVE" : "RESIGNED",
         effective_date: "",
         reason: "",
     });
@@ -628,18 +636,17 @@ function StatusForm({
             className="mt-5 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-2"
             onSubmit={(event) => {
                 event.preventDefault();
-                post(route("employees.status", employeeId), {
-                    onSuccess: onDone,
-                });
+                setConfirming(true);
             }}
         >
             <label className="text-sm font-medium text-slate-700">
-                Status akhir
+                Status baru
                 <select
                     className={inputClass}
                     value={data.status}
                     onChange={(event) => setData("status", event.target.value)}
                 >
+                    {currentStatus === "PROBATION" && <option value="ACTIVE">Aktif</option>}
                     <option value="RESIGNED">Resign</option>
                     <option value="TERMINATED">Terminasi</option>
                     <option value="INACTIVE">Tidak Aktif</option>
@@ -669,6 +676,17 @@ function StatusForm({
                     {processing ? "Menyimpan..." : "Simpan Status"}
                 </Button>
             </div>
+            <ConfirmDeleteDialog
+                open={confirming}
+                title="Konfirmasi Perubahan Status"
+                message={`Ubah status pejuang menjadi ${data.status === "ACTIVE" ? "Aktif" : data.status === "RESIGNED" ? "Resign" : data.status === "TERMINATED" ? "Terminasi" : "Tidak Aktif"}?`}
+                confirmLabel="Ya, Simpan"
+                processing={processing}
+                processingLabel="Menyimpan..."
+                variant="primary"
+                onConfirm={() => post(route("employees.status", employeeId), { onSuccess: () => { setConfirming(false); onDone(); } })}
+                onCancel={() => setConfirming(false)}
+            />
         </form>
     );
 }
@@ -846,7 +864,6 @@ function DocumentsCard({
     const previewUrl = previewTarget
         ? route("employees.documents.preview", previewTarget.id)
         : null;
-    const downloadUrl = (doc: Document) => route("employees.documents.download", doc.id);
     const isPreviewable = (doc: Document) =>
         doc.mime_type.startsWith("image/") || doc.mime_type === "application/pdf";
 

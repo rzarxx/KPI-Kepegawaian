@@ -9,12 +9,12 @@ Aplikasi dapat di-install di desktop/mobile dan berjalan seperti aplikasi standa
 Implementasi saat ini:
 ```json
 {
-  "name": "Sistem Penilaian Karyawan",
-  "short_name": "KPI Karyawan",
+  "name": "Sistem Penilaian Pejuang",
+  "short_name": "KPI Pejuang",
   "display": "standalone",
   "start_url": "/",
   "theme_color": "#16A34A",
-  "background_color": "#F8FAFC"
+  "background_color": "#ffffff"
 }
 ```
 

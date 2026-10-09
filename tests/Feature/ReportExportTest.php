@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace Tests\Feature;
 
@@ -148,7 +148,7 @@ class ReportExportTest extends TestCase
         $spreadsheet = IOFactory::load(Storage::disk('local')->path($export->file_path));
         $sheet = $spreadsheet->getActiveSheet();
         $this->assertSame([
-            'No', 'NIK / ID Pejuang', 'Nama', 'Cabang', 'Divisi', 'Sub Divisi',
+            'No', 'NIK / ID Karyawan', 'Nama', 'Cabang', 'Divisi', 'Sub Divisi',
             'Jabatan', 'Tanggal Masuk', 'Masa Kerja %', 'Tanggung Jawab %',
             'Absensi %', 'Inisiatif %', 'Sikap %', 'Komunikasi %',
             'Kerjasama Tim %', 'Total %', 'Kriteria Penilaian', 'Keterangan',

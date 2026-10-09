@@ -4,17 +4,22 @@ namespace App\Actions;
 
 use App\Models\CalibrationAdjustment;
 use App\Models\CalibrationSession;
+use App\Models\Division;
 use App\Models\EmployeeEvaluation;
 use App\Models\EvaluationCriterion;
 use App\Models\User;
 use App\Services\AuditLogger;
+use App\Services\OrganizationalScopeResolver;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ManageCalibrationAction
 {
-    public function __construct(private readonly AuditLogger $audit) {}
+    public function __construct(
+        private readonly AuditLogger $audit,
+        private readonly OrganizationalScopeResolver $scopeResolver,
+    ) {}
 
     /** Buat sesi kalibrasi baru */
     public function createSession(User $actor, array $data): CalibrationSession
@@ -23,11 +28,13 @@ class ManageCalibrationAction
             throw new AuthorizationException;
         }
 
+        $this->assertScopeIsAllowed($actor, $data['scope_type'] ?? 'ALL', $data['scope_id'] ?? null);
+
         $session = CalibrationSession::create([
             'period_id' => $data['period_id'],
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
-            'scope_type' => $data['scope_type'] ?? null,
+            'scope_type' => $data['scope_type'] ?? 'ALL',
             'scope_id' => $data['scope_id'] ?? null,
             'created_by' => $actor->id,
             'status' => 'DRAFT',
@@ -50,6 +57,12 @@ class ManageCalibrationAction
         }
 
         $evaluation = EmployeeEvaluation::findOrFail($data['evaluation_id']);
+
+        if (! $evaluation->assignment
+            || ! $this->scopeResolver->allowsAssignment($actor, $evaluation->assignment)
+            || ! $this->scopeResolver->calibrationIncludesAssignment($session, $evaluation->assignment)) {
+            throw new AuthorizationException;
+        }
 
         // Pastikan evaluasi sudah FINALIZED atau APPROVED
         if (! in_array($evaluation->status, ['APPROVED', 'FINALIZED'], true)) {
@@ -129,6 +142,11 @@ class ManageCalibrationAction
 
             foreach ($adjustments as $adjustment) {
                 $evaluation = $adjustment->evaluation;
+                if (! $evaluation->assignment
+                    || ! $this->scopeResolver->allowsAssignment($actor, $evaluation->assignment)
+                    || ! $this->scopeResolver->calibrationIncludesAssignment($session, $evaluation->assignment)) {
+                    throw new AuthorizationException;
+                }
                 $beforeEval = $evaluation->toArray();
 
                 $evaluation->update([
@@ -150,5 +168,29 @@ class ManageCalibrationAction
 
             return $session->fresh();
         });
+    }
+
+    private function assertScopeIsAllowed(User $actor, string $scopeType, ?int $scopeId): void
+    {
+        if ($scopeType === 'ALL') {
+            if ($this->scopeResolver->allowedBranchIds($actor) !== null) {
+                throw new AuthorizationException;
+            }
+
+            return;
+        }
+
+        if ($scopeType === 'BRANCH') {
+            if (! $this->scopeResolver->allows($actor, $scopeId)) {
+                throw new AuthorizationException;
+            }
+
+            return;
+        }
+
+        $division = Division::query()->findOrFail($scopeId);
+        if (! $this->scopeResolver->allows($actor, $division->branch_id, $division->id)) {
+            throw new AuthorizationException;
+        }
     }
 }

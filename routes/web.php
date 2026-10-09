@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Http\Controllers\AppSettingsController;
 use App\Http\Controllers\AttentionRuleController;

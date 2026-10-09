@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Branch;
 use App\Models\Division;
+use App\Models\SubDivision;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
@@ -69,6 +70,35 @@ class OrganizationManagementTest extends TestCase
 
         $this->assertDatabaseHas('branches', ['id' => $branch->id, 'name' => 'Jakarta Pusat', 'is_active' => false]);
         $this->assertDatabaseHas('audit_logs', ['actor_id' => $admin->id, 'action' => 'organization.cabang.update']);
+    }
+
+    public function test_super_admin_can_delete_unused_division_and_sub_division(): void
+    {
+        $admin = $this->organizationAdmin();
+        $branch = Branch::query()->create(['code' => 'JKT', 'name' => 'Jakarta']);
+        $division = Division::query()->create(['branch_id' => $branch->id, 'code' => 'TI', 'name' => 'Teknologi Informasi']);
+        $subDivision = SubDivision::query()->create(['division_id' => $division->id, 'code' => 'DEV', 'name' => 'Pengembangan']);
+
+        $this->actingAs($admin)->delete(route('organization.destroy', ['sub-divisi', $subDivision->id]))->assertSessionHasNoErrors();
+        $this->assertDatabaseMissing('sub_divisions', ['id' => $subDivision->id]);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $admin->id, 'action' => 'organization.sub-divisi.delete']);
+
+        $this->actingAs($admin)->delete(route('organization.destroy', ['divisi', $division->id]))->assertSessionHasNoErrors();
+        $this->assertDatabaseMissing('divisions', ['id' => $division->id]);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $admin->id, 'action' => 'organization.divisi.delete']);
+    }
+
+    public function test_division_with_sub_divisions_is_not_deleted_to_preserve_organization_history(): void
+    {
+        $admin = $this->organizationAdmin();
+        $branch = Branch::query()->create(['code' => 'JKT', 'name' => 'Jakarta']);
+        $division = Division::query()->create(['branch_id' => $branch->id, 'code' => 'TI', 'name' => 'Teknologi Informasi']);
+        SubDivision::query()->create(['division_id' => $division->id, 'code' => 'DEV', 'name' => 'Pengembangan']);
+
+        $this->actingAs($admin)->delete(route('organization.destroy', ['divisi', $division->id]))
+            ->assertSessionHas('error', 'Divisi "Teknologi Informasi" tidak dapat dihapus karena masih memiliki 1 sub divisi terkait.');
+
+        $this->assertDatabaseHas('divisions', ['id' => $division->id]);
     }
 
     private function organizationAdmin(): User

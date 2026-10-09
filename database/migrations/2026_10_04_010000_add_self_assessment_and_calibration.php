@@ -1,7 +1,8 @@
-﻿<?php
+<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -16,8 +17,13 @@ return new class extends Migration
         });
 
         // Update unique constraint: satu pejuang hanya satu penilaian per tipe per periode per evaluator
+        if (DB::getDriverName() === 'mysql') {
+            Schema::table('employee_evaluations', function (Blueprint $table): void {
+                $table->dropUnique('evaluations_employee_period_evaluator_unique');
+            });
+        }
+
         Schema::table('employee_evaluations', function (Blueprint $table): void {
-            $table->dropUnique('evaluations_employee_period_evaluator_unique');
             $table->unique(
                 ['employee_id', 'period_id', 'evaluator_id', 'evaluation_type'],
                 'evaluations_emp_period_evaluator_type_unique'
@@ -84,10 +90,12 @@ return new class extends Migration
 
         Schema::table('employee_evaluations', function (Blueprint $table): void {
             $table->dropUnique('evaluations_emp_period_evaluator_type_unique');
-            $table->unique(
-                ['employee_id', 'period_id', 'evaluator_id'],
-                'evaluations_employee_period_evaluator_unique'
-            );
+            if (DB::getDriverName() === 'mysql') {
+                $table->unique(
+                    ['employee_id', 'period_id', 'evaluator_id'],
+                    'evaluations_employee_period_evaluator_unique'
+                );
+            }
             $table->dropIndex(['employee_id', 'period_id', 'evaluation_type']);
             $table->dropColumn('evaluation_type');
         });

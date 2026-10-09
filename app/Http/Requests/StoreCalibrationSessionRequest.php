@@ -20,7 +20,7 @@ class StoreCalibrationSessionRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
             'scope_type' => ['nullable', 'in:BRANCH,DIVISION,ALL'],
-            'scope_id' => ['nullable', 'integer', 'required_with:scope_type'],
+            'scope_id' => ['nullable', 'integer', 'required_if:scope_type,BRANCH,DIVISION', 'prohibited_if:scope_type,ALL'],
         ];
     }
 }

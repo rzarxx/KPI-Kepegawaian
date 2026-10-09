@@ -4,9 +4,12 @@ namespace App\Policies;
 
 use App\Models\Goal;
 use App\Models\User;
+use App\Services\OrganizationalScopeResolver;
 
 class GoalPolicy
 {
+    public function __construct(private readonly OrganizationalScopeResolver $scopeResolver) {}
+
     public function viewAny(User $user): bool
     {
         return $user->can('goal.view');
@@ -14,7 +17,7 @@ class GoalPolicy
 
     public function view(User $user, Goal $goal): bool
     {
-        return $user->can('goal.view');
+        return $user->can('goal.view') && $this->scopeResolver->allowsGoal($user, $goal);
     }
 
     public function create(User $user): bool
@@ -24,11 +27,15 @@ class GoalPolicy
 
     public function update(User $user, Goal $goal): bool
     {
-        return $user->can('goal.update') && in_array($goal->status, ['DRAFT', 'ACTIVE'], true);
+        return $user->can('goal.update')
+            && $this->scopeResolver->allowsGoal($user, $goal)
+            && in_array($goal->status, ['DRAFT', 'ACTIVE'], true);
     }
 
     public function delete(User $user, Goal $goal): bool
     {
-        return $user->can('goal.update') && $goal->status === 'DRAFT';
+        return $user->can('goal.update')
+            && $this->scopeResolver->allowsGoal($user, $goal)
+            && $goal->status === 'DRAFT';
     }
 }

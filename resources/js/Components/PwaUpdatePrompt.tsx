@@ -1,3 +1,4 @@
+import { confirmAction } from '@/Utils/confirmation';
 import { useEffect, useState } from 'react';
 
 export default function PwaUpdatePrompt() {
@@ -36,8 +37,8 @@ export default function PwaUpdatePrompt() {
     }, []);
 
     if (!waitingWorker) return null;
-    const update = () => {
-        if (dirtyForm && !window.confirm('Ada perubahan formulir yang belum disimpan. Muat ulang dan abaikan perubahan tersebut?')) return;
+    const update = async () => {
+        if (dirtyForm && !await confirmAction({ title: 'Muat Ulang Aplikasi', message: 'Ada perubahan formulir yang belum disimpan. Muat ulang dan abaikan perubahan tersebut?', confirmLabel: 'Ya, Muat Ulang', variant: 'danger' })) return;
         waitingWorker.postMessage({ type: 'SKIP_WAITING' });
     };
     return <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto flex max-w-lg items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 text-sm shadow-lg"><span>{dirtyForm ? 'Pembaruan tersedia. Simpan formulir sebelum memuat ulang.' : 'Pembaruan aplikasi tersedia.'}</span><button type="button" className="min-h-10 rounded-lg bg-brand px-3 font-semibold text-white hover:bg-brand-dark" onClick={update}>Muat ulang</button></div>;

@@ -1,4 +1,5 @@
-﻿import { Button } from '@/Components/ui/button';
+import { confirmAction } from '@/Utils/confirmation';
+import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Head, Link, router, useForm as useInertiaForm } from '@inertiajs/react';
@@ -93,8 +94,8 @@ function IncidentCard({ incident, canResolve, canUpdate }: { incident: Incident;
     const status = statusLabels[incident.status];
     const canDelete = canUpdate && ['OPEN', 'UNDER_REVIEW'].includes(incident.status);
 
-    const destroy = () => {
-        if (!window.confirm('Hapus catatan masalah ini? Tindakan tidak dapat dibatalkan.')) return;
+    const destroy = async () => {
+        if (!await confirmAction({ title: 'Hapus Catatan Masalah', message: 'Hapus catatan masalah ini? Tindakan ini tidak dapat dibatalkan.', confirmLabel: 'Ya, Hapus', variant: 'danger' })) return;
         router.delete(route('employees.incidents.destroy', incident.id), { preserveScroll: true });
     };
 

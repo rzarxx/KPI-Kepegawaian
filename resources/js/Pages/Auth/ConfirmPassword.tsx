@@ -1,4 +1,3 @@
-import InputError from '@/Components/InputError';
 import SecurePasswordInput from '@/Components/SecurePasswordInput';
 import { Button } from '@/Components/ui/button';
 import GuestLayout from '@/Layouts/GuestLayout';
@@ -48,4 +47,3 @@ export default function ConfirmPassword() {
         </GuestLayout>
     );
 }
-

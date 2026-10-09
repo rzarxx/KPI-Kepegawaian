@@ -2,16 +2,23 @@
 
 namespace App\Actions;
 
+use App\Models\Branch;
+use App\Models\Division;
+use App\Models\Employee;
 use App\Models\Goal;
 use App\Models\User;
 use App\Services\AuditLogger;
+use App\Services\OrganizationalScopeResolver;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class ManageGoalAction
 {
-    public function __construct(private readonly AuditLogger $audit) {}
+    public function __construct(
+        private readonly AuditLogger $audit,
+        private readonly OrganizationalScopeResolver $scopeResolver,
+    ) {}
 
     /** Buat goal baru */
     public function create(User $actor, array $data): Goal
@@ -20,9 +27,14 @@ class ManageGoalAction
             throw new AuthorizationException;
         }
 
+        $this->assertTargetIsAllowed($actor, $data);
+
         // Validasi parent jika ada
         if (! empty($data['parent_id'])) {
             $parent = Goal::findOrFail($data['parent_id']);
+            if (! $actor->can('view', $parent)) {
+                throw new AuthorizationException;
+            }
             $levelHierarchy = ['COMPANY' => 0, 'BRANCH' => 1, 'DIVISION' => 2, 'INDIVIDUAL' => 3];
             $parentLevel = $levelHierarchy[$parent->level] ?? 0;
             $childLevel = $levelHierarchy[$data['level']] ?? 0;
@@ -58,6 +70,41 @@ class ManageGoalAction
         $this->audit->log('goal.created', $actor, $goal, null, $goal->toArray());
 
         return $goal;
+    }
+
+    private function assertTargetIsAllowed(User $actor, array $data): void
+    {
+        $levelTargets = [
+            'COMPANY' => null,
+            'BRANCH' => Branch::class,
+            'DIVISION' => Division::class,
+            'INDIVIDUAL' => Employee::class,
+        ];
+        $expectedType = $levelTargets[$data['level']];
+        $actualType = $data['goalable_type'] ?? null;
+
+        if ($actualType !== $expectedType || ($expectedType === null && ! empty($data['goalable_id']))) {
+            throw ValidationException::withMessages(['goalable_type' => 'Target harus sesuai dengan level target.']);
+        }
+
+        if ($expectedType === null) {
+            if ($this->scopeResolver->allowedBranchIds($actor) !== null) {
+                throw new AuthorizationException;
+            }
+
+            return;
+        }
+
+        $target = $expectedType::query()->findOrFail($data['goalable_id']);
+        $isAllowed = match ($expectedType) {
+            Branch::class => $this->scopeResolver->allows($actor, $target->id),
+            Division::class => $this->scopeResolver->allows($actor, $target->branch_id, $target->id),
+            Employee::class => $this->scopeResolver->allowsEmployee($actor, $target),
+        };
+
+        if (! $isAllowed) {
+            throw new AuthorizationException;
+        }
     }
 
     /** Update goal */

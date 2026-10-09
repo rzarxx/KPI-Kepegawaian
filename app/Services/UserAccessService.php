@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Division;
+use App\Models\Employee;
 use App\Models\SubDivision;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -15,11 +16,11 @@ class UserAccessService
     public function assignableRoleNames(User $actor): array
     {
         if ($actor->hasRole('Super Admin')) {
-            return ['Super Admin', 'HR Admin', 'HR Manager', 'Branch Head', 'Division Head', 'Sub Division Head', 'Auditor'];
+            return ['Super Admin', 'HR Admin', 'HR Manager', 'Branch Head', 'Division Head', 'Sub Division Head', 'Auditor', 'Employee'];
         }
 
         if ($actor->hasRole('HR Admin')) {
-            return ['HR Manager', 'Branch Head', 'Division Head', 'Sub Division Head', 'Auditor'];
+            return ['HR Manager', 'Branch Head', 'Division Head', 'Sub Division Head', 'Auditor', 'Employee'];
         }
 
         return [];
@@ -30,11 +31,13 @@ class UserAccessService
         $this->assertRoleAssignable($actor, $data['role']);
         $this->validateRoleScopeContract($data['role'], $data['scopes'] ?? []);
         $this->validateScopes($actor, $data['scopes'] ?? []);
+        $this->validateEmployeeLink($actor, $data['role'], $data['employee_id'] ?? null);
 
         return DB::transaction(function () use ($data): User {
             $user = User::query()->create(['name' => $data['name'], 'email' => $data['email'], 'password' => $data['password'], 'is_active' => true]);
             $user->assignRole($data['role']);
             $this->replaceScopes($user, $data['scopes'] ?? []);
+            $this->syncEmployeeLink($user, $data['employee_id'] ?? null);
 
             return $user;
         });
@@ -45,11 +48,13 @@ class UserAccessService
         $this->assertRoleAssignable($actor, $data['role']);
         $this->validateRoleScopeContract($data['role'], $data['scopes'] ?? []);
         $this->validateScopes($actor, $data['scopes'] ?? []);
+        $this->validateEmployeeLink($actor, $data['role'], $data['employee_id'] ?? null, $user);
 
         DB::transaction(function () use ($user, $data): void {
             $user->update(['name' => $data['name']]);
             $user->syncRoles([$data['role']]);
             $this->replaceScopes($user, $data['scopes'] ?? []);
+            $this->syncEmployeeLink($user, $data['employee_id'] ?? null);
         });
     }
 
@@ -65,6 +70,14 @@ class UserAccessService
         if ($role === 'Super Admin') {
             if ($scopes !== []) {
                 throw ValidationException::withMessages(['scopes' => 'Super Admin harus menggunakan cakupan seluruh organisasi tanpa scope tambahan.']);
+            }
+
+            return;
+        }
+
+        if ($role === 'Employee') {
+            if ($scopes !== []) {
+                throw ValidationException::withMessages(['scopes' => 'Akun pejuang tidak menggunakan cakupan organisasi.']);
             }
 
             return;
@@ -141,6 +154,39 @@ class UserAccessService
                 'scope_type' => ! empty($scope['sub_division_id']) ? 'sub_division' : (! empty($scope['division_id']) ? 'division' : (! empty($scope['branch_id']) ? 'branch' : 'organization')),
                 'is_active' => true,
             ]);
+        }
+    }
+
+    private function validateEmployeeLink(User $actor, string $role, ?int $employeeId, ?User $user = null): void
+    {
+        if ($role === 'Employee' && $employeeId === null) {
+            throw ValidationException::withMessages(['employee_id' => 'Pilih data pejuang yang akan dihubungkan dengan akun ini.']);
+        }
+
+        if ($employeeId === null) {
+            return;
+        }
+
+        if ($role !== 'Employee') {
+            throw ValidationException::withMessages(['employee_id' => 'Hanya akun dengan peran Pejuang yang dapat dihubungkan ke data pejuang.']);
+        }
+
+        $employee = Employee::query()->with(['currentAssignment', 'latestAssignment'])->findOrFail($employeeId);
+        if (! app(OrganizationalScopeResolver::class)->allowsEmployee($actor, $employee)) {
+            throw new AuthorizationException;
+        }
+
+        if ($employee->user_id !== null && $employee->user_id !== $user?->id) {
+            throw ValidationException::withMessages(['employee_id' => 'Data pejuang tersebut sudah terhubung dengan akun lain.']);
+        }
+    }
+
+    private function syncEmployeeLink(User $user, ?int $employeeId): void
+    {
+        Employee::query()->where('user_id', $user->id)->update(['user_id' => null]);
+
+        if ($employeeId !== null) {
+            Employee::query()->whereKey($employeeId)->update(['user_id' => $user->id]);
         }
     }
 }

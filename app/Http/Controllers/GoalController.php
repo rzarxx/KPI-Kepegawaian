@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use App\Actions\ManageGoalAction;
 use App\Http\Requests\StoreGoalRequest;
 use App\Http\Requests\UpdateGoalRequest;
-use App\Models\Branch;
 use App\Models\Goal;
 use App\Models\PerformancePeriod;
+use App\Services\AuditLogger;
 use App\Services\OrganizationalScopeResolver;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -27,30 +28,7 @@ class GoalController extends Controller
             ->with(['parent:id,title,level', 'period:id,name', 'children'])
             ->orderByDesc('created_at');
 
-        // Organizational scope: filter goals berdasarkan scope user
-        $allowedBranchIds = $scopeResolver->allowedBranchIds($user);
-        if ($allowedBranchIds !== null) {
-            $branchModel = (new Branch)->getMorphClass();
-            $query->where(function ($q) use ($allowedBranchIds, $branchModel) {
-                // Goal perusahaan (COMPANY level tanpa goalable) tetap terlihat
-                $q->where('level', 'COMPANY')
-                    // Goal cabang yang termasuk dalam scope
-                    ->orWhere(function ($q2) use ($allowedBranchIds, $branchModel) {
-                        $q2->where('goalable_type', $branchModel)
-                            ->whereIn('goalable_id', $allowedBranchIds);
-                    })
-                    // Goal divisi/individu yang cabangnya termasuk scope
-                    ->orWhereHas('goalable', function ($q3) use ($allowedBranchIds) {
-                        // Division has branch_id
-                        $q3->whereIn('branch_id', $allowedBranchIds);
-                    })
-                    // Goal individu (employee) via currentAssignment.branch_id
-                    ->orWhere(function ($q4) use ($allowedBranchIds) {
-                        $q4->where('level', 'INDIVIDUAL')
-                            ->whereNull('goalable_type');
-                    });
-            });
-        }
+        $scopeResolver->scopeGoals($user, $query);
 
         if ($periodId) {
             $query->where('period_id', $periodId);
@@ -82,12 +60,13 @@ class GoalController extends Controller
             ->get(['id', 'name']);
 
         // Goal induk yang bisa jadi parent
-        $parentGoals = Goal::query()
+        $parentGoalsQuery = Goal::query()
             ->whereIn('level', ['COMPANY', 'BRANCH', 'DIVISION'])
             ->whereIn('status', ['DRAFT', 'ACTIVE'])
             ->orderBy('level')
-            ->orderBy('title')
-            ->get(['id', 'title', 'level', 'period_id']);
+            ->orderBy('title');
+        $scopeResolver->scopeGoals($user, $parentGoalsQuery);
+        $parentGoals = $parentGoalsQuery->get(['id', 'title', 'level', 'period_id']);
 
         return Inertia::render('Goals/Index', [
             'goals' => $goals,
@@ -134,9 +113,13 @@ class GoalController extends Controller
     {
         $this->authorize('delete', $goal);
 
-        $snapshot = $goal->toArray();
-        $goal->delete();
-        $audit->log('goal.deleted', $request->user(), $goal, $snapshot, null);
+        try {
+            $snapshot = $goal->toArray();
+            $goal->delete();
+            $audit->log('goal.deleted', $request->user(), $goal, $snapshot, null);
+        } catch (QueryException $e) {
+            return back()->with('error', 'Target tidak dapat dihapus karena masih memiliki data terkait.');
+        }
 
         return back()->with('success', 'Target berhasil dihapus.');
     }

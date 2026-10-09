@@ -41,6 +41,7 @@ class StoreManagedUserRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:12'],
             'role' => ['required', 'string', Rule::exists('roles', 'name')],
+            'employee_id' => ['nullable', 'integer', 'required_if:role,Employee', 'exists:employees,id'],
             'scopes' => ['nullable', 'array', 'max:20'],
             'scopes.*.branch_id' => ['nullable', 'integer', 'exists:branches,id'],
             'scopes.*.division_id' => ['nullable', 'integer', 'exists:divisions,id'],

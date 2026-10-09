@@ -1,4 +1,5 @@
 import Modal from '@/Components/Modal';
+import { confirmAction } from '@/Utils/confirmation';
 import SecurePasswordInput from '@/Components/SecurePasswordInput';
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -19,9 +20,9 @@ type UserScope = Omit<Scope, 'branch_id' | 'division_id' | 'sub_division_id'> & 
     division_id?: number | null;
     sub_division_id?: number | null;
 };
-type UserRow = { id: number; name: string; email: string; is_active: boolean; roles: string[]; scopes: UserScope[] };
+type UserRow = { id: number; name: string; email: string; is_active: boolean; roles: string[]; employee_id?: number | null; scopes: UserScope[] };
 type Option = { id: number | string; name: string; branch_id?: number; division_id?: number };
-type AccessForm = { name: string; role: string; scopes: Scope[] };
+type AccessForm = { name: string; role: string; employee_id: string; scopes: Scope[] };
 type CreateForm = AccessForm & { email: string; password: string };
 
 const emptyScope = (): Scope => ({ branch_id: '', division_id: '', sub_division_id: '' });
@@ -33,6 +34,7 @@ export default function Index({
     branches,
     divisions,
     subDivisions,
+    employees,
     canImpersonate,
     canManageRoles,
 }: {
@@ -41,11 +43,12 @@ export default function Index({
     branches: Option[];
     divisions: Option[];
     subDivisions: Option[];
+    employees: Option[];
     canImpersonate: boolean;
     canManageRoles: boolean;
 }) {
-    const create = useForm<CreateForm>({ name: '', email: '', password: '', role: '', scopes: [] });
-    const access = useForm<AccessForm>({ name: '', role: '', scopes: [] });
+    const create = useForm<CreateForm>({ name: '', email: '', password: '', role: '', employee_id: '', scopes: [] });
+    const access = useForm<AccessForm>({ name: '', role: '', employee_id: '', scopes: [] });
     const impersonation = useForm({ reason: '' });
     const [editing, setEditing] = useState<UserRow | null>(null);
     const [target, setTarget] = useState<UserRow | null>(null);
@@ -59,6 +62,7 @@ export default function Index({
         access.setData({
             name: user.name,
             role: user.roles[0] ?? '',
+            employee_id: String(user.employee_id ?? ''),
             scopes: user.scopes.map((scope) => ({
                 branch_id: String(scope.branch_id ?? ''),
                 division_id: String(scope.division_id ?? ''),
@@ -76,9 +80,9 @@ export default function Index({
         });
     };
 
-    const deleteUser = (user: UserRow) => {
+    const deleteUser = async (user: UserRow) => {
         setOpenMenu(null);
-        if (!window.confirm(`Hapus pengguna "${user.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+        if (!await confirmAction({ title: 'Hapus Pengguna', message: `Hapus pengguna "${user.name}"? Tindakan ini tidak dapat dibatalkan.`, confirmLabel: 'Ya, Hapus', variant: 'danger' })) return;
         router.delete(route('users.destroy', user.id), { preserveScroll: true });
     };
 
@@ -154,12 +158,13 @@ export default function Index({
                             />
                         </div>
                         <Select label="Peran" value={create.data.role} error={create.errors.role} onChange={(value) => changeRole(value, create.data.scopes, (scopes) => create.setData('scopes', scopes), (role) => create.setData('role', role))} options={roles.map((role) => ({ id: role, name: role }))} />
-                        <ScopeEditor rows={create.data.scopes} single={singleScopeRoles.includes(create.data.role)} errors={create.errors} onChange={(scopes) => create.setData('scopes', scopes)} branches={branches} divisions={divisions} subDivisions={subDivisions} />
+                        {create.data.role === 'Employee' && <Select label="Data Pejuang" value={create.data.employee_id} error={create.errors.employee_id} onChange={(value) => create.setData('employee_id', value)} options={employees} />}
+                        {create.data.role !== 'Employee' && <ScopeEditor rows={create.data.scopes} single={singleScopeRoles.includes(create.data.role)} errors={create.errors} onChange={(scopes) => create.setData('scopes', scopes)} branches={branches} divisions={divisions} subDivisions={subDivisions} />}
                         <Button className="mt-5 w-full" type="submit" disabled={create.processing}>{create.processing ? 'Menyimpan...' : 'Simpan Pengguna'}</Button>
                     </form>
                 </aside>
             </div>
-            <EditAccessDialog user={editing} form={access} close={() => setEditing(null)} roles={roles} branches={branches} divisions={divisions} subDivisions={subDivisions} />
+            <EditAccessDialog user={editing} form={access} close={() => setEditing(null)} roles={roles} employees={employees} branches={branches} divisions={divisions} subDivisions={subDivisions} />
             <ImpersonationDialog user={target} form={impersonation} close={() => setTarget(null)} />
         </AuthenticatedLayout>
     );
@@ -204,9 +209,9 @@ function ActionMenu({ user, canManageRoles, canImpersonate, toggling, onEdit, on
     );
 }
 
-function EditAccessDialog({ user, form, close, roles, branches, divisions, subDivisions }: {
+function EditAccessDialog({ user, form, close, roles, employees, branches, divisions, subDivisions }: {
     user: UserRow | null; form: ReturnType<typeof useForm<AccessForm>>; close: () => void;
-    roles: string[]; branches: Option[]; divisions: Option[]; subDivisions: Option[];
+    roles: string[]; employees: Option[]; branches: Option[]; divisions: Option[]; subDivisions: Option[];
 }) {
     const submit = (event: FormEvent) => {
         event.preventDefault();
@@ -219,7 +224,8 @@ function EditAccessDialog({ user, form, close, roles, branches, divisions, subDi
                 <p className="mt-2 text-sm text-slate-500">Sesuaikan peran dan cakupan organisasi pengguna ini.</p>
                 <Field label="Nama" value={form.data.name} error={form.errors.name} onChange={(value) => form.setData('name', value)} />
                 <Select label="Peran" value={form.data.role} error={form.errors.role} onChange={(value) => changeRole(value, form.data.scopes, (scopes) => form.setData('scopes', scopes), (role) => form.setData('role', role))} options={roles.map((role) => ({ id: role, name: role }))} />
-                <ScopeEditor rows={form.data.scopes} single={singleScopeRoles.includes(form.data.role)} errors={form.errors} onChange={(scopes) => form.setData('scopes', scopes)} branches={branches} divisions={divisions} subDivisions={subDivisions} />
+                {form.data.role === 'Employee' && <Select label="Data Pejuang" value={form.data.employee_id} error={form.errors.employee_id} onChange={(value) => form.setData('employee_id', value)} options={employees} />}
+                {form.data.role !== 'Employee' && <ScopeEditor rows={form.data.scopes} single={singleScopeRoles.includes(form.data.role)} errors={form.errors} onChange={(scopes) => form.setData('scopes', scopes)} branches={branches} divisions={divisions} subDivisions={subDivisions} />}
                 <div className="mt-6 flex justify-end gap-3"><Button type="button" variant="secondary" onClick={close}>Batal</Button><Button disabled={form.processing} type="submit">{form.processing ? 'Menyimpan...' : 'Simpan Perubahan'}</Button></div>
             </form>
         </Modal>
@@ -280,7 +286,7 @@ function ImpersonationDialog({ user, form, close }: { user: UserRow | null; form
 
 function changeRole(role: string, currentScopes: Scope[], setScopes: (scopes: Scope[]) => void, setRole: (role: string) => void) {
     setRole(role);
-    if (role === 'Super Admin') return setScopes([]);
+    if (role === 'Super Admin' || role === 'Employee') return setScopes([]);
     const first = currentScopes[0] ?? emptyScope();
     setScopes(singleScopeRoles.includes(role) ? [first] : (currentScopes.length ? currentScopes : [first]));
 }

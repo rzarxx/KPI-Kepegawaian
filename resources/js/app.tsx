@@ -8,6 +8,7 @@ import { createRoot } from 'react-dom/client';
 import PwaUpdatePrompt from './Components/PwaUpdatePrompt';
 import PwaInstallPrompt from './Components/PwaInstallPrompt';
 import ConnectivityStatus from './Components/ConnectivityStatus';
+import ConfirmationDialogHost from './Components/ConfirmationDialogHost';
 
 const appName = import.meta.env.VITE_APP_NAME || 'KPI Kepegawaian';
 
@@ -27,7 +28,7 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<><App {...props} /><ConnectivityStatus /><PwaUpdatePrompt /><PwaInstallPrompt /></>);
+        root.render(<><App {...props} /><ConfirmationDialogHost /><ConnectivityStatus /><PwaUpdatePrompt /><PwaInstallPrompt /></>);
     },
     progress: {
         color: '#4B5563',

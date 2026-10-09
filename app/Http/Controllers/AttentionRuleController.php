@@ -28,9 +28,15 @@ class AttentionRuleController extends Controller
 
     public function destroy(EmployeeAttentionRule $rule, AuditLogger $audit): RedirectResponse
     {
-        $snapshot = $rule->toArray();
-        $rule->delete();
-        $audit->log('attention_rule.delete', request()->user(), $rule, $snapshot, null);
+        $this->authorize('settings.manage');
+
+        try {
+            $snapshot = $rule->toArray();
+            $rule->delete();
+            $audit->log('attention_rule.delete', request()->user(), $rule, $snapshot, null);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return back()->with('error', 'Aturan perhatian tidak dapat dihapus karena masih digunakan.');
+        }
 
         return back()->with('success', 'Aturan perhatian berhasil dihapus.');
     }

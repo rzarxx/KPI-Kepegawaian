@@ -24,16 +24,12 @@ class SaveEmployeeEvaluationAction
             throw new AuthorizationException;
         }
 
-        if ($period === null) {
-            throw ValidationException::withMessages(['period_id' => 'Periode penilaian wajib dipilih.']);
-        }
-
         return DB::transaction(function () use ($actor, $employee, $period, $data) {
             $assignment = $employee->currentAssignment;
             if (! $assignment) {
                 throw ValidationException::withMessages(['employee' => 'Karyawan tidak memiliki penempatan aktif.']);
             }
-            if (! in_array($period->status, ['DRAFT', 'ACTIVE'], true) || ! $period->is_active) {
+            if ($period && (! in_array($period->status, ['DRAFT', 'ACTIVE'], true) || ! $period->is_active)) {
                 throw ValidationException::withMessages(['period_id' => 'Periode penilaian tidak dapat digunakan saat ini.']);
             }
             $components = EvaluationComponent::query()->where('is_active', true)->with('rules')->orderBy('sort_order')->get()->keyBy('id');
@@ -48,7 +44,7 @@ class SaveEmployeeEvaluationAction
             if (round((float) $weight, 2) !== 100.0) {
                 throw ValidationException::withMessages(['scores' => 'Total bobot komponen aktif harus tepat 100%.']);
             }
-            $referenceDate = $period->end_date;
+            $referenceDate = $period?->end_date ?? now();
             $scores = $components->map(function (EvaluationComponent $component) use ($submitted, $employee, $referenceDate): array {
                 $isAutomatic = $component->is_auto_calculated;
                 $rawScore = $isAutomatic ? $this->tenureScores->resolve($employee, $component, $referenceDate) : (float) $submitted[$component->id]['raw_score'];
@@ -56,13 +52,13 @@ class SaveEmployeeEvaluationAction
                 return ['component_id' => $component->id, 'raw_score' => $rawScore, 'weight' => (float) $component->default_weight, 'weighted_score' => round($rawScore * ((float) $component->default_weight / 100), 4), 'note' => $isAutomatic ? null : ($submitted[$component->id]['note'] ?? null), 'source_type' => $isAutomatic ? 'automatic' : 'manual'];
             });
             $calculated = $this->calculator->calculate($scores);
-            $lookupAttributes = ['employee_id' => $employee->id, 'evaluator_id' => $actor->id, 'period_id' => $period->id, 'evaluation_type' => EmployeeEvaluation::TYPE_SUPERVISOR];
+            $lookupAttributes = ['employee_id' => $employee->id, 'evaluator_id' => $actor->id, 'period_id' => $period?->id, 'evaluation_type' => EmployeeEvaluation::TYPE_SUPERVISOR];
             $evaluation = EmployeeEvaluation::query()->firstOrNew($lookupAttributes);
             if ($evaluation->exists && $evaluation->status !== 'DRAFT') {
                 throw ValidationException::withMessages(['evaluation' => 'Penilaian yang sudah diajukan tidak dapat diubah.']);
             }
             $before = $evaluation->exists ? $evaluation->toArray() : null;
-            $evaluation->fill(['assignment_id' => $assignment->id, 'period_id' => $period->id, 'evaluation_type' => EmployeeEvaluation::TYPE_SUPERVISOR, 'total_score' => $calculated['total_score'], 'criteria_id' => $calculated['criteria_id'], 'notes' => $data['notes'] ?? null, 'status' => 'DRAFT']);
+            $evaluation->fill(['assignment_id' => $assignment->id, 'period_id' => $period?->id, 'evaluation_type' => EmployeeEvaluation::TYPE_SUPERVISOR, 'total_score' => $calculated['total_score'], 'criteria_id' => $calculated['criteria_id'], 'notes' => $data['notes'] ?? null, 'status' => 'DRAFT']);
             $evaluation->save();
             $evaluation->scores()->delete();
             $evaluation->scores()->createMany($scores->all());

@@ -17,10 +17,15 @@ class ChangeEmployeeStatusRequest extends FormRequest
     {
         /** @var Employee $employee */
         $employee = $this->route('employee');
+        $allowedStatuses = ['RESIGNED', 'TERMINATED', 'INACTIVE'];
+
+        if ($employee?->current_status->value === 'PROBATION') {
+            $allowedStatuses[] = 'ACTIVE';
+        }
 
         return [
-            'status' => ['required', Rule::in(['RESIGNED', 'TERMINATED', 'INACTIVE'])],
-            'effective_date' => ['required', 'date', 'after_or_equal:'.$employee->join_date->toDateString()],
+            'status' => ['required', Rule::in($allowedStatuses)],
+            'effective_date' => ['required', 'date', 'after_or_equal:'.$employee->join_date->toDateString(), 'before_or_equal:today'],
             'reason' => ['required', 'string', 'max:255'],
         ];
     }

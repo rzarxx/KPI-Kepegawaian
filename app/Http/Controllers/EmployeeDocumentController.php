@@ -60,10 +60,15 @@ class EmployeeDocumentController extends Controller
     public function destroy(EmployeeDocument $document, AuditLogger $audit): RedirectResponse
     {
         $this->authorize('delete', $document);
-        $snapshot = $document->toArray();
-        Storage::disk($document->disk)->delete($document->path);
-        $document->delete();
-        $audit->log('employee.document.delete', request()->user(), null, $snapshot, null);
+
+        try {
+            $snapshot = $document->toArray();
+            Storage::disk($document->disk)->delete($document->path);
+            $document->delete();
+            $audit->log('employee.document.delete', request()->user(), null, $snapshot, null);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return back()->with('error', 'Dokumen tidak dapat dihapus karena masih memiliki data terkait.');
+        }
 
         return back()->with('success', 'Dokumen pribadi berhasil dihapus.');
     }

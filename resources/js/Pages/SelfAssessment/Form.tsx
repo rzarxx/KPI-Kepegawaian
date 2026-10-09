@@ -1,3 +1,4 @@
+import { confirmAction } from '@/Utils/confirmation';
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
@@ -36,8 +37,8 @@ export default function Form({
         Object.entries(form.errors).find(([field]) => field === 'scores.' + index + '.raw_score')?.[1];
 
     const save = () => form.post(route('self-assessment.store', period.id), { preserveScroll: true });
-    const submit = () => {
-        if (!evaluation || !window.confirm('Setelah diajukan, penilaian diri tidak dapat diubah lagi. Lanjutkan?')) return;
+    const submit = async () => {
+        if (!evaluation || !await confirmAction({ title: 'Ajukan Penilaian Diri', message: 'Setelah diajukan, penilaian diri tidak dapat diubah lagi. Lanjutkan?', confirmLabel: 'Ya, Ajukan' })) return;
         router.post(route('self-assessment.submit', evaluation.id), {}, { preserveScroll: true });
     };
 

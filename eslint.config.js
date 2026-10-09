@@ -4,7 +4,7 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-    { ignores: ['app/**', 'bootstrap/**', 'config/**', 'database/**', 'public/build/**', 'storage/**', 'vendor/**', 'node_modules/**'] },
+    { ignores: ['app/**', 'bootstrap/**', 'config/**', 'database/**', 'public/build/**', 'resources/js/ziggy.js', 'storage/**', 'vendor/**', 'node_modules/**'] },
     js.configs.recommended,
     ...tseslint.configs.recommended,
     {

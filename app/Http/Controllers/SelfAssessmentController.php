@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Actions\SaveSelfAssessmentAction;
-use App\Models\Employee;
 use App\Models\EmployeeEvaluation;
 use App\Models\EvaluationComponent;
 use App\Models\PerformancePeriod;
@@ -21,7 +20,7 @@ class SelfAssessmentController extends Controller
             abort(403, 'Anda tidak memiliki izin untuk penilaian diri.');
         }
 
-        $employee = Employee::where('email', $user->email)->first();
+        $employee = $user->employee()->first();
 
         if (! $employee) {
             return Inertia::render('SelfAssessment/Index', [
@@ -75,7 +74,8 @@ class SelfAssessmentController extends Controller
             abort(403, 'Anda tidak memiliki izin untuk penilaian diri.');
         }
 
-        $employee = Employee::where('email', $user->email)->firstOrFail();
+        $employee = $user->employee()->first();
+        abort_unless($employee !== null, 403, 'Akun Anda belum terhubung dengan data pejuang.');
 
         $existing = EmployeeEvaluation::query()
             ->where('employee_id', $employee->id)
@@ -122,7 +122,8 @@ class SelfAssessmentController extends Controller
             abort(403, 'Anda tidak memiliki izin untuk penilaian diri.');
         }
 
-        $employee = Employee::where('email', $user->email)->firstOrFail();
+        $employee = $user->employee()->first();
+        abort_unless($employee !== null, 403, 'Akun Anda belum terhubung dengan data pejuang.');
 
         $data = $request->validate([
             'notes' => ['nullable', 'string', 'max:2000'],
@@ -148,7 +149,9 @@ class SelfAssessmentController extends Controller
             abort(403, 'Anda tidak memiliki izin untuk penilaian diri.');
         }
 
-        if (! $evaluation->isSelfAssessment() || $evaluation->evaluator_id !== $user->id) {
+        if (! $evaluation->isSelfAssessment()
+            || $evaluation->evaluator_id !== $user->id
+            || $evaluation->employee?->user_id !== $user->id) {
             abort(403, 'Anda tidak memiliki akses ke penilaian ini.');
         }
 

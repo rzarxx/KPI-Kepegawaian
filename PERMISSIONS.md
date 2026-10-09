@@ -107,7 +107,7 @@ Maka seluruh query harus intersect dengan scope tersebut.
 | Export | Yes | Yes | Scope | Scope | Scope | Limited |
 | Manage branding | Yes | No | No | No | No | No |
 | Manage role | Yes | Limited/No | No | No | No | No |
-| Audit view | Yes | Limited | No | No | No | Yes/limited |
+| Audit view | Yes | No | No | No | No | No |
 
 ## 6. Policy Rules
 

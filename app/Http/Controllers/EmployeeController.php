@@ -52,11 +52,17 @@ class EmployeeController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request, OrganizationalScopeResolver $scopeResolver): Response
     {
         $this->authorize('create', Employee::class);
 
-        return Inertia::render('Employees/Create', $this->organizationOptions($request));
+        $scopes = $scopeResolver->effectiveScopes($request->user());
+        $lockedScope = $scopes->count() === 1 ? $scopes->first()->only(['branch_id', 'division_id', 'sub_division_id']) : null;
+
+        return Inertia::render('Employees/Create', [
+            ...$this->organizationOptions($request),
+            'lockedScope' => $lockedScope,
+        ]);
     }
 
     public function store(StoreEmployeeRequest $request, CreateEmployeeAction $action): RedirectResponse

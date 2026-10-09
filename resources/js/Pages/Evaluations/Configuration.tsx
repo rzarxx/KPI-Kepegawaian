@@ -1,3 +1,4 @@
+import { confirmAction } from '@/Utils/confirmation';
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
@@ -40,20 +41,20 @@ export default function Configuration({
     const [editingCriterion, setEditingCriterion] = useState<Criterion | null>(null);
     const [editingAttention, setEditingAttention] = useState<AttentionRule | null>(null);
 
-    const destroyPeriod = (period: Period) => {
-        if (!window.confirm(`Hapus periode "${period.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+    const destroyPeriod = async (period: Period) => {
+        if (!await confirmAction({ title: 'Hapus Periode', message: `Hapus periode "${period.name}"? Tindakan ini tidak dapat dibatalkan.`, confirmLabel: 'Ya, Hapus', variant: 'danger' })) return;
         router.delete(route('evaluation-periods.destroy', period.id), { preserveScroll: true });
     };
-    const destroyComponent = (component: Component) => {
-        if (!window.confirm(`Hapus komponen "${component.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+    const destroyComponent = async (component: Component) => {
+        if (!await confirmAction({ title: 'Hapus Komponen', message: `Hapus komponen "${component.name}"? Tindakan ini tidak dapat dibatalkan.`, confirmLabel: 'Ya, Hapus', variant: 'danger' })) return;
         router.delete(route('evaluation-components.destroy', component.id), { preserveScroll: true });
     };
-    const destroyCriterion = (criterion: Criterion) => {
-        if (!window.confirm(`Hapus kriteria "${criterion.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+    const destroyCriterion = async (criterion: Criterion) => {
+        if (!await confirmAction({ title: 'Hapus Kriteria', message: `Hapus kriteria "${criterion.name}"? Tindakan ini tidak dapat dibatalkan.`, confirmLabel: 'Ya, Hapus', variant: 'danger' })) return;
         router.delete(route('evaluation-criteria.destroy', criterion.id), { preserveScroll: true });
     };
-    const destroyAttentionRule = (rule: AttentionRule) => {
-        if (!window.confirm(`Hapus aturan "${rule.name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+    const destroyAttentionRule = async (rule: AttentionRule) => {
+        if (!await confirmAction({ title: 'Hapus Aturan', message: `Hapus aturan "${rule.name}"? Tindakan ini tidak dapat dibatalkan.`, confirmLabel: 'Ya, Hapus', variant: 'danger' })) return;
         router.delete(route('attention-rules.destroy', rule.id), { preserveScroll: true });
     };
 
@@ -168,9 +169,9 @@ function AttentionRuleForm({ initial, onDone }: { initial: AttentionRule | null;
     return <Editor title={initial ? 'Ubah aturan perhatian' : 'Tambah aturan perhatian'} editing={Boolean(initial)} onCancel={onDone}><form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" onSubmit={(event) => { event.preventDefault(); submit(); }}><Input label="Nama aturan" value={form.data.name} error={form.errors.name} onChange={(value) => form.setData('name', value)} /><label className="text-sm font-medium text-slate-700">Sumber aturan<select className={inputClass} value={form.data.rule_type} onChange={(event) => form.setData('rule_type', event.target.value)}><option value="INCIDENT_SEVERITY_COUNT">Jumlah catatan masalah</option><option value="EVALUATION_BELOW">Nilai total</option><option value="ATTENDANCE_BELOW">Nilai absensi</option></select></label><label className="text-sm font-medium text-slate-700">Tingkat minimum<select className={inputClass} value={form.data.minimum_severity} onChange={(event) => form.setData('minimum_severity', event.target.value)}><option value="LOW">Rendah</option><option value="MEDIUM">Sedang</option><option value="HIGH">Tinggi</option><option value="CRITICAL">Kritis</option></select></label><label className="text-sm font-medium text-slate-700">Operator<select className={inputClass} value={form.data.operator} onChange={(event) => form.setData('operator', event.target.value)}><option value="<">Kurang dari</option><option value="<=">Kurang dari atau sama</option><option value=">">Lebih dari</option><option value=">=">Lebih dari atau sama</option><option value="=">Sama dengan</option></select></label><Input label="Batas nilai" type="number" value={form.data.threshold} error={form.errors.threshold} onChange={(value) => form.setData('threshold', value)} /><label className="flex min-h-10 items-center gap-2 text-sm text-slate-700"><input checked={form.data.is_active} onChange={(event) => form.setData('is_active', event.target.checked)} type="checkbox" />Aturan aktif</label><SubmitButton editing={Boolean(initial)} processing={form.processing} /></form></Editor>;
 }
 
-function transitionPeriod(period: Period) {
+async function transitionPeriod(period: Period) {
     const next = nextPeriod[period.status];
-    if (!next || !window.confirm('Ubah status periode menjadi ' + periodLabels[next] + '?')) return;
+    if (!next || !await confirmAction({ title: 'Ubah Status Periode', message: 'Ubah status periode menjadi ' + periodLabels[next] + '?', confirmLabel: 'Ya, Ubah' })) return;
     router.post(route('evaluation-periods.transition', period.id), { status: next }, { preserveScroll: true });
 }
 function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) { return <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><h2 className="flex items-center gap-2 font-semibold text-slate-900">{icon}{title}</h2><div className="mt-4">{children}</div></section>; }

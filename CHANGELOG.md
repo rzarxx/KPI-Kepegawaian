@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+### Hardening Scope, Evaluasi, dan Konfirmasi Aksi -- 9 Oktober 2026
+
+- Menutup akses lintas cakupan pada Goal dan Kalibrasi melalui Policy, Action,
+  query daftar, dan test regresi request langsung.
+- Menambahkan relasi unik `employees.user_id`; penilaian diri kini memakai
+  relasi eksplisit, bukan pencocokan email. Provisioning akun Pejuang mewajibkan
+  pemilihan data pejuang dalam scope administrator.
+- Memulihkan evaluasi ad-hoc tanpa periode dan membuat migration kompatibel
+  dengan SQLite test serta MySQL.
+- Mengganti seluruh `window.confirm` dengan dialog konfirmasi aplikasi global.
+- Menghapus BOM pada route, migration, test, dan manifest yang menghambat test
+  atau parsing JSON.
+
+### Perbaikan Penghapusan, Konfirmasi, dan Masa Percobaan -- 9 Oktober 2026
+
+- Penghapusan divisi dan sub divisi yang tidak memiliki dependensi kini diverifikasi melalui test; data yang masih menjadi bagian histori penempatan atau struktur tetap dilindungi dengan pesan alasan yang jelas.
+- Tombol hapus struktur organisasi kini menggunakan modal konfirmasi aplikasi, menggantikan dialog browser.
+- Pejuang berstatus Masa Percobaan kini dapat diubah menjadi Aktif tanpa menutup penempatan aktif atau mengisi data keluar; perubahan tetap tercatat pada riwayat status dan audit log.
+
 ### Code Review, Dead Code Removal & Production Hardening -- 2 Oktober 2026
 
 #### 1. Dead Code Dihapus

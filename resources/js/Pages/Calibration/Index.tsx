@@ -1,3 +1,4 @@
+import { confirmAction } from '@/Utils/confirmation';
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
@@ -37,7 +38,7 @@ export default function Index({
     periods,
     canManage,
 }: {
-    sessions: { data: Session[]; links: any[] };
+    sessions: { data: Session[]; links: unknown[] };
     periods: Period[];
     canManage: boolean;
 }) {
@@ -179,8 +180,8 @@ export default function Index({
                                         {canManage && session.status === 'DRAFT' && (
                                             <button
                                                 className="flex size-8 items-center justify-center rounded-lg border border-red-200 text-red-500 hover:bg-red-50"
-                                                onClick={() => {
-                                                    if (window.confirm('Hapus sesi kalibrasi ini?'))
+                                                onClick={async () => {
+                                                    if (await confirmAction({ title: 'Hapus Sesi Kalibrasi', message: 'Hapus sesi kalibrasi ini? Tindakan tidak dapat dibatalkan.', confirmLabel: 'Ya, Hapus', variant: 'danger' }))
                                                         router.delete(route('calibration.destroy', session.id), { preserveScroll: true });
                                                 }}
                                                 title="Hapus sesi"

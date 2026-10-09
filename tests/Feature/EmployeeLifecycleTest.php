@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace Tests\Feature;
 
@@ -87,6 +87,36 @@ class EmployeeLifecycleTest extends TestCase
         $this->assertDatabaseCount('employee_assignments', 2);
         $this->assertDatabaseHas('employee_status_histories', ['employee_id' => $employee->id, 'new_status' => 'ACTIVE']);
         $this->assertDatabaseHas('audit_logs', ['actor_id' => $actor->id, 'action' => 'employee.rehire']);
+    }
+
+    public function test_probation_employee_can_be_activated_without_closing_assignment(): void
+    {
+        [$actor, $employee] = $this->employeeWithAccess(['employee.change_status', 'employee.view', 'employee.manage_track_record']);
+        $employee->update(['current_status' => 'PROBATION']);
+
+        $this->actingAs($actor)->post(route('employees.status', $employee), [
+            'status' => 'ACTIVE',
+            'effective_date' => now()->toDateString(),
+            'reason' => 'Masa percobaan selesai.',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('employees', ['id' => $employee->id, 'current_status' => 'ACTIVE', 'exit_date' => null, 'exit_reason' => null]);
+        $this->assertDatabaseHas('employee_assignments', ['employee_id' => $employee->id, 'end_date' => null]);
+        $this->assertDatabaseHas('employee_status_histories', ['employee_id' => $employee->id, 'previous_status' => 'PROBATION', 'new_status' => 'ACTIVE']);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $actor->id, 'action' => 'employee.active']);
+    }
+
+    public function test_active_employee_cannot_be_activated_again_via_status_endpoint(): void
+    {
+        [$actor, $employee] = $this->employeeWithAccess(['employee.change_status', 'employee.view', 'employee.manage_track_record']);
+
+        $this->actingAs($actor)->post(route('employees.status', $employee), [
+            'status' => 'ACTIVE',
+            'effective_date' => now()->toDateString(),
+            'reason' => 'Tidak boleh diproses.',
+        ])->assertSessionHasErrors('status');
+
+        $this->assertDatabaseCount('employee_status_histories', 0);
     }
 
     private function employeeWithAccess(array $permissions): array

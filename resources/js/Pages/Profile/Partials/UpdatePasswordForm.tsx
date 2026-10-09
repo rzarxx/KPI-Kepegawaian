@@ -1,4 +1,3 @@
-import InputError from '@/Components/InputError';
 import SecurePasswordInput from '@/Components/SecurePasswordInput';
 import { Button } from '@/Components/ui/button';
 import { Transition } from '@headlessui/react';

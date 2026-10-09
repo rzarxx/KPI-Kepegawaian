@@ -6,11 +6,13 @@ use App\Http\Requests\StoreManagedUserRequest;
 use App\Http\Requests\UpdateManagedUserRequest;
 use App\Models\Branch;
 use App\Models\Division;
+use App\Models\Employee;
 use App\Models\SubDivision;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\OrganizationalScopeResolver;
 use App\Services\UserAccessService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -21,11 +23,20 @@ class UserManagementController extends Controller
         $this->authorize('viewAny', User::class);
 
         $branchIds = $scope->allowedBranchIds($request->user());
-        $users = User::query()->with(['roles', 'organizationalScopes.branch', 'organizationalScopes.division', 'organizationalScopes.subDivision'])
-            ->when($branchIds !== null, fn ($query) => $query->whereHas('organizationalScopes', fn ($scopeQuery) => $scopeQuery->where('is_active', true)->whereIn('branch_id', $branchIds)))
+        $users = User::query()->with(['roles', 'employee', 'organizationalScopes.branch', 'organizationalScopes.division', 'organizationalScopes.subDivision'])
+            ->when($branchIds !== null, function ($query) use ($branchIds, $request, $scope): void {
+                $query->where(function ($userQuery) use ($branchIds, $request, $scope): void {
+                    $userQuery->whereHas('organizationalScopes', fn ($scopeQuery) => $scopeQuery->where('is_active', true)->whereIn('branch_id', $branchIds))
+                        ->orWhereHas('employee.currentAssignment', fn ($assignmentQuery) => $scope->scopeAssignments($request->user(), $assignmentQuery));
+                });
+            })
             ->orderBy('name')->get();
 
-        return Inertia::render('Users/Index', ['users' => $users->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'is_active' => $u->is_active, 'roles' => $u->getRoleNames(), 'scopes' => $u->organizationalScopes->map(fn ($s) => ['id' => $s->id, 'branch_id' => $s->branch_id, 'division_id' => $s->division_id, 'sub_division_id' => $s->sub_division_id, 'label' => collect([$s->branch?->name, $s->division?->name, $s->subDivision?->name])->filter()->join(' / ') ?: 'Seluruh organisasi'])]), 'roles' => $access->assignableRoleNames($request->user()), 'canManageRoles' => $request->user()->can('user.update'), 'canImpersonate' => $request->user()->hasRole('Super Admin') && $request->user()->can('impersonation.start'), 'branches' => $scope->scopeBranches($request->user(), Branch::query()->where('is_active', true))->get(['id', 'name']), 'divisions' => Division::query()->where('is_active', true)->when($branchIds !== null, fn ($query) => $query->whereIn('branch_id', $branchIds))->get(['id', 'branch_id', 'name']), 'subDivisions' => SubDivision::query()->where('is_active', true)->when($branchIds !== null, fn ($query) => $query->whereHas('division', fn ($divisionQuery) => $divisionQuery->whereIn('branch_id', $branchIds)))->get(['id', 'division_id', 'name'])]);
+        $employees = Employee::query()->with(['currentAssignment', 'latestAssignment'])->orderBy('full_name')->get()
+            ->filter(fn (Employee $employee): bool => $scope->allowsEmployee($request->user(), $employee))
+            ->map(fn (Employee $employee): array => ['id' => $employee->id, 'name' => $employee->employee_number.' — '.$employee->full_name]);
+
+        return Inertia::render('Users/Index', ['users' => $users->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'is_active' => $u->is_active, 'roles' => $u->getRoleNames(), 'employee_id' => $u->employee?->id, 'scopes' => $u->organizationalScopes->map(fn ($s) => ['id' => $s->id, 'branch_id' => $s->branch_id, 'division_id' => $s->division_id, 'sub_division_id' => $s->sub_division_id, 'label' => collect([$s->branch?->name, $s->division?->name, $s->subDivision?->name])->filter()->join(' / ') ?: 'Seluruh organisasi'])]), 'employees' => $employees->values(), 'roles' => $access->assignableRoleNames($request->user()), 'canManageRoles' => $request->user()->can('user.update'), 'canImpersonate' => $request->user()->hasRole('Super Admin') && $request->user()->can('impersonation.start'), 'branches' => $scope->scopeBranches($request->user(), Branch::query()->where('is_active', true))->get(['id', 'name']), 'divisions' => Division::query()->where('is_active', true)->when($branchIds !== null, fn ($query) => $query->whereIn('branch_id', $branchIds))->get(['id', 'branch_id', 'name']), 'subDivisions' => SubDivision::query()->where('is_active', true)->when($branchIds !== null, fn ($query) => $query->whereHas('division', fn ($divisionQuery) => $divisionQuery->whereIn('branch_id', $branchIds)))->get(['id', 'division_id', 'name'])]);
     }
 
     public function store(StoreManagedUserRequest $request, UserAccessService $access, AuditLogger $audit)
@@ -64,8 +75,8 @@ class UserManagementController extends Controller
             $snapshot = ['id' => $user->id, 'name' => $user->name, 'email' => $user->email];
             $user->delete();
             $audit->log('user.delete', $request->user(), $user, $snapshot, null);
-        } catch (\Illuminate\Database\QueryException $e) {
-            return back()->withErrors(['delete' => 'Pengguna tidak dapat dihapus karena masih memiliki data terkait.']);
+        } catch (QueryException $e) {
+            return back()->with('error', 'Pengguna tidak dapat dihapus karena masih memiliki data terkait.');
         }
 
         return back()->with('success', 'Pengguna berhasil dihapus.');

@@ -96,13 +96,17 @@ class ReportController extends Controller
     {
         $this->authorize('delete', $export);
 
-        if ($export->file_path && Storage::disk('local')->exists($export->file_path)) {
-            Storage::disk('local')->delete($export->file_path);
-        }
+        try {
+            if ($export->file_path && Storage::disk('local')->exists($export->file_path)) {
+                Storage::disk('local')->delete($export->file_path);
+            }
 
-        $snapshot = $export->toArray();
-        $export->delete();
-        $audit->log('report.export.delete', request()->user(), $export, $snapshot, null);
+            $snapshot = $export->toArray();
+            $export->delete();
+            $audit->log('report.export.delete', request()->user(), $export, $snapshot, null);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return back()->with('error', 'Laporan ekspor tidak dapat dihapus karena masih memiliki data terkait.');
+        }
 
         return back()->with('success', 'Laporan ekspor berhasil dihapus.');
     }

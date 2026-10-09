@@ -12,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         // Hapus data evaluasi tanpa periode sebelum enforce constraint
         DB::statement('DELETE FROM employee_evaluations WHERE period_id IS NULL');
 

@@ -1,4 +1,5 @@
-﻿import { Button } from '@/Components/ui/button';
+import { confirmAction } from '@/Utils/confirmation';
+import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Calculator, CalendarDays, CheckCircle2, ClipboardCheck, LockKeyhole, Send } from 'lucide-react';
@@ -13,7 +14,6 @@ type Abilities = { edit: boolean; submit: boolean; approve: boolean; finalize: b
 export default function Form({
     employee,
     period,
-    periods,
     components,
     evaluation,
     selfAssessment,
@@ -21,7 +21,6 @@ export default function Form({
 }: {
     employee: { id: number; full_name: string; employee_number: string };
     period: Period | null;
-    periods: Period[];
     components: Component[];
     evaluation: Evaluation | null;
     selfAssessment?: SelfAssessment;
@@ -41,9 +40,9 @@ export default function Form({
         .find(([field]) => field === 'scores.' + index + '.raw_score')?.[1];
 
     const save = () => form.post(route('evaluations.store', employee.id), { preserveScroll: true });
-    const move = () => {
+    const move = async () => {
         if (!evaluation || !transition) return;
-        if (['FINALIZED', 'CLOSED'].includes(transition.status) && !window.confirm(transition.confirmation)) return;
+        if (['FINALIZED', 'CLOSED'].includes(transition.status) && !await confirmAction({ title: transition.label, message: transition.confirmation, confirmLabel: 'Ya, Lanjutkan' })) return;
         router.post(route('evaluations.transition', evaluation.id), { status: transition.status }, { preserveScroll: true });
     };
 

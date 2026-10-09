@@ -116,7 +116,7 @@ class EmployeeIncidentController extends Controller
             $incident->delete();
             $audit->log('employee.incident.delete', request()->user(), $incident, $snapshot, null);
         } catch (\Illuminate\Database\QueryException $e) {
-            return back()->withErrors(['delete' => 'Catatan masalah tidak dapat dihapus karena masih memiliki data terkait.']);
+            return back()->with('error', 'Catatan masalah tidak dapat dihapus karena masih memiliki data terkait.');
         }
 
         return back()->with('success', 'Catatan masalah berhasil dihapus.');

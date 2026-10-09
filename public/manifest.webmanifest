@@ -1,6 +1,6 @@
-﻿{
-    "name": "KPI Kepegawaian",
-    "short_name": "KPI",
+{
+    "name": "Sistem Penilaian Pejuang",
+    "short_name": "KPI Pejuang",
     "description": "Sistem Penilaian Karyawan",
     "start_url": "/",
     "display": "standalone",

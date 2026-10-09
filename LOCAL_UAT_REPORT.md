@@ -71,7 +71,7 @@ Implikasi: respons HTTP-level dan feature test tidak cukup membuktikan halaman d
 Pengujian PWA independen dilakukan melalui origin loopback HTTP, yang diperlakukan sebagai secure context oleh Chromium:
 
 - `manifest.webmanifest`, `sw.js`, dan `offline.html`: 200;
-- nama aplikasi `Sistem Penilaian Karyawan`, mode `standalone`, dan ikon maskable ditemukan;
+- nama aplikasi `Sistem Penilaian Pejuang`, mode `standalone`, dan ikon maskable ditemukan;
 - service worker mencapai status `activated`;
 - cache `kpi-static-v4` berisi fallback offline;
 - cache tidak berisi path `/karyawan`, `/laporan`, atau `/api/`;

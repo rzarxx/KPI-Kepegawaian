@@ -27,8 +27,7 @@ class SaveSelfAssessmentAction
             throw new AuthorizationException('Anda tidak memiliki izin untuk melakukan penilaian diri.');
         }
 
-        // Validasi: employee harus terhubung dengan user via email
-        if ($employee->email !== $actor->email) {
+        if ((int) $employee->user_id !== (int) $actor->id) {
             throw new AuthorizationException('Anda hanya dapat menilai diri sendiri.');
         }
 

@@ -1,7 +1,8 @@
-﻿import { Button } from '@/Components/ui/button';
+import { confirmAction } from '@/Utils/confirmation';
+import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
-import { ArrowRight, Check, CheckCircle2, Pencil, Scale, Send, X } from 'lucide-react';
+import { Check, CheckCircle2, Pencil, Scale, Send, X } from 'lucide-react';
 import { useState } from 'react';
 
 type Adjustment = {
@@ -63,14 +64,14 @@ export default function Show({
 }) {
     const [editingId, setEditingId] = useState<number | null>(null);
 
-    const transition = (status: string) => {
+    const transition = async (status: string) => {
         const label = statusLabels[status] ?? status;
-        if (!window.confirm(`Ubah status sesi kalibrasi menjadi ${label}?`)) return;
+        if (!await confirmAction({ title: 'Ubah Status Kalibrasi', message: `Ubah status sesi kalibrasi menjadi ${label}?`, confirmLabel: 'Ya, Ubah' })) return;
         router.post(route('calibration.transition', session.id), { status }, { preserveScroll: true });
     };
 
-    const applyCalibration = () => {
-        if (!window.confirm('Terapkan semua penyesuaian ke penilaian asli? Tindakan ini tidak dapat dibatalkan.')) return;
+    const applyCalibration = async () => {
+        if (!await confirmAction({ title: 'Terapkan Kalibrasi', message: 'Terapkan semua penyesuaian ke penilaian asli? Tindakan ini tidak dapat dibatalkan.', confirmLabel: 'Ya, Terapkan', variant: 'danger' })) return;
         router.post(route('calibration.apply', session.id), {}, { preserveScroll: true });
     };
 
