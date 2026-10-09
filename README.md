@@ -8,6 +8,14 @@ dengan otorisasi berbasis role, permission, dan cakupan organisasi.
 > Repository ini bersifat privat. Jangan memasukkan `.env`, kredensial,
 > database, dokumen karyawan, atau data production ke dalam Git.
 
+## Panduan Pengguna
+
+Gunakan [Panduan Praktis KPI Kepegawaian.pdf](Panduan%20Praktis%20KPI%20Kepegawaian.pdf)
+sebagai panduan utama pengguna. Dokumen ini memakai langkah singkat dan
+checklist untuk login, data pejuang, struktur organisasi, penilaian, laporan,
+dan bantuan kendala umum. Sumber HTML-nya tersedia di
+`PANDUAN_PRAKTIS_KPI_KEPEGAWAIAN.html`.
+
 ## Fitur Utama
 
 - Pengelolaan identitas dan status karyawan tanpa menghapus histori kerja.
