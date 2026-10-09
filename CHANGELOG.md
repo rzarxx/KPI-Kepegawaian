@@ -17,6 +17,8 @@
 - Penghapusan unit organisasi kini mewajibkan pengetikan ulang kode unit. Unit
   yang masih memiliki pejuang, struktur turunan, atau riwayat penempatan
   diarsipkan beserta struktur turunannya dan dicatat pada audit log.
+- Menambahkan Panduan Praktis KPI Kepegawaian dalam HTML dan PDF dengan bahasa
+  operasional, checklist, serta alur kerja singkat untuk tiap peran.
 
 ### Perbaikan Penghapusan, Konfirmasi, dan Masa Percobaan -- 9 Oktober 2026
 

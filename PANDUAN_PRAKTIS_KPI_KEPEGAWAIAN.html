@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>Panduan Praktis KPI Kepegawaian</title>
+    <style>
+        @page { size: A4; margin: 0; }
+        :root { --brand: #15803d; --brand-dark: #14532d; --ink: #0f172a; --muted: #475569; --line: #cbd5e1; --soft: #f8fafc; --warn: #9a3412; }
+        * { box-sizing: border-box; }
+        body { margin: 0; color: var(--ink); font-family: Inter, Arial, sans-serif; font-size: 10.5pt; line-height: 1.55; }
+        .page { min-height: 297mm; padding: 18mm 17mm 16mm; page-break-after: always; position: relative; }
+        .cover { background: linear-gradient(145deg, #052e16, #15803d); color: white; display: flex; flex-direction: column; justify-content: space-between; padding: 25mm 22mm; }
+        .cover h1 { font-size: 31pt; line-height: 1.08; margin: 0 0 8mm; }
+        .cover p { font-size: 14pt; line-height: 1.6; max-width: 145mm; }
+        .label { color: var(--brand); font-size: 8.5pt; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+        .cover .label { color: #bbf7d0; }
+        h1 { font-size: 24pt; line-height: 1.2; margin: 2mm 0 4mm; }
+        h2 { font-size: 14pt; margin: 7mm 0 3mm; color: var(--brand-dark); }
+        h3 { font-size: 11pt; margin: 0 0 2mm; }
+        p { margin: 0 0 3mm; }
+        .lead { color: var(--muted); font-size: 12pt; max-width: 160mm; }
+        .card { border: 1px solid var(--line); border-radius: 3mm; padding: 4.5mm; margin: 4mm 0; background: white; }
+        .card.soft { background: var(--soft); }
+        .steps { counter-reset: step; margin: 4mm 0; padding: 0; list-style: none; }
+        .steps li { counter-increment: step; display: grid; grid-template-columns: 8mm 1fr; gap: 3mm; margin: 3mm 0; }
+        .steps li::before { content: counter(step); display: grid; place-items: center; width: 7mm; height: 7mm; margin-top: .5mm; border-radius: 50%; background: var(--brand); color: white; font-size: 8.5pt; font-weight: 800; }
+        .checklist { list-style: none; padding: 0; margin: 3mm 0; }
+        .checklist li { margin: 2mm 0; padding-left: 7mm; position: relative; }
+        .checklist li::before { content: '✓'; color: var(--brand); font-weight: 800; position: absolute; left: 0; }
+        .notice { border-left: 3px solid var(--brand); background: #f0fdf4; padding: 3.5mm 4mm; margin: 5mm 0; }
+        .warning { border-left-color: #ea580c; background: #fff7ed; color: #7c2d12; }
+        table { width: 100%; border-collapse: collapse; margin: 4mm 0; font-size: 9.4pt; }
+        th, td { border: 1px solid var(--line); padding: 2.7mm; text-align: left; vertical-align: top; }
+        th { background: #f1f5f9; }
+        .footer { position: absolute; bottom: 8mm; left: 17mm; right: 17mm; display: flex; justify-content: space-between; color: #64748b; font-size: 8pt; border-top: 1px solid var(--line); padding-top: 2mm; }
+        .two { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+        .flow { display: flex; gap: 2mm; flex-wrap: wrap; margin: 4mm 0; }
+        .flow span { background: #dcfce7; color: #14532d; border-radius: 999px; padding: 1.5mm 3mm; font-size: 9pt; font-weight: 700; }
+        .flow span::after { content: ' →'; color: #64748b; margin-left: 2mm; }
+        .flow span:last-child::after { content: ''; }
+    </style>
+</head>
+<body>
+    <section class="page cover">
+        <div>
+            <div class="label">Panduan pengguna sehari-hari · Oktober 2026</div>
+            <h1>KPI<br>Kepegawaian</h1>
+            <p>Panduan singkat untuk menjalankan pekerjaan utama di sistem: mengelola pejuang, menilai kinerja, membaca laporan, dan menjaga data organisasi tetap aman.</p>
+        </div>
+        <div>
+            <p><strong>Gunakan panduan ini seperti checklist.</strong><br>Kerjakan satu bagian sesuai peran Anda, lalu lanjutkan ke langkah berikutnya.</p>
+            <small>Dokumen internal · Versi praktis</small>
+        </div>
+    </section>
+
+    <section class="page">
+        <div class="label">Mulai dari sini</div>
+        <h1>1. Login dan mengenali akses</h1>
+        <p class="lead">Setelah login, lihat nama peran dan cakupan kerja di bagian atas aplikasi. Sistem hanya menampilkan data yang menjadi wewenang Anda.</p>
+        <h2>Langkah login</h2>
+        <ol class="steps"><li>Buka alamat aplikasi dari administrator.</li><li>Masukkan email dan kata sandi akun Anda.</li><li>Tekan <strong>Masuk</strong>. Jika lupa kata sandi, gunakan tautan pemulihan di halaman login.</li></ol>
+        <div class="notice"><strong>Perhatikan cakupan akses.</strong> Kepala Divisi hanya dapat melihat pejuang di divisinya. Jika muncul halaman 403/Dilarang, jangan mengubah URL; hubungi administrator bila cakupan akun perlu diperbarui.</div>
+        <h2>Peran dan pekerjaan utama</h2>
+        <table><tr><th>Peran</th><th>Fokus utama</th></tr><tr><td>Super Admin / HR Admin</td><td>Pengaturan organisasi, akun, periode, komponen penilaian, dan data pejuang.</td></tr><tr><td>HR Manager / Kepala Cabang</td><td>Meninjau, menyetujui, kalibrasi, dan membaca laporan sesuai cakupan.</td></tr><tr><td>Kepala Divisi / Sub Divisi</td><td>Mengelola target dan menilai bawahan dalam unit kerja sendiri.</td></tr><tr><td>Pejuang</td><td>Melihat target dan mengisi Penilaian Diri pada periode aktif.</td></tr><tr><td>Auditor</td><td>Membaca data dan laporan sesuai hak akses tanpa mengubah data.</td></tr></table>
+        <div class="footer"><span>KPI Kepegawaian · Panduan Praktis</span><span>1</span></div>
+    </section>
+
+    <section class="page">
+        <div class="label">Persiapan administrator</div>
+        <h1>2. Urutan setup sebelum penilaian</h1>
+        <p class="lead">Lakukan urutan ini saat aplikasi pertama dipakai atau sebelum periode baru dimulai.</p>
+        <ol class="steps"><li><strong>Struktur Organisasi:</strong> buat Cabang, Divisi, Sub Divisi, dan Jabatan yang aktif.</li><li><strong>Pengguna:</strong> buat akun, pilih peran, lalu tetapkan cakupan Cabang/Divisi/Sub Divisi.</li><li><strong>Data Pejuang:</strong> masukkan identitas dan penempatan awal setiap pejuang.</li><li><strong>Konfigurasi Penilaian:</strong> buat periode, komponen, bobot, aturan masa kerja, dan kriteria hasil.</li><li><strong>Aktifkan Periode:</strong> periksa total bobot tepat 100%, lalu ubah periode menjadi Aktif.</li></ol>
+        <div class="warning notice"><strong>Jangan loncat urutan.</strong> Penilaian tidak dapat dibuat bila pejuang belum memiliki penempatan atau periode belum aktif.</div>
+        <h2>Checklist sebelum membuka periode</h2>
+        <ul class="checklist"><li>Cabang, divisi, dan jabatan yang dipakai berstatus Aktif.</li><li>Akun penilai memiliki peran dan cakupan yang benar.</li><li>Setiap pejuang memiliki tanggal bergabung dan penempatan aktif.</li><li>Bobot komponen penilaian berjumlah 100%.</li><li>Kriteria hasil tersedia dan periode sudah Aktif.</li></ul>
+        <div class="footer"><span>KPI Kepegawaian · Panduan Praktis</span><span>2</span></div>
+    </section>
+
+    <section class="page">
+        <div class="label">Data pejuang</div>
+        <h1>3. Kelola pejuang dari masuk hingga aktif</h1>
+        <h2>Menambah pejuang</h2>
+        <ol class="steps"><li>Buka menu <strong>Pejuang</strong>, lalu tekan <strong>Tambah Pejuang</strong>.</li><li>Isi Nomor Induk Pejuang, nama lengkap, tanggal bergabung, dan data kontak.</li><li>Pilih Cabang, Divisi, Sub Divisi (bila ada), Jabatan, serta status awal.</li><li>Tekan <strong>Simpan Pejuang</strong>.</li></ol>
+        <h2>Perubahan yang sering dilakukan</h2>
+        <table><tr><th>Kebutuhan</th><th>Tindakan yang benar</th></tr><tr><td>Masa Percobaan selesai</td><td>Buka detail pejuang, pilih perubahan status menjadi <strong>Aktif</strong>, lalu konfirmasi. Riwayat status tetap tersimpan.</td></tr><tr><td>Mutasi unit kerja</td><td>Gunakan tindakan mutasi dari detail pejuang. Isi penempatan baru dan tanggal efektif; jangan mengubah riwayat lama secara manual.</td></tr><tr><td>Resign / terminasi</td><td>Ubah status dari detail pejuang dan isi informasi keluar bila diminta. Jangan menghapus identitas pejuang.</td></tr><tr><td>Data pribadi keliru</td><td>Gunakan tombol Ubah pada profil untuk memperbaiki identitas atau kontak.</td></tr></table>
+        <div class="notice"><strong>Prinsip utama:</strong> satu pejuang memiliki satu identitas permanen. Mutasi, perubahan status, dan keluar kerja dicatat sebagai riwayat, bukan dengan menghapus data.</div>
+        <div class="footer"><span>KPI Kepegawaian · Panduan Praktis</span><span>3</span></div>
+    </section>
+
+    <section class="page">
+        <div class="label">Struktur organisasi</div>
+        <h1>4. Kelola dan hapus unit organisasi dengan aman</h1>
+        <p class="lead">Gunakan menu <strong>Pengaturan → Struktur Organisasi</strong> untuk Cabang, Divisi, Sub Divisi, dan Jabatan.</p>
+        <h2>Tambah atau ubah unit</h2>
+        <ol class="steps"><li>Pilih bagian Cabang, Divisi, Sub Divisi, atau Jabatan.</li><li>Isi kode dan nama. Untuk Divisi/Sub Divisi, pilih induknya yang masih aktif.</li><li>Tekan <strong>Tambah</strong> atau <strong>Simpan</strong> setelah mengubah data.</li></ol>
+        <h2>Hapus atau arsipkan unit</h2>
+        <ol class="steps"><li>Tekan ikon hapus pada unit yang dipilih.</li><li>Baca peringatan pada dialog konfirmasi.</li><li>Ketik ulang <strong>kode unit</strong> yang ditampilkan.</li><li>Tombol konfirmasi baru aktif setelah kodenya tepat.</li></ol>
+        <div class="two"><div class="card soft"><h3>Unit tanpa data terkait</h3><p>Sistem menghapus unit tersebut secara permanen.</p></div><div class="card soft"><h3>Unit memiliki pejuang atau riwayat</h3><p>Sistem mengarsipkan unit menjadi <strong>Tidak Aktif</strong>. Struktur turunan ikut diarsipkan, sedangkan riwayat penempatan tetap aman.</p></div></div>
+        <div class="warning notice"><strong>Jangan memaksa penghapusan lewat database.</strong> Unit yang diarsipkan tidak boleh dipakai untuk penempatan baru. Buat unit baru bila struktur organisasi berubah.</div>
+        <div class="footer"><span>KPI Kepegawaian · Panduan Praktis</span><span>4</span></div>
+    </section>
+
+    <section class="page">
+        <div class="label">Target kerja</div>
+        <h1>5. Buat dan pantau target</h1>
+        <p class="lead">Menu <strong>Target</strong> menyambungkan sasaran organisasi sampai pekerjaan individu.</p>
+        <ol class="steps"><li>Pilih periode penilaian dan tingkat target.</li><li>Tekan <strong>Tambah Target</strong>.</li><li>Isi judul, deskripsi, nilai target, satuan, dan target induk bila ada.</li><li>Simpan sebagai Draf, lalu aktifkan saat target sudah siap dipakai.</li><li>Perbarui realisasi/progres selama periode berjalan dan tandai selesai bila target tercapai.</li></ol>
+        <div class="flow"><span>Perusahaan</span><span>Cabang</span><span>Divisi</span><span>Individu</span></div>
+        <div class="notice"><strong>Tips:</strong> gunakan nama target yang singkat dan terukur, misalnya “Laporan bulanan tepat waktu 100%”, bukan “Meningkatkan laporan”.</div>
+        <div class="footer"><span>KPI Kepegawaian · Panduan Praktis</span><span>5</span></div>
+    </section>
+
+    <section class="page">
+        <div class="label">Penilaian</div>
+        <h1>6. Jalankan siklus penilaian</h1>
+        <h2>A. Penilaian Diri oleh pejuang</h2>
+        <ol class="steps"><li>Buka menu <strong>Penilaian Diri</strong>.</li><li>Pilih periode yang Aktif, lalu tekan mulai/buka formulir.</li><li>Isi nilai setiap komponen dan catatan bukti kerja.</li><li>Tekan <strong>Simpan Draf</strong> bila masih ingin diperbaiki.</li><li>Tekan <strong>Ajukan</strong> bila seluruh isian sudah benar.</li></ol>
+        <h2>B. Penilaian oleh atasan</h2>
+        <ol class="steps"><li>Buka detail pejuang dalam cakupan kerja Anda.</li><li>Pilih periode aktif dan buat/buka penilaian.</li><li>Isi nilai serta catatan evaluasi; nilai Penilaian Diri ditampilkan sebagai pembanding.</li><li>Simpan Draf atau Ajukan sesuai kesiapan.</li></ol>
+        <h2>Status yang perlu dipahami</h2>
+        <div class="flow"><span>Draf</span><span>Diajukan</span><span>Disetujui</span><span>Final</span><span>Ditutup</span></div>
+        <div class="notice"><strong>Ingat:</strong> setelah diajukan, perubahan dibatasi. Periksa nilai dan catatan sebelum menekan Ajukan.</div>
+        <div class="footer"><span>KPI Kepegawaian · Panduan Praktis</span><span>6</span></div>
+    </section>
+
+    <section class="page">
+        <div class="label">Review dan pelaporan</div>
+        <h1>7. Kalibrasi, catatan masalah, dan laporan</h1>
+        <h2>Kalibrasi nilai</h2>
+        <ol class="steps"><li>Buka menu <strong>Kalibrasi</strong> dan buat sesi untuk periode serta cakupan yang tepat.</li><li>Tambahkan penilaian yang akan dibahas.</li><li>Isi alasan saat menyesuaikan nilai. Jangan mengubah nilai tanpa dasar yang jelas.</li><li>Terapkan hasil sesi setelah komite menyetujui.</li></ol>
+        <h2>Catatan masalah</h2>
+        <ol class="steps"><li>Buka detail pejuang lalu pilih <strong>Catatan Masalah</strong>.</li><li>Catat kategori, tingkat keparahan, tanggal kejadian, dan penjelasan faktual.</li><li>Gunakan status <strong>Ditinjau</strong> saat ditangani dan <strong>Selesai</strong> setelah ada penyelesaian.</li></ol>
+        <h2>Ekspor laporan</h2>
+        <ol class="steps"><li>Buka menu <strong>Laporan</strong>.</li><li>Pilih periode serta filter Cabang/Divisi yang menjadi wewenang Anda.</li><li>Periksa pratinjau, lalu tekan <strong>Ekspor</strong>.</li><li>Tunggu status selesai dan unduh berkas dari riwayat ekspor.</li></ol>
+        <div class="notice"><strong>Jika ekspor masih menunggu:</strong> jangan membuat ekspor berulang. Tunggu antrean selesai atau hubungi administrator untuk memeriksa layanan queue.</div>
+        <div class="footer"><span>KPI Kepegawaian · Panduan Praktis</span><span>7</span></div>
+    </section>
+
+    <section class="page">
+        <div class="label">Penutup</div>
+        <h1>8. Rutinitas kerja dan bantuan cepat</h1>
+        <h2>Rutinitas sederhana</h2>
+        <table><tr><th>Waktu</th><th>Yang dilakukan</th></tr><tr><td>Awal periode</td><td>Administrator memeriksa struktur, akun, periode aktif, dan bobot 100%.</td></tr><tr><td>Setiap minggu</td><td>Atasan memperbarui target, menyelesaikan penilaian draf, dan menindaklanjuti catatan masalah.</td></tr><tr><td>Akhir periode</td><td>Pejuang mengajukan penilaian diri; atasan menilai; pimpinan menyetujui; HR melakukan kalibrasi bila diperlukan.</td></tr><tr><td>Setelah final</td><td>Unduh laporan sesuai cakupan dan gunakan hasilnya untuk tindak lanjut.</td></tr></table>
+        <h2>Jika mengalami kendala</h2>
+        <ul class="checklist"><li><strong>403/Dilarang:</strong> cek peran dan cakupan akun; hubungi administrator.</li><li><strong>Tidak dapat menilai:</strong> pastikan periode Aktif, pejuang memiliki penempatan, dan Anda berada dalam cakupan.</li><li><strong>Tombol hapus terkunci:</strong> ketik ulang kode unit yang diminta pada dialog.</li><li><strong>Data tidak muncul:</strong> periksa filter periode, Cabang, Divisi, dan status.</li><li><strong>Lupa kata sandi:</strong> gunakan pemulihan kata sandi, jangan memakai akun pengguna lain.</li></ul>
+        <div class="warning notice"><strong>Jaga keamanan akun.</strong> Jangan membagikan kata sandi, jangan memakai impersonasi untuk pekerjaan rutin, dan selalu keluar dari aplikasi saat menggunakan komputer bersama.</div>
+        <div class="card soft"><h3>Ringkasan paling penting</h3><p>Isi data dengan benar, gunakan status dan riwayat alih-alih menghapus data penting, ajukan penilaian hanya setelah diperiksa, dan bekerja hanya dalam cakupan yang diberikan sistem.</p></div>
+        <div class="footer"><span>KPI Kepegawaian · Panduan Praktis</span><span>8</span></div>
+    </section>
+</body>
+</html>
