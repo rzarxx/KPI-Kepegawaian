@@ -19,6 +19,9 @@
   diarsipkan beserta struktur turunannya dan dicatat pada audit log.
 - Menambahkan Panduan Praktis KPI Kepegawaian dalam HTML dan PDF dengan bahasa
   operasional, checklist, serta alur kerja singkat untuk tiap peran.
+- Daftar struktur organisasi kini menyembunyikan unit terarsip secara default
+  dan menyediakan tombol `Lihat Arsip` agar hasil penghapusan aman terlihat
+  jelas tanpa menghilangkan riwayat.
 
 ### Perbaikan Penghapusan, Konfirmasi, dan Masa Percobaan -- 9 Oktober 2026
 
