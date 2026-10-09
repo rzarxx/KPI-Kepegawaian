@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\ArchiveOrganizationUnitAction;
+use App\Http\Requests\DestroyOrganizationUnitRequest;
 use App\Http\Requests\ManageOrganizationUnitRequest;
 use App\Models\Branch;
 use App\Models\Division;
-use App\Models\EmployeeAssignment;
 use App\Models\Position;
 use App\Models\SubDivision;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\OrganizationalScopeResolver;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -52,59 +54,20 @@ class OrganizationController extends Controller
         return back()->with('success', 'Data organisasi berhasil diperbarui.');
     }
 
-    public function destroy(Request $request, string $type, int $unit, AuditLogger $audit)
+    public function destroy(DestroyOrganizationUnitRequest $request, string $type, int $unit, ArchiveOrganizationUnitAction $archive)
     {
         $model = $this->model($type)->newQuery()->findOrFail($unit);
         $this->authorize('delete', $model);
 
-        $dependencyError = $this->checkDependencies($model, $type);
-        if ($dependencyError !== null) {
-            return back()->with('error', $dependencyError);
-        }
-
         try {
-            $snapshot = $model->toArray();
-            $model->delete();
-            $audit->log("organization.{$type}.delete", $request->user(), $model, $snapshot, null);
-        } catch (\Illuminate\Database\QueryException $e) {
+            $archived = $archive->execute($model, $type, $request->user(), app(AuditLogger::class));
+        } catch (QueryException $e) {
             return back()->with('error', 'Tidak dapat dihapus karena masih digunakan oleh data lain.');
         }
 
-        return back()->with('success', 'Data organisasi berhasil dihapus.');
-    }
-
-    private function checkDependencies(Model $model, string $type): ?string
-    {
-        if ($model instanceof Branch) {
-            $divisionCount = Division::query()->where('branch_id', $model->id)->count();
-            if ($divisionCount > 0) {
-                return "Cabang \"{$model->name}\" tidak dapat dihapus karena masih memiliki {$divisionCount} divisi terkait.";
-            }
-            $assignmentCount = EmployeeAssignment::query()->where('branch_id', $model->id)->count();
-            if ($assignmentCount > 0) {
-                return "Cabang \"{$model->name}\" tidak dapat dihapus karena masih memiliki {$assignmentCount} penempatan pejuang terkait.";
-            }
-        }
-
-        if ($model instanceof Division) {
-            $subDivisionCount = SubDivision::query()->where('division_id', $model->id)->count();
-            if ($subDivisionCount > 0) {
-                return "Divisi \"{$model->name}\" tidak dapat dihapus karena masih memiliki {$subDivisionCount} sub divisi terkait.";
-            }
-            $assignmentCount = EmployeeAssignment::query()->where('division_id', $model->id)->count();
-            if ($assignmentCount > 0) {
-                return "Divisi \"{$model->name}\" tidak dapat dihapus karena masih memiliki {$assignmentCount} penempatan pejuang terkait.";
-            }
-        }
-
-        if ($model instanceof SubDivision) {
-            $assignmentCount = EmployeeAssignment::query()->where('sub_division_id', $model->id)->count();
-            if ($assignmentCount > 0) {
-                return "Sub divisi \"{$model->name}\" tidak dapat dihapus karena masih memiliki {$assignmentCount} penempatan pejuang terkait.";
-            }
-        }
-
-        return null;
+        return back()->with('success', $archived
+            ? 'Unit organisasi memiliki data terkait dan telah diarsipkan untuk menjaga riwayat.'
+            : 'Data organisasi berhasil dihapus.');
     }
 
     private function model(string $type): Model

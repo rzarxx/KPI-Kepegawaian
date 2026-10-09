@@ -2470,6 +2470,11 @@
                     <td>Hubungi tim IT/Administrator server untuk memastikan service worker berjalan dengan perintah: <span class="legend-code">supervisorctl restart all</span>.</td>
                 </tr>
                 <tr>
+                    <td><b>Divisi atau Sub Divisi Tidak Hilang Setelah Dihapus</b></td>
+                    <td>Unit tersebut masih memiliki pejuang, struktur turunan, atau riwayat penempatan yang harus dipertahankan.</td>
+                    <td>Ketika menghapus, ketik ulang kode unit pada dialog verifikasi. Sistem akan mengarsipkan unit dan struktur turunannya, sehingga riwayat tetap aman. Unit berstatus <b>Tidak Aktif</b> tidak dapat dipilih untuk penempatan baru.</td>
+                </tr>
+                <tr>
                     <td><b>Angka di Beranda Belum Berubah</b></td>
                     <td>Beranda secara desain hanya menghitung penilaian yang sudah berstatus <b>Final</b> atau <b>Ditutup</b>.</td>
                     <td>Pastikan penilaian telah melalui alur persetujuan lengkap dan difinalisasi oleh HR Manager agar terekam dalam statistik tren dashboard.</td>
@@ -2501,7 +2506,7 @@
         <h1 class="section-title">Spesifikasi Sistem & Pengesahan SOP</h1>
         <p class="section-subtitle">Dokumen manual book ini menjadi standar operasional resmi perusahaan dalam pelaksanaan penilaian kinerja berbasis sistem informasi.</p>
 
-        <h2 class="block-title">Catatan Pembaruan Rilis Aplikasi (Changelog v2.0)</h2>
+        <h2 class="block-title">Catatan Pembaruan Rilis Aplikasi (Changelog v2.1)</h2>
         <table class="legend-table">
             <thead>
                 <tr>
@@ -2530,6 +2535,11 @@
                     <td><b>Security Hardening</b></td>
                     <td>Proteksi impersonasi, whitelist polymorph, dan scope enforcement di seluruh route.</td>
                     <td>Kerahasiaan data karyawan terjamin 100%.</td>
+                </tr>
+                <tr>
+                    <td><b>Pengarsipan Organisasi Aman</b></td>
+                    <td>Hapus divisi, sub divisi, cabang, atau jabatan memerlukan pengetikan ulang kode unit. Unit yang memiliki data terkait diarsipkan dan dicatat pada audit log.</td>
+                    <td>Riwayat penempatan pejuang dan struktur organisasi tetap terlindungi.</td>
                 </tr>
             </tbody>
         </table>

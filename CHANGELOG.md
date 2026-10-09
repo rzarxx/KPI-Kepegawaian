@@ -14,6 +14,9 @@
 - Mengganti seluruh `window.confirm` dengan dialog konfirmasi aplikasi global.
 - Menghapus BOM pada route, migration, test, dan manifest yang menghambat test
   atau parsing JSON.
+- Penghapusan unit organisasi kini mewajibkan pengetikan ulang kode unit. Unit
+  yang masih memiliki pejuang, struktur turunan, atau riwayat penempatan
+  diarsipkan beserta struktur turunannya dan dicatat pada audit log.
 
 ### Perbaikan Penghapusan, Konfirmasi, dan Masa Percobaan -- 9 Oktober 2026
 

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Branch;
 use App\Models\Division;
+use App\Models\Employee;
 use App\Models\SubDivision;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -79,26 +80,51 @@ class OrganizationManagementTest extends TestCase
         $division = Division::query()->create(['branch_id' => $branch->id, 'code' => 'TI', 'name' => 'Teknologi Informasi']);
         $subDivision = SubDivision::query()->create(['division_id' => $division->id, 'code' => 'DEV', 'name' => 'Pengembangan']);
 
-        $this->actingAs($admin)->delete(route('organization.destroy', ['sub-divisi', $subDivision->id]))->assertSessionHasNoErrors();
+        $this->actingAs($admin)->delete(route('organization.destroy', ['sub-divisi', $subDivision->id]), ['verification_code' => 'DEV'])->assertSessionHasNoErrors();
         $this->assertDatabaseMissing('sub_divisions', ['id' => $subDivision->id]);
         $this->assertDatabaseHas('audit_logs', ['actor_id' => $admin->id, 'action' => 'organization.sub-divisi.delete']);
 
-        $this->actingAs($admin)->delete(route('organization.destroy', ['divisi', $division->id]))->assertSessionHasNoErrors();
+        $this->actingAs($admin)->delete(route('organization.destroy', ['divisi', $division->id]), ['verification_code' => 'TI'])->assertSessionHasNoErrors();
         $this->assertDatabaseMissing('divisions', ['id' => $division->id]);
         $this->assertDatabaseHas('audit_logs', ['actor_id' => $admin->id, 'action' => 'organization.divisi.delete']);
     }
 
-    public function test_division_with_sub_divisions_is_not_deleted_to_preserve_organization_history(): void
+    public function test_division_with_sub_divisions_is_archived_after_code_verification(): void
     {
         $admin = $this->organizationAdmin();
         $branch = Branch::query()->create(['code' => 'JKT', 'name' => 'Jakarta']);
         $division = Division::query()->create(['branch_id' => $branch->id, 'code' => 'TI', 'name' => 'Teknologi Informasi']);
-        SubDivision::query()->create(['division_id' => $division->id, 'code' => 'DEV', 'name' => 'Pengembangan']);
+        $subDivision = SubDivision::query()->create(['division_id' => $division->id, 'code' => 'DEV', 'name' => 'Pengembangan']);
+
+        $this->actingAs($admin)->delete(route('organization.destroy', ['divisi', $division->id]), ['verification_code' => 'TI'])
+            ->assertSessionHas('success', 'Unit organisasi memiliki data terkait dan telah diarsipkan untuk menjaga riwayat.');
+
+        $this->assertDatabaseHas('divisions', ['id' => $division->id, 'is_active' => false]);
+        $this->assertDatabaseHas('sub_divisions', ['id' => $subDivision->id, 'is_active' => false]);
+        $this->assertDatabaseHas('audit_logs', ['actor_id' => $admin->id, 'action' => 'organization.divisi.archive']);
+    }
+
+    public function test_division_with_employee_assignments_requires_verification_and_is_archived(): void
+    {
+        $admin = $this->organizationAdmin();
+        $branch = Branch::query()->create(['code' => 'JKT', 'name' => 'Jakarta']);
+        $division = Division::query()->create(['branch_id' => $branch->id, 'code' => 'TI', 'name' => 'Teknologi Informasi']);
+        $employee = Employee::query()->create([
+            'employee_number' => 'EMP-ORG-01',
+            'full_name' => 'Rina Pratama',
+            'join_date' => now()->subYear(),
+            'current_status' => 'ACTIVE',
+        ]);
+        $employee->assignments()->create(['branch_id' => $branch->id, 'division_id' => $division->id, 'start_date' => now(), 'status' => 'ACTIVE']);
 
         $this->actingAs($admin)->delete(route('organization.destroy', ['divisi', $division->id]))
-            ->assertSessionHas('error', 'Divisi "Teknologi Informasi" tidak dapat dihapus karena masih memiliki 1 sub divisi terkait.');
+            ->assertSessionHasErrors('verification_code');
+        $this->assertDatabaseHas('divisions', ['id' => $division->id, 'is_active' => true]);
 
-        $this->assertDatabaseHas('divisions', ['id' => $division->id]);
+        $this->actingAs($admin)->delete(route('organization.destroy', ['divisi', $division->id]), ['verification_code' => 'TI'])
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('divisions', ['id' => $division->id, 'is_active' => false]);
+        $this->assertDatabaseHas('employee_assignments', ['employee_id' => $employee->id, 'division_id' => $division->id]);
     }
 
     private function organizationAdmin(): User

@@ -1,6 +1,6 @@
 import { Button } from '@/Components/ui/button';
 import { AlertTriangle } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ConfirmDeleteDialogProps {
     open: boolean;
@@ -9,8 +9,9 @@ interface ConfirmDeleteDialogProps {
     confirmLabel?: string;
     processing?: boolean;
     processingLabel?: string;
+    verificationCode?: string;
     variant?: "primary" | "danger";
-    onConfirm: () => void;
+    onConfirm: (verificationCode?: string) => void;
     onCancel: () => void;
 }
 
@@ -21,11 +22,13 @@ export default function ConfirmDeleteDialog({
     confirmLabel = 'Ya, Hapus',
     processing = false,
     processingLabel = 'Menghapus...',
+    verificationCode,
     variant = 'danger',
     onConfirm,
     onCancel,
 }: ConfirmDeleteDialogProps) {
     const cancelRef = useRef<HTMLButtonElement>(null);
+    const [enteredCode, setEnteredCode] = useState('');
 
     useEffect(() => {
         if (open) {
@@ -77,6 +80,17 @@ export default function ConfirmDeleteDialog({
                         </p>
                     </div>
                 </div>
+                {verificationCode && (
+                    <label className="mt-4 block text-sm font-medium text-slate-700">
+                        Ketik kode <span className="font-semibold text-slate-900">{verificationCode}</span> untuk melanjutkan
+                        <input
+                            className="mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm uppercase focus:border-red-500 focus:ring-red-500"
+                            value={enteredCode}
+                            onChange={(event) => setEnteredCode(event.target.value.toUpperCase())}
+                            autoComplete="off"
+                        />
+                    </label>
+                )}
                 <div className="mt-5 flex justify-end gap-3">
                     <Button
                         ref={cancelRef}
@@ -90,8 +104,8 @@ export default function ConfirmDeleteDialog({
                     <Button
                         type="button"
                         variant={variant}
-                        onClick={onConfirm}
-                        disabled={processing}
+                        onClick={() => onConfirm(enteredCode)}
+                        disabled={processing || (verificationCode !== undefined && enteredCode !== verificationCode)}
                     >
                         {processing ? processingLabel : confirmLabel}
                     </Button>
