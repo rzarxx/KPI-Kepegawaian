@@ -11,7 +11,7 @@ class PwaAssetsTest extends TestCase
         $path = public_path('manifest.webmanifest');
         $this->assertFileExists($path);
         $manifest = json_decode(file_get_contents($path), true, flags: JSON_THROW_ON_ERROR);
-        $this->assertSame('Sistem Penilaian Pejuang', $manifest['name']);
+        $this->assertSame('Sistem Penilaian Karyawan', $manifest['name']);
         $this->assertSame('standalone', $manifest['display']);
         $this->assertContains('maskable', array_column($manifest['icons'], 'purpose'));
         foreach (['kpi-64.png' => [64, 64], 'kpi-192.png' => [192, 192], 'kpi-512.png' => [512, 512], 'kpi-maskable-512.png' => [512, 512], 'apple-touch-icon.png' => [180, 180]] as $file => $size) {
@@ -31,6 +31,10 @@ class PwaAssetsTest extends TestCase
         $this->assertStringContainsString("request.mode === 'navigate'", file_get_contents($path));
         $this->assertStringContainsString('/icons/kpi-192.png', file_get_contents($path));
         $this->assertStringContainsString('/icons/kpi-maskable-512.png', file_get_contents($path));
+        $this->assertStringContainsString('responseForCache = response.clone();', file_get_contents($path));
+        $this->assertStringContainsString('event.waitUntil(', file_get_contents($path));
+        $this->assertStringContainsString('self.skipWaiting()', file_get_contents($path));
+        $this->assertStringContainsString('self.clients.claim()', file_get_contents($path));
         $this->assertStringNotContainsString('/pejuang', file_get_contents($path));
         $this->assertStringNotContainsString('/laporan', file_get_contents($path));
     }

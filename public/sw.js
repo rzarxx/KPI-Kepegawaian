@@ -1,4 +1,4 @@
-const STATIC_CACHE = 'kpi-static-v4';
+const STATIC_CACHE = 'kpi-static-v6';
 const STATIC_DESTINATIONS = new Set(['font', 'image', 'script', 'style']);
 const CORE_ASSETS = [
     '/offline.html',
@@ -12,7 +12,11 @@ const CORE_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-    event.waitUntil(caches.open(STATIC_CACHE).then((cache) => cache.addAll(CORE_ASSETS)));
+    event.waitUntil(
+        caches.open(STATIC_CACHE)
+            .then((cache) => cache.addAll(CORE_ASSETS))
+            .then(() => self.skipWaiting()),
+    );
 });
 
 self.addEventListener('message', (event) => {
@@ -27,7 +31,7 @@ self.addEventListener('activate', (event) => {
             keys
                 .filter((key) => key.startsWith('kpi-static-') && key !== STATIC_CACHE)
                 .map((key) => caches.delete(key)),
-        )),
+        )).then(() => self.clients.claim()),
     );
 });
 
@@ -58,9 +62,27 @@ self.addEventListener('fetch', (event) => {
             }
 
             return fetch(request).then((response) => {
-                if (response.ok) {
-                    void caches.open(STATIC_CACHE).then((cache) => cache.put(request, response.clone()));
+                if (!response.ok) {
+                    return response;
                 }
+
+                // Clone before returning the response. Returning it first allows the
+                // browser to consume its body before the asynchronous cache write.
+                let responseForCache;
+
+                try {
+                    responseForCache = response.clone();
+                } catch {
+                    // Serving the asset takes priority; a response that cannot be
+                    // cloned simply is not added to the static cache.
+                    return response;
+                }
+
+                event.waitUntil(
+                    caches.open(STATIC_CACHE)
+                        .then((cache) => cache.put(request, responseForCache))
+                        .catch(() => undefined),
+                );
 
                 return response;
             });

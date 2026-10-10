@@ -22,7 +22,7 @@
                 <p style="margin:20px 0 8px;font-size:12px;color:#64748b;">Jika tombol tidak dapat dibuka, salin tautan berikut ke browser:</p>
                 <p style="margin:0;word-break:break-all;font-size:12px;line-height:1.6;color:#16a34a;">{{ $resetUrl }}</p>
             </td></tr>
-            <tr><td style="border-top:1px solid #e2e8f0;padding:20px 32px;font-size:12px;line-height:1.6;color:#64748b;">Email otomatis dari Sistem Penilaian Pejuang. Jangan membalas email ini atau membagikan tautannya kepada siapa pun.</td></tr>
+            <tr><td style="border-top:1px solid #e2e8f0;padding:20px 32px;font-size:12px;line-height:1.6;color:#64748b;">Email otomatis dari Sistem Penilaian Karyawan. Jangan membalas email ini atau membagikan tautannya kepada siapa pun.</td></tr>
         </table>
     </td></tr>
 </table>

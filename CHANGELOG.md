@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+### Perbaikan Menu Pengguna, Pratinjau PDF, dan PWA -- 10 Oktober 2026
+
+- Menu tindakan pada daftar pengguna tidak lagi terpotong oleh container dan
+  menentukan arah buka berdasarkan ruang aktual pada viewport.
+- Pratinjau dokumen privat dapat di-frame hanya oleh aplikasi yang sama,
+  sehingga PDF tampil tanpa melonggarkan proteksi frame untuk halaman lain.
+- Service worker mengkloning respons aset sebelum cache write asinkron dimulai,
+  mencegah error `Response body is already used`.
+- Pembaruan service worker kini langsung menggantikan versi cache lama dan
+  mengambil alih halaman terbuka, tanpa pernah menyimpan data privat.
+- Istilah tampilan diselaraskan: `Employee` menjadi `Pejuang`, peran organisasi
+  memakai Bahasa Indonesia, dan "Pejuang Bermasalah" menjadi "Catatan Khusus".
+
+### Audit Alur dan Pembersihan Artefak Tidak Terpakai -- 10 Oktober 2026
+
+- Memverifikasi rute, handler frontend, controller, policy, scope organisasi,
+  dan alur transisi utama tanpa menemukan dead code pada source aplikasi.
+- Menghapus skrip perbaikan sekali-pakai dan hasil generate Ziggy lokal yang
+  tidak diimpor; Ziggy tetap disediakan pada runtime melalui `@routes` Blade.
+
 ### Perbaikan Instalasi Database MySQL -- 9 Oktober 2026
 
 - Menambahkan indeks `employee_id` sebelum melepas indeks unik evaluasi saat

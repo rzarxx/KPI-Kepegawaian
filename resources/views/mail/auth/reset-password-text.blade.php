@@ -11,4 +11,4 @@ Tautan ini berlaku selama {{ $expiresIn }} menit dan hanya dapat digunakan untuk
 
 Jika Anda tidak meminta perubahan kata sandi, abaikan email ini. Kata sandi Anda tidak akan berubah.
 
-Email otomatis dari Sistem Penilaian Pejuang. Jangan membagikan tautan ini kepada siapa pun.
+Email otomatis dari Sistem Penilaian Karyawan. Jangan membagikan tautan ini kepada siapa pun.

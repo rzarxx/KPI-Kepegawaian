@@ -34,14 +34,14 @@ export default function Create({ branches, divisions, subDivisions, positions, l
     const filteredSubDivisions = subDivisions.filter((subDivision) => !data.division_id || subDivision.division_id === Number(data.division_id));
     const field = 'mt-1 h-10 w-full rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-100 disabled:text-slate-500';
 
-    return <AuthenticatedLayout header={<div><p className="text-sm text-slate-500">Pejuang</p><h1 className="text-[26px] font-bold text-slate-900">Tambah Pejuang</h1></div>}>
-        <Head title="Tambah Pejuang" />
+    return <AuthenticatedLayout header={<div><p className="text-sm text-slate-500">Karyawan</p><h1 className="text-[26px] font-bold text-slate-900">Tambah Karyawan</h1></div>}>
+        <Head title="Tambah Karyawan" />
         <div className="mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
             <form className="space-y-6" onSubmit={(event) => { event.preventDefault(); post(route('employees.store')); }}>
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 className="text-base font-semibold text-slate-900">Identitas Pejuang</h2>
+                    <h2 className="text-base font-semibold text-slate-900">Identitas Karyawan</h2>
                     <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                        <Field label="Nomor Pejuang" error={errors.employee_number}><input className={field} value={data.employee_number} onChange={(event) => setData('employee_number', event.target.value)} /></Field>
+                        <Field label="Nomor Induk Karyawan" error={errors.employee_number}><input className={field} value={data.employee_number} onChange={(event) => setData('employee_number', event.target.value)} /></Field>
                         <Field label="Nama Lengkap" error={errors.full_name}><input className={field} value={data.full_name} onChange={(event) => setData('full_name', event.target.value)} /></Field>
                         <Field label="NIK" error={errors.national_id}><input className={field} value={data.national_id} onChange={(event) => setData('national_id', event.target.value)} /></Field>
                         <Field label="Email" error={errors.email}><input className={field} type="email" value={data.email} onChange={(event) => setData('email', event.target.value)} /></Field>
@@ -60,7 +60,7 @@ export default function Create({ branches, divisions, subDivisions, positions, l
                         <Field label="Status Awal" error={errors.current_status}><select className={field} value={data.current_status} onChange={(event) => setData('current_status', event.target.value)}><option value="ACTIVE">Aktif</option><option value="PROBATION">Masa Percobaan</option><option value="INACTIVE">Tidak Aktif</option></select></Field>
                     </div>
                 </section>
-                <div className="flex justify-end gap-3"><Button asChild variant="secondary"><Link href={route('employees.index')}>Batal</Link></Button><Button disabled={processing} type="submit">{processing ? 'Menyimpan...' : 'Simpan Pejuang'}</Button></div>
+                <div className="flex justify-end gap-3"><Button asChild variant="secondary"><Link href={route('employees.index')}>Batal</Link></Button><Button disabled={processing} type="submit">{processing ? 'Menyimpan...' : 'Simpan Karyawan'}</Button></div>
             </form>
         </div>
     </AuthenticatedLayout>;

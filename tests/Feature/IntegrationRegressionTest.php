@@ -108,6 +108,14 @@ class IntegrationRegressionTest extends TestCase
         $document = $employee->documents()->sole();
         Storage::disk('local')->assertExists($document->path);
         $this->actingAs($owner)->get(route('employees.documents.download', $document))->assertOk();
+        $previewResponse = $this->actingAs($owner)->get(route('employees.documents.preview', $document));
+        $previewResponse
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertHeader('Content-Disposition', 'inline; filename="kontrak.pdf"')
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertHeader('X-Frame-Options', 'SAMEORIGIN');
+        $this->assertStringContainsString("frame-ancestors 'self'", (string) $previewResponse->headers->get('Content-Security-Policy'));
 
         $outsider = User::factory()->create();
         $outsider->givePermissionTo(
@@ -117,6 +125,7 @@ class IntegrationRegressionTest extends TestCase
         [$outsideBranch] = $this->organization('SBY');
         $outsider->organizationalScopes()->create(['branch_id' => $outsideBranch->id, 'scope_type' => 'branch', 'is_active' => true]);
         $this->actingAs($outsider)->get(route('employees.documents.download', $document))->assertForbidden();
+        $this->actingAs($outsider)->get(route('employees.documents.preview', $document))->assertForbidden();
 
         $this->actingAs($owner)->delete(route('employees.documents.destroy', $document))->assertSessionHasNoErrors();
         Storage::disk('local')->assertMissing($document->path);

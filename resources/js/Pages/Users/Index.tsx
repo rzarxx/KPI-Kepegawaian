@@ -6,7 +6,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { DialogTitle } from '@headlessui/react';
 import { Head, router, useForm } from '@inertiajs/react';
 import { MoreHorizontal, Pencil, Plus, Power, ShieldCheck, Trash2, Users } from 'lucide-react';
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, useLayoutEffect, useRef, useState } from 'react';
 
 type Scope = {
     id?: number;
@@ -27,6 +27,13 @@ type CreateForm = AccessForm & { email: string; password: string };
 
 const emptyScope = (): Scope => ({ branch_id: '', division_id: '', sub_division_id: '' });
 const singleScopeRoles = ['Branch Head', 'Division Head', 'Sub Division Head'];
+const roleLabels: Record<string, string> = {
+    Employee: 'Karyawan',
+    'Branch Head': 'Kepala Cabang',
+    'Division Head': 'Kepala Divisi',
+    'Sub Division Head': 'Kepala Subdivisi',
+};
+const roleLabel = (role: string) => roleLabels[role] ?? role;
 
 export default function Index({
     users,
@@ -97,7 +104,7 @@ export default function Index({
         <AuthenticatedLayout header={<div><p className="text-sm text-slate-500">Pengaturan</p><h1 className="text-[26px] font-bold text-slate-900">Kelola Pengguna</h1></div>}>
             <Head title="Kelola Pengguna" />
             <div className="mx-auto grid max-w-[1400px] gap-6 p-4 sm:p-6 lg:grid-cols-[1fr_420px] lg:p-8">
-                <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <section className="relative rounded-xl border border-slate-200 bg-white shadow-sm">
                     <div className="flex items-center gap-2 border-b border-slate-100 p-5 font-semibold text-slate-900"><Users size={18} />Daftar Pengguna</div>
                     <div className="divide-y divide-slate-100">
                         {users.length ? users.map((user) => (
@@ -110,7 +117,7 @@ export default function Index({
                                         </span>
                                     </div>
                                     <p className="mt-0.5 text-sm text-slate-500">{user.email}</p>
-                                    <p className="mt-0.5 text-xs text-slate-400">{user.roles.join(', ') || 'Belum memiliki peran'} · {user.scopes.map((scope) => scope.label).join('; ') || 'Seluruh organisasi'}</p>
+                                    <p className="mt-0.5 text-xs text-slate-400">{user.roles.map(roleLabel).join(', ') || 'Belum memiliki peran'} · {user.scopes.map((scope) => scope.label).join('; ') || 'Seluruh organisasi'}</p>
                                 </div>
                                 <div className="relative shrink-0">
                                     <Button
@@ -157,8 +164,8 @@ export default function Index({
                                 onChange={(value) => create.setData('password', value)}
                             />
                         </div>
-                        <Select label="Peran" value={create.data.role} error={create.errors.role} onChange={(value) => changeRole(value, create.data.scopes, (scopes) => create.setData('scopes', scopes), (role) => create.setData('role', role))} options={roles.map((role) => ({ id: role, name: role }))} />
-                        {create.data.role === 'Employee' && <Select label="Data Pejuang" value={create.data.employee_id} error={create.errors.employee_id} onChange={(value) => create.setData('employee_id', value)} options={employees} />}
+                        <Select label="Peran" value={create.data.role} error={create.errors.role} onChange={(value) => changeRole(value, create.data.scopes, (scopes) => create.setData('scopes', scopes), (role) => create.setData('role', role))} options={roles.map((role) => ({ id: role, name: roleLabel(role) }))} />
+                        {create.data.role === 'Employee' && <Select label="Data Karyawan" value={create.data.employee_id} error={create.errors.employee_id} onChange={(value) => create.setData('employee_id', value)} options={employees} />}
                         {create.data.role !== 'Employee' && <ScopeEditor rows={create.data.scopes} single={singleScopeRoles.includes(create.data.role)} errors={create.errors} onChange={(scopes) => create.setData('scopes', scopes)} branches={branches} divisions={divisions} subDivisions={subDivisions} />}
                         <Button className="mt-5 w-full" type="submit" disabled={create.processing}>{create.processing ? 'Menyimpan...' : 'Simpan Pengguna'}</Button>
                     </form>
@@ -175,12 +182,37 @@ function ActionMenu({ user, canManageRoles, canImpersonate, toggling, onEdit, on
     onEdit: () => void; onToggle: () => void; onDelete: () => void; onImpersonate: () => void; onClose: () => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
+    const [openUpward, setOpenUpward] = useState(false);
     const isSuperAdmin = user.roles.includes('Super Admin');
+
+    useLayoutEffect(() => {
+        const updatePlacement = () => {
+            const menu = ref.current;
+            if (!menu) return;
+
+            const trigger = menu.parentElement?.getBoundingClientRect();
+            if (!trigger) return;
+
+            const spaceAbove = trigger.top;
+            const spaceBelow = window.innerHeight - trigger.bottom;
+
+            setOpenUpward(spaceBelow < menu.offsetHeight && spaceAbove > spaceBelow);
+        };
+
+        updatePlacement();
+        window.addEventListener('resize', updatePlacement);
+        window.addEventListener('scroll', updatePlacement, true);
+
+        return () => {
+            window.removeEventListener('resize', updatePlacement);
+            window.removeEventListener('scroll', updatePlacement, true);
+        };
+    }, []);
 
     return (
         <>
             <div className="fixed inset-0 z-40" onClick={onClose} />
-            <div ref={ref} className="absolute right-0 top-full z-50 mt-1 w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
+            <div ref={ref} className={`absolute right-0 z-50 max-h-[calc(100dvh-1rem)] w-52 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg ${openUpward ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
                 {canManageRoles && !isSuperAdmin && (
                     <button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50" onClick={onEdit}>
                         <Pencil size={15} />Ubah akses
@@ -223,8 +255,8 @@ function EditAccessDialog({ user, form, close, roles, employees, branches, divis
                 <DialogTitle className="text-lg font-semibold text-slate-900">Ubah Akses — {user?.name}</DialogTitle>
                 <p className="mt-2 text-sm text-slate-500">Sesuaikan peran dan cakupan organisasi pengguna ini.</p>
                 <Field label="Nama" value={form.data.name} error={form.errors.name} onChange={(value) => form.setData('name', value)} />
-                <Select label="Peran" value={form.data.role} error={form.errors.role} onChange={(value) => changeRole(value, form.data.scopes, (scopes) => form.setData('scopes', scopes), (role) => form.setData('role', role))} options={roles.map((role) => ({ id: role, name: role }))} />
-                {form.data.role === 'Employee' && <Select label="Data Pejuang" value={form.data.employee_id} error={form.errors.employee_id} onChange={(value) => form.setData('employee_id', value)} options={employees} />}
+                <Select label="Peran" value={form.data.role} error={form.errors.role} onChange={(value) => changeRole(value, form.data.scopes, (scopes) => form.setData('scopes', scopes), (role) => form.setData('role', role))} options={roles.map((role) => ({ id: role, name: roleLabel(role) }))} />
+                {form.data.role === 'Employee' && <Select label="Data Karyawan" value={form.data.employee_id} error={form.errors.employee_id} onChange={(value) => form.setData('employee_id', value)} options={employees} />}
                 {form.data.role !== 'Employee' && <ScopeEditor rows={form.data.scopes} single={singleScopeRoles.includes(form.data.role)} errors={form.errors} onChange={(scopes) => form.setData('scopes', scopes)} branches={branches} divisions={divisions} subDivisions={subDivisions} />}
                 <div className="mt-6 flex justify-end gap-3"><Button type="button" variant="secondary" onClick={close}>Batal</Button><Button disabled={form.processing} type="submit">{form.processing ? 'Menyimpan...' : 'Simpan Perubahan'}</Button></div>
             </form>

@@ -48,6 +48,19 @@ class SecurityHardeningTest extends TestCase
         );
     }
 
+    public function test_document_preview_allows_framing_only_from_this_application(): void
+    {
+        Route::get('/_test/document-preview', fn () => response('PDF'))
+            ->middleware('web')
+            ->name('employees.documents.preview');
+
+        $response = $this->get('/_test/document-preview');
+        $policy = (string) $response->headers->get('Content-Security-Policy');
+
+        $response->assertOk()->assertHeader('X-Frame-Options', 'SAMEORIGIN');
+        $this->assertStringContainsString("frame-ancestors 'self'", $policy);
+    }
+
     public function test_local_loopback_vite_server_is_allowed_without_unsafe_inline_scripts(): void
     {
         $originalEnvironment = app()->environment();

@@ -19,7 +19,7 @@ class ChangeEmployeeStatusAction
             $this->ensureAllowedTransition($previous, $status);
 
             if ($employee->currentAssignment === null) {
-                throw ValidationException::withMessages(['employee' => 'Pejuang tidak memiliki penempatan aktif.']);
+                throw ValidationException::withMessages(['employee' => 'Karyawan tidak memiliki penempatan aktif.']);
             }
 
             if ($status === 'ACTIVE') {
@@ -37,7 +37,7 @@ class ChangeEmployeeStatusAction
     private function ensureAllowedTransition(string $previous, string $status): void
     {
         if (! in_array($previous, ['ACTIVE', 'PROBATION'], true)) {
-            throw ValidationException::withMessages(['status' => 'Status pejuang saat ini tidak dapat diubah melalui tindakan ini.']);
+            throw ValidationException::withMessages(['status' => 'Status karyawan saat ini tidak dapat diubah melalui tindakan ini.']);
         }
 
         if ($status === 'ACTIVE' && $previous === 'PROBATION') {
@@ -48,6 +48,6 @@ class ChangeEmployeeStatusAction
             return;
         }
 
-        throw ValidationException::withMessages(['status' => 'Perubahan status pejuang tidak valid.']);
+        throw ValidationException::withMessages(['status' => 'Perubahan status karyawan tidak valid.']);
     }
 }

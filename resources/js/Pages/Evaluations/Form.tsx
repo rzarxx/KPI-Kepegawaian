@@ -47,8 +47,8 @@ export default function Form({
     };
 
     return (
-        <AuthenticatedLayout header={<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-sm text-slate-500">Penilaian</p><h1 className="text-[26px] font-bold text-slate-900">Penilaian Pejuang</h1></div>{evaluation && <span className={'w-fit rounded-full px-3 py-1.5 text-sm font-semibold ' + statusStyles[evaluation.status]}>{statusLabels[evaluation.status]}</span>}</div>}>
-            <Head title="Penilaian Pejuang" />
+        <AuthenticatedLayout header={<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-sm text-slate-500">Penilaian</p><h1 className="text-[26px] font-bold text-slate-900">Penilaian Karyawan</h1></div>{evaluation && <span className={'w-fit rounded-full px-3 py-1.5 text-sm font-semibold ' + statusStyles[evaluation.status]}>{statusLabels[evaluation.status]}</span>}</div>}>
+            <Head title="Penilaian Karyawan" />
             <div className="mx-auto grid max-w-[1200px] gap-6 p-4 sm:p-6 lg:grid-cols-[1fr_280px] lg:p-8">
                 <form className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" onSubmit={(event) => { event.preventDefault(); save(); }}>
                     <div className="flex flex-col gap-1 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -68,7 +68,7 @@ export default function Form({
 
                     {!period && (
                         <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                            Periode penilaian tidak ditemukan. Kembali ke halaman pejuang dan pilih periode yang tersedia.
+                            Periode penilaian tidak ditemukan. Kembali ke halaman karyawan dan pilih periode yang tersedia.
                         </div>
                     )}
 
@@ -79,7 +79,7 @@ export default function Form({
                                 <span className="font-semibold">Penilaian Diri Tersedia</span>
                             </div>
                             <p className="mt-1 text-blue-700">
-                                Pejuang telah mengisi penilaian diri dengan total skor{' '}
+                                Karyawan telah mengisi penilaian diri dengan total skor{' '}
                                 <span className="font-bold">{Number(selfAssessment.total_score).toFixed(2)}</span>.
                                 Nilai penilaian diri ditampilkan sebagai referensi di setiap komponen.
                             </p>
@@ -109,7 +109,7 @@ export default function Form({
                         <div className="mt-4 border-t border-slate-100 pt-4">
                             <p className="text-xs font-semibold text-slate-500">PENILAIAN DIRI</p>
                             <p className="mt-1 text-2xl font-bold text-blue-600">{Number(selfAssessment.total_score).toFixed(2)}</p>
-                            <p className="mt-1 text-xs text-slate-500">Skor penilaian diri oleh pejuang</p>
+                            <p className="mt-1 text-xs text-slate-500">Skor penilaian diri oleh karyawan</p>
                             {selfAssessment.notes && (
                                 <p className="mt-2 rounded bg-blue-50 p-2 text-xs text-blue-700">{selfAssessment.notes}</p>
                             )}

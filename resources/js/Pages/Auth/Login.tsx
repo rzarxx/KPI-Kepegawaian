@@ -44,15 +44,15 @@ export default function Login({
                     <div>
                         {brand.app_logo ? <img src={`/storage/${brand.app_logo}`} alt={brand.app_name} className="size-11 object-contain rounded-xl bg-white/10 p-1" /> : <div className="flex size-11 items-center justify-center rounded-xl bg-white/15"><BarChart3 aria-hidden="true" size={24} /></div>}
                         <p className="mt-8 text-sm font-semibold tracking-wide text-white/80 uppercase">{brand.app_name}</p>
-                        <h1 className="mt-3 max-w-sm text-3xl font-bold leading-tight">Sistem Penilaian Pejuang</h1>
+                        <h1 className="mt-3 max-w-sm text-3xl font-bold leading-tight">Sistem Penilaian Karyawan</h1>
                         <p className="mt-4 max-w-sm text-sm leading-6 text-white/60">
-                            Kelola data, penilaian, dan tindak lanjut pejuang dalam satu sistem yang aman.
+                            Kelola data, penilaian, dan tindak lanjut karyawan dalam satu sistem yang aman.
                         </p>
                     </div>
 
                     <div className="space-y-4 text-sm text-white/60">
                         <div className="flex items-center gap-3"><ShieldCheck aria-hidden="true" size={18} /> Akses berdasarkan peran dan scope organisasi</div>
-                        <div className="flex items-center gap-3"><UsersRound aria-hidden="true" size={18} /> Riwayat pejuang tetap terjaga</div>
+                        <div className="flex items-center gap-3"><UsersRound aria-hidden="true" size={18} /> Riwayat karyawan tetap terjaga</div>
                     </div>
                 </section>
 

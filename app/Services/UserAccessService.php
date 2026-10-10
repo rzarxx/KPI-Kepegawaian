@@ -77,7 +77,7 @@ class UserAccessService
 
         if ($role === 'Employee') {
             if ($scopes !== []) {
-                throw ValidationException::withMessages(['scopes' => 'Akun pejuang tidak menggunakan cakupan organisasi.']);
+                throw ValidationException::withMessages(['scopes' => 'Akun karyawan tidak menggunakan cakupan organisasi.']);
             }
 
             return;
@@ -160,7 +160,7 @@ class UserAccessService
     private function validateEmployeeLink(User $actor, string $role, ?int $employeeId, ?User $user = null): void
     {
         if ($role === 'Employee' && $employeeId === null) {
-            throw ValidationException::withMessages(['employee_id' => 'Pilih data pejuang yang akan dihubungkan dengan akun ini.']);
+            throw ValidationException::withMessages(['employee_id' => 'Pilih data karyawan yang akan dihubungkan dengan akun ini.']);
         }
 
         if ($employeeId === null) {
@@ -168,7 +168,7 @@ class UserAccessService
         }
 
         if ($role !== 'Employee') {
-            throw ValidationException::withMessages(['employee_id' => 'Hanya akun dengan peran Pejuang yang dapat dihubungkan ke data pejuang.']);
+            throw ValidationException::withMessages(['employee_id' => 'Hanya akun dengan peran Karyawan yang dapat dihubungkan ke data karyawan.']);
         }
 
         $employee = Employee::query()->with(['currentAssignment', 'latestAssignment'])->findOrFail($employeeId);
@@ -177,7 +177,7 @@ class UserAccessService
         }
 
         if ($employee->user_id !== null && $employee->user_id !== $user?->id) {
-            throw ValidationException::withMessages(['employee_id' => 'Data pejuang tersebut sudah terhubung dengan akun lain.']);
+            throw ValidationException::withMessages(['employee_id' => 'Data karyawan tersebut sudah terhubung dengan akun lain.']);
         }
     }
 

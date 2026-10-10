@@ -75,7 +75,7 @@ class SelfAssessmentController extends Controller
         }
 
         $employee = $user->employee()->first();
-        abort_unless($employee !== null, 403, 'Akun Anda belum terhubung dengan data pejuang.');
+        abort_unless($employee !== null, 403, 'Akun Anda belum terhubung dengan data karyawan.');
 
         $existing = EmployeeEvaluation::query()
             ->where('employee_id', $employee->id)
@@ -123,7 +123,7 @@ class SelfAssessmentController extends Controller
         }
 
         $employee = $user->employee()->first();
-        abort_unless($employee !== null, 403, 'Akun Anda belum terhubung dengan data pejuang.');
+        abort_unless($employee !== null, 403, 'Akun Anda belum terhubung dengan data karyawan.');
 
         $data = $request->validate([
             'notes' => ['nullable', 'string', 'max:2000'],

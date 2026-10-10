@@ -29,6 +29,9 @@ class SecurityHeaders
             $connectSources[] = preg_replace('/^http/', 'ws', $viteOrigin);
         }
 
+        $canBeFramedByThisApplication = $request->routeIs('employees.documents.preview');
+        $frameAncestors = $canBeFramedByThisApplication ? "'self'" : "'none'";
+
         $policy = implode('; ', [
             "default-src 'self'",
             'script-src '.implode(' ', $scriptSources),
@@ -36,7 +39,7 @@ class SecurityHeaders
             'font-src '.implode(' ', $fontSources),
             'img-src '.implode(' ', $imageSources),
             'connect-src '.implode(' ', array_unique($connectSources)),
-            "frame-ancestors 'none'",
+            "frame-ancestors {$frameAncestors}",
             "base-uri 'self'",
             "form-action 'self'",
             'upgrade-insecure-requests',
@@ -46,7 +49,7 @@ class SecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-        $response->headers->set('X-Frame-Options', 'DENY');
+        $response->headers->set('X-Frame-Options', $canBeFramedByThisApplication ? 'SAMEORIGIN' : 'DENY');
         if ($request->isSecure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }

@@ -77,7 +77,7 @@ function Section({ title, icon, type, items, choices = [], choiceLabel, hasLevel
                     {editing && <Button type="button" variant="secondary" onClick={() => { setEditing(null); form.reset(); }}>Batal</Button>}
                 </div>
             </form>}
-            {pendingDelete && <ConfirmDeleteDialog key={pendingDelete.id} open message={`Hapus ${title.toLowerCase()} "${pendingDelete.name}"? Unit yang masih memiliki pejuang, struktur turunan, atau riwayat akan diarsipkan agar data tetap aman.`} verificationCode={pendingDelete.code} processing={deleting} onConfirm={destroy} onCancel={() => setPendingDelete(null)} />}
+            {pendingDelete && <ConfirmDeleteDialog key={pendingDelete.id} open message={`Hapus ${title.toLowerCase()} "${pendingDelete.name}"? Unit yang masih memiliki karyawan, struktur turunan, atau riwayat akan diarsipkan agar data tetap aman.`} verificationCode={pendingDelete.code} processing={deleting} onConfirm={destroy} onCancel={() => setPendingDelete(null)} />}
         </section>
     );
 }

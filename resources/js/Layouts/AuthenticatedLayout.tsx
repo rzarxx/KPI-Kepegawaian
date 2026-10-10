@@ -55,10 +55,10 @@ export default function AuthenticatedLayout({
             ? [{ label: 'Beranda', href: route('dashboard'), active: route().current('dashboard'), icon: <Building2 size={18} /> }]
             : []),
         ...(abilities.employeeView
-            ? [{ label: 'Pejuang', href: route('employees.index'), active: route().current('employees.*'), icon: <UsersRound size={18} /> }]
+            ? [{ label: 'Karyawan', href: route('employees.index'), active: route().current('employees.*'), icon: <UsersRound size={18} /> }]
             : []),
         ...(abilities.incidentView
-            ? [{ label: 'Catatan Khusus', href: route('employees.incidents.overview'), active: route().current('employees.incidents.*'), icon: <TriangleAlert size={18} /> }]
+            ? [{ label: 'Karyawan Bermasalah', href: route('employees.incidents.overview'), active: route().current('employees.incidents.*'), icon: <TriangleAlert size={18} /> }]
             : []),
         ...(abilities.evaluationView
             ? [{ label: 'Penilaian', href: route('evaluations.configuration'), active: route().current('evaluations.*') || route().current('evaluation-*'), icon: <UserRound size={18} /> }]

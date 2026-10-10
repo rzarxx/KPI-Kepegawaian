@@ -28,8 +28,8 @@ class StoreEmployeeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'employee_number.unique' => 'Nomor karyawan sudah digunakan. Periksa data karyawan lama dan gunakan proses rehire bila orang yang sama kembali bekerja.',
-            'national_id.unique' => 'NIK sudah terhubung ke karyawan lama. Verifikasi identitas lalu gunakan proses rehire pada profil karyawan tersebut.',
+            'employee_number.unique' => 'Nomor induk karyawan sudah digunakan. Periksa data karyawan sebelumnya dan gunakan proses aktifkan kembali bila orang yang sama kembali bekerja.',
+            'national_id.unique' => 'NIK sudah terhubung ke data karyawan sebelumnya. Verifikasi identitas lalu gunakan proses aktifkan kembali pada profil karyawan tersebut.',
         ];
     }
 }
