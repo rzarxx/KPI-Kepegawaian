@@ -26,7 +26,7 @@ class SelfAssessmentController extends Controller
             return Inertia::render('SelfAssessment/Index', [
                 'periods' => [],
                 'employee' => null,
-                'error' => 'Akun Anda belum terhubung dengan data karyawan.',
+                'error' => 'Akun Anda belum terhubung dengan data pejuang.',
             ]);
         }
 
@@ -75,7 +75,7 @@ class SelfAssessmentController extends Controller
         }
 
         $employee = $user->employee()->first();
-        abort_unless($employee !== null, 403, 'Akun Anda belum terhubung dengan data karyawan.');
+        abort_unless($employee !== null, 403, 'Akun Anda belum terhubung dengan data pejuang.');
 
         $existing = EmployeeEvaluation::query()
             ->where('employee_id', $employee->id)
@@ -123,7 +123,7 @@ class SelfAssessmentController extends Controller
         }
 
         $employee = $user->employee()->first();
-        abort_unless($employee !== null, 403, 'Akun Anda belum terhubung dengan data karyawan.');
+        abort_unless($employee !== null, 403, 'Akun Anda belum terhubung dengan data pejuang.');
 
         $data = $request->validate([
             'notes' => ['nullable', 'string', 'max:2000'],

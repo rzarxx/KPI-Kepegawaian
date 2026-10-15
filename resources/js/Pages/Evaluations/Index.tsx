@@ -42,7 +42,7 @@ export default function Index({
             header={(
                 <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                     <div>
-                        <p className="text-sm text-slate-500">Penilaian Karyawan</p>
+                        <p className="text-sm text-slate-500">Penilaian Pejuang</p>
                         <h1 className="text-[26px] font-bold text-slate-900">{canEvaluate ? 'Daftar Tugas Kasubdiv' : 'Monitoring Penilaian'}</h1>
                     </div>
                     {canConfigure && <Button asChild variant="secondary"><Link href={route('evaluations.configuration')}><Settings2 size={16} /> Konfigurasi</Link></Button>}
@@ -72,12 +72,12 @@ export default function Index({
                 {needsPlacement > 0 && (
                     <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                         <AlertTriangle className="mt-0.5 shrink-0" size={18} />
-                        <div><strong>{needsPlacement} Karyawan perlu penempatan.</strong><p className="mt-1 text-amber-800">Tetapkan Sub Divisi aktif terlebih dahulu agar tanggung jawab penilai jelas.</p></div>
+                        <div><strong>{needsPlacement} Pejuang perlu penempatan.</strong><p className="mt-1 text-amber-800">Tetapkan Sub Divisi aktif terlebih dahulu agar tanggung jawab penilai jelas.</p></div>
                     </div>
                 )}
 
                 <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <Metric icon={<UsersRound size={18} />} label="Total Karyawan" value={summary.total} tone="slate" />
+                    <Metric icon={<UsersRound size={18} />} label="Total Pejuang" value={summary.total} tone="slate" />
                     <Metric icon={<ClipboardList size={18} />} label="Belum Dinilai" value={summary.not_started} tone="slate" />
                     <Metric icon={<Clock3 size={18} />} label="Masih Draf" value={summary.draft} tone="amber" />
                     <Metric icon={<CheckCircle2 size={18} />} label="Selesai" value={`${summary.completed} (${summary.completion_percentage}%)`} tone="green" />
@@ -85,7 +85,7 @@ export default function Index({
 
                 <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                     <div className="flex flex-col justify-between gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center">
-                        <div><h2 className="font-semibold text-slate-900">Daftar Penilaian</h2><p className="mt-1 text-sm text-slate-500">Satu Karyawan hanya memiliki satu status pada periode aktif.</p></div>
+                        <div><h2 className="font-semibold text-slate-900">Daftar Penilaian</h2><p className="mt-1 text-sm text-slate-500">Satu Pejuang hanya memiliki satu status pada periode aktif.</p></div>
                         <div className="flex flex-wrap gap-2">
                             {([['ALL', 'Semua'], ['NOT_STARTED', 'Belum Dinilai'], ['DRAFT', 'Draf'], ['COMPLETED', 'Selesai']] as const).map(([value, label]) => (
                                 <button className={`min-h-9 rounded-lg px-3 text-xs font-semibold ${status === value ? 'bg-brand text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`} key={value} onClick={() => setStatus(value)} type="button">{label}</button>
@@ -96,11 +96,11 @@ export default function Index({
                     {!activePeriod ? (
                         <Empty title="Belum ada periode aktif" text="HR perlu mengaktifkan periode sebelum Kasubdiv dapat melakukan penilaian." />
                     ) : visibleTasks.length === 0 ? (
-                        <Empty title="Tidak ada tugas pada filter ini" text="Pilih status lain atau periksa penempatan Karyawan." />
+                        <Empty title="Tidak ada tugas pada filter ini" text="Pilih status lain atau periksa penempatan Pejuang." />
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[820px] text-left text-sm">
-                                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-4 py-3">Karyawan</th><th className="px-4 py-3">Sub Divisi</th><th className="px-4 py-3">Penilai</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Nilai</th><th className="px-4 py-3 text-right">Tindakan</th></tr></thead>
+                                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-4 py-3">Pejuang</th><th className="px-4 py-3">Sub Divisi</th><th className="px-4 py-3">Penilai</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Nilai</th><th className="px-4 py-3 text-right">Tindakan</th></tr></thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {visibleTasks.map((task) => <TaskRow activePeriod={activePeriod} key={task.employee.id} task={task} />)}
                                 </tbody>

@@ -69,7 +69,7 @@ class EmployeeController extends Controller
     {
         $employee = $action->execute($request->user(), $request->validated());
 
-        return redirect()->route('employees.show', $employee)->with('success', 'Karyawan berhasil ditambahkan.');
+        return redirect()->route('employees.show', $employee)->with('success', 'Pejuang berhasil ditambahkan.');
     }
 
     public function show(Employee $employee): Response
@@ -111,7 +111,7 @@ class EmployeeController extends Controller
                 'id' => 'incident-'.$incident->id,
                 'date' => $incident->occurred_at->toDateString(),
                 'type' => 'INCIDENT',
-                'title' => $incident->title ?: 'Catatan masalah',
+                'title' => $incident->title ?: 'Catatan khusus',
                 'description' => 'Tingkat '.$this->severityLabel($incident->severity).' - '.$this->incidentStatusLabel($incident->status),
             ]));
         }
@@ -208,7 +208,7 @@ class EmployeeController extends Controller
     {
         $action->execute($request->user(), $employee, $request->validated());
 
-        return redirect()->route('employees.show', $employee)->with('success', 'Data karyawan berhasil diperbarui.');
+        return redirect()->route('employees.show', $employee)->with('success', 'Data pejuang berhasil diperbarui.');
     }
 
     public function transfer(Employee $employee, TransferEmployeeRequest $request, TransferEmployeeAction $action): RedirectResponse
@@ -216,7 +216,7 @@ class EmployeeController extends Controller
         $this->authorize('transfer', $employee);
         $action->execute($request->user(), $employee, $request->validated());
 
-        return back()->with('success', 'Mutasi karyawan berhasil disimpan.');
+        return back()->with('success', 'Mutasi pejuang berhasil disimpan.');
     }
 
     public function changeStatus(Employee $employee, ChangeEmployeeStatusRequest $request, ChangeEmployeeStatusAction $action): RedirectResponse
@@ -225,14 +225,14 @@ class EmployeeController extends Controller
         $data = $request->validated();
         $action->execute($request->user(), $employee, $data['status'], $data['effective_date'], $data['reason']);
 
-        return back()->with('success', 'Status karyawan berhasil diperbarui.');
+        return back()->with('success', 'Status pejuang berhasil diperbarui.');
     }
 
     public function rehire(Employee $employee, RehireEmployeeRequest $request, RehireEmployeeAction $action): RedirectResponse
     {
         $action->execute($request->user(), $employee, $request->validated());
 
-        return back()->with('success', 'Karyawan berhasil diaktifkan kembali dengan penempatan baru.');
+        return back()->with('success', 'Pejuang berhasil diaktifkan kembali dengan penempatan baru.');
     }
 
     private function employeeData(Employee $employee): array
