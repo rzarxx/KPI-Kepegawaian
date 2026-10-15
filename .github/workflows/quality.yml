@@ -57,9 +57,6 @@ jobs:
       - name: Check PHP formatting
         run: php vendor/bin/pint --test
 
-      - name: Run PHP tests
-        run: php artisan test
-
       - name: Check TypeScript
         run: npm run typecheck
 
@@ -68,6 +65,9 @@ jobs:
 
       - name: Build production assets
         run: npm run build
+
+      - name: Run PHP tests
+        run: php artisan test
 
       - name: Audit dependencies
         run: |

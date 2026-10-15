@@ -22,6 +22,8 @@
   browser di CI setelah migration smoke MySQL.
 - Mencegah reload mendadak saat service worker pertama kali mengambil alih
   halaman, sehingga input login atau formulir yang sedang diisi tidak hilang.
+- Menjalankan production build sebelum test PHP pada CI agar fresh checkout
+  memiliki manifest Vite ketika test merender halaman Inertia.
 
 ### Penyederhanaan Penilaian Kasubdiv -- 13 Oktober 2026
 
