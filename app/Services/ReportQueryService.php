@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\EmployeeEvaluation;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -15,6 +16,8 @@ class ReportQueryService
                 'latestAssignment.branch', 'latestAssignment.division', 'latestAssignment.subDivision', 'latestAssignment.position',
                 'evaluations' => fn ($evaluation) => $evaluation
                     ->with(['scores.component', 'criterion', 'evaluator', 'period'])
+                    ->where('evaluation_type', EmployeeEvaluation::TYPE_SUPERVISOR)
+                    ->whereIn('status', ['FINALIZED', 'CLOSED'])
                     ->when($filters['criteria_id'] ?? null, fn ($nested, $id) => $nested->where('criteria_id', $id))
                     ->when($filters['start_date'] ?? null, fn ($nested, $date) => $nested->whereDate('created_at', '>=', $date))
                     ->when($filters['end_date'] ?? null, fn ($nested, $date) => $nested->whereDate('created_at', '<=', $date))
@@ -40,15 +43,22 @@ class ReportQueryService
         $this->applyOrganization($query, $filters);
 
         $query->when($filters['status'] ?? null, fn (Builder $q, $status) => $q->where('current_status', $status));
-        $query->when($filters['criteria_id'] ?? null, fn (Builder $q, $id) => $q->whereHas('evaluations', fn (Builder $evaluation) => $evaluation->where('criteria_id', $id)));
+        $query->when($filters['criteria_id'] ?? null, fn (Builder $q, $id) => $q->whereHas('evaluations', fn (Builder $evaluation) => $this->completedSupervisor($evaluation)->where('criteria_id', $id)));
         $query->when($filters['problem_status'] ?? null, fn (Builder $q, $status) => $q->whereHas('incidents', fn (Builder $incident) => $incident->where('status', $status)));
         if (($filters['start_date'] ?? null) || ($filters['end_date'] ?? null)) {
-            $query->whereHas('evaluations', fn (Builder $evaluation) => $evaluation
+            $query->whereHas('evaluations', fn (Builder $evaluation) => $this->completedSupervisor($evaluation)
                 ->when($filters['start_date'] ?? null, fn (Builder $nested, $date) => $nested->whereDate('created_at', '>=', $date))
                 ->when($filters['end_date'] ?? null, fn (Builder $nested, $date) => $nested->whereDate('created_at', '<=', $date)));
         }
 
         return $query->orderBy('full_name')->orderBy('employees.id');
+    }
+
+    private function completedSupervisor(Builder $query): Builder
+    {
+        return $query
+            ->where('evaluation_type', EmployeeEvaluation::TYPE_SUPERVISOR)
+            ->whereIn('status', ['FINALIZED', 'CLOSED']);
     }
 
     private function applyOrganization(Builder $query, array $filters): void

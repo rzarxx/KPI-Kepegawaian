@@ -2,12 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Models\Employee;
-use App\Models\EmployeeEvaluation;
 use App\Models\PerformancePeriod;
 use App\Models\User;
 use App\Notifications\SystemNotification;
-use App\Services\OrganizationalScopeResolver;
+use App\Services\EvaluationTaskService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -26,10 +24,10 @@ class SendPeriodEvaluationReminder implements ShouldQueue
 
     public function __construct(public readonly int $periodId, public readonly string $reason = 'reminder') {}
 
-    public function handle(OrganizationalScopeResolver $scopeResolver): void
+    public function handle(EvaluationTaskService $tasks): void
     {
         $period = PerformancePeriod::find($this->periodId);
-        if (! $period || in_array($period->status, ['FINALIZED', 'CLOSED'], true)) {
+        if (! $period || $period->status !== 'ACTIVE' || ! $period->is_active) {
             return;
         }
 
@@ -42,15 +40,18 @@ class SendPeriodEvaluationReminder implements ShouldQueue
             ? "Periode penilaian \"{$period->name}\" (s/d {$period->end_date->format('d M Y')}) sudah berakhir. Segera selesaikan penilaian yang belum diisi."
             : "Periode penilaian \"{$period->name}\" berakhir dalam {$daysLeft} hari ({$period->end_date->format('d M Y')}). Pastikan semua penilaian sudah diisi sebelum batas waktu.";
 
-        // Cari semua user yang bisa membuat penilaian (evaluator)
+        // Hanya Kasubdiv yang menjadi operator penilaian pada alur sederhana.
         $evaluators = User::query()
             ->where('is_active', true)
-            ->whereHas('roles', fn ($q) => $q->whereIn('name', ['Division Head', 'Sub Division Head', 'Branch Head', 'HR Admin', 'HR Manager']))
+            ->role('Sub Division Head')
             ->get();
 
         foreach ($evaluators as $evaluator) {
             // Cek apakah evaluator ini punya karyawan yang belum dinilai
-            $pendingCount = $this->countPendingEvaluations($evaluator, $period, $scopeResolver);
+            $pendingCount = collect($tasks->gather($evaluator, $period->id)['tasks'])
+                ->whereIn('status', ['NOT_STARTED', 'DRAFT'])
+                ->where('can_evaluate', true)
+                ->count();
             if ($pendingCount === 0) {
                 continue;
             }
@@ -58,34 +59,12 @@ class SendPeriodEvaluationReminder implements ShouldQueue
             $evaluator->notify(new SystemNotification(
                 $title,
                 "{$message} ({$pendingCount} karyawan belum dinilai).",
-                route('evaluations.configuration'),
+                route('evaluations.index', ['period_id' => $period->id]),
                 $isOverdue ? 'warning' : 'info',
             ));
         }
 
         // Update reminder_sent_at agar tidak dikirim ulang
         $period->update(['reminder_sent_at' => now()]);
-    }
-
-    private function countPendingEvaluations(User $evaluator, PerformancePeriod $period, OrganizationalScopeResolver $scopeResolver): int
-    {
-        // Karyawan yang sudah dinilai oleh evaluator ini di periode ini
-        $alreadyEvaluatedIds = EmployeeEvaluation::query()
-            ->where('evaluator_id', $evaluator->id)
-            ->where('period_id', $period->id)
-            ->pluck('employee_id');
-
-        // Karyawan aktif dalam scope evaluator yang belum dinilai
-        $query = Employee::query()
-            ->where('current_status', 'ACTIVE')
-            ->whereNotIn('id', $alreadyEvaluatedIds)
-            ->whereHas('currentAssignment');
-
-        $allowedBranchIds = $scopeResolver->allowedBranchIds($evaluator);
-        if ($allowedBranchIds !== null) {
-            $query->whereHas('currentAssignment', fn ($q) => $q->whereIn('branch_id', $allowedBranchIds));
-        }
-
-        return $query->count();
     }
 }

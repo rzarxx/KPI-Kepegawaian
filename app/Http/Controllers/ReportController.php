@@ -13,6 +13,7 @@ use App\Services\AuditLogger;
 use App\Services\OrganizationalScopeResolver;
 use App\Services\OrganizationalScopeSnapshot;
 use App\Services\ReportQueryService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -104,7 +105,7 @@ class ReportController extends Controller
             $snapshot = $export->toArray();
             $export->delete();
             $audit->log('report.export.delete', request()->user(), $export, $snapshot, null);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return back()->with('error', 'Laporan ekspor tidak dapat dihapus karena masih memiliki data terkait.');
         }
 

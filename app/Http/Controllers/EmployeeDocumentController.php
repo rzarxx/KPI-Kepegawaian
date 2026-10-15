@@ -6,9 +6,13 @@ use App\Http\Requests\StoreEmployeeDocumentRequest;
 use App\Models\Employee;
 use App\Models\EmployeeDocument;
 use App\Services\AuditLogger;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EmployeeDocumentController extends Controller
@@ -43,17 +47,25 @@ class EmployeeDocumentController extends Controller
         return Storage::disk($document->disk)->download($document->path, $document->original_name);
     }
 
-    public function preview(EmployeeDocument $document): \Illuminate\Http\Response
+    public function preview(EmployeeDocument $document): Response
     {
         $this->authorize('view', $document);
 
         abort_unless(Storage::disk($document->disk)->exists($document->path), 404);
 
         $content = Storage::disk($document->disk)->get($document->path);
+        $displayName = preg_replace('/[\x00-\x1F\x7F]/u', '', $document->original_name) ?: 'dokumen';
+        $displayName = str_replace(['/', '\\'], '_', $displayName);
+        $fallbackName = preg_replace('/[^A-Za-z0-9._-]/', '_', Str::ascii($displayName)) ?: 'dokumen';
+        $disposition = HeaderUtils::makeDisposition(
+            ResponseHeaderBag::DISPOSITION_INLINE,
+            $displayName,
+            $fallbackName,
+        );
 
         return response($content, 200)
             ->header('Content-Type', $document->mime_type)
-            ->header('Content-Disposition', 'inline; filename="' . $document->original_name . '"')
+            ->header('Content-Disposition', $disposition)
             ->header('Cache-Control', 'private, no-store');
     }
 
@@ -66,7 +78,7 @@ class EmployeeDocumentController extends Controller
             Storage::disk($document->disk)->delete($document->path);
             $document->delete();
             $audit->log('employee.document.delete', request()->user(), null, $snapshot, null);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return back()->with('error', 'Dokumen tidak dapat dihapus karena masih memiliki data terkait.');
         }
 

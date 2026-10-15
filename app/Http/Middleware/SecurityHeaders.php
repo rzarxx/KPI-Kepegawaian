@@ -32,7 +32,7 @@ class SecurityHeaders
         $canBeFramedByThisApplication = $request->routeIs('employees.documents.preview');
         $frameAncestors = $canBeFramedByThisApplication ? "'self'" : "'none'";
 
-        $policy = implode('; ', [
+        $directives = [
             "default-src 'self'",
             'script-src '.implode(' ', $scriptSources),
             'style-src '.implode(' ', $styleSources),
@@ -42,8 +42,13 @@ class SecurityHeaders
             "frame-ancestors {$frameAncestors}",
             "base-uri 'self'",
             "form-action 'self'",
-            'upgrade-insecure-requests',
-        ]);
+        ];
+
+        if ($request->isSecure()) {
+            $directives[] = 'upgrade-insecure-requests';
+        }
+
+        $policy = implode('; ', $directives);
 
         $response->headers->set('Content-Security-Policy', $policy);
         $response->headers->set('X-Content-Type-Options', 'nosniff');

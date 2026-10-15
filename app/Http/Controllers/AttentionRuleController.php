@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreAttentionRuleRequest;
 use App\Models\EmployeeAttentionRule;
 use App\Services\AuditLogger;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 
 class AttentionRuleController extends Controller
@@ -34,7 +35,7 @@ class AttentionRuleController extends Controller
             $snapshot = $rule->toArray();
             $rule->delete();
             $audit->log('attention_rule.delete', request()->user(), $rule, $snapshot, null);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return back()->with('error', 'Aturan perhatian tidak dapat dihapus karena masih digunakan.');
         }
 

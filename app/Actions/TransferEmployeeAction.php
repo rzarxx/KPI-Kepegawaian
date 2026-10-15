@@ -31,7 +31,7 @@ class TransferEmployeeAction
             throw new AuthorizationException;
         }
 
-return DB::transaction(function () use ($actor, $employee, $current, $data) {
+        return DB::transaction(function () use ($actor, $employee, $current, $data) {
             $current->update(['end_date' => $data['effective_date']]);
             $next = $employee->assignments()->create(['branch_id' => $data['branch_id'], 'division_id' => $data['division_id'], 'sub_division_id' => $data['sub_division_id'] ?? null, 'position_id' => $data['position_id'] ?? null, 'start_date' => $data['effective_date'], 'status' => 'ACTIVE', 'reason' => $data['reason'] ?? 'Mutasi', 'created_by' => $actor->id]);
             $employee->statusHistories()->create(['previous_status' => $employee->current_status->value, 'new_status' => 'MUTATED', 'effective_date' => $data['effective_date'], 'reason' => $data['reason'] ?? 'Mutasi', 'actor_id' => $actor->id]);

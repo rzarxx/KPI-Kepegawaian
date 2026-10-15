@@ -21,7 +21,7 @@ dan bantuan kendala umum. Sumber HTML-nya tersedia di
 - Pengelolaan identitas dan status karyawan tanpa menghapus histori kerja.
 - Riwayat penempatan cabang, divisi, sub-divisi, dan jabatan.
 - Konfigurasi periode, komponen, bobot, dan kriteria penilaian.
-- Alur penilaian dari draf, pengajuan, persetujuan, hingga finalisasi.
+- Alur penilaian ringkas oleh Kasubdiv: Belum Dinilai, Draf, lalu Selesai.
 - Catatan masalah karyawan beserta status penyelesaiannya.
 - Dokumen karyawan yang disimpan secara privat dan diunduh melalui otorisasi.
 - Laporan terfilter sesuai scope serta export XLSX melalui queue.
@@ -35,7 +35,7 @@ dan bantuan kendala umum. Sumber HTML-nya tersedia di
 | --- | --- |
 | Super Admin | Seluruh organisasi dan pengaturan sistem |
 | HR Admin | Pengelolaan SDM sesuai scope yang diberikan |
-| HR Manager | Peninjauan, persetujuan, laporan, dan audit yang diizinkan |
+| HR Manager | Monitoring, buka kembali penilaian, laporan, dan audit yang diizinkan |
 | Branch Head | Karyawan pada cabang yang ditetapkan |
 | Division Head | Karyawan pada divisi yang ditetapkan |
 | Sub Division Head | Karyawan pada sub-divisi yang ditetapkan |
@@ -44,6 +44,11 @@ dan bantuan kendala umum. Sumber HTML-nya tersedia di
 Setiap request sensitif diperiksa di backend melalui authentication,
 permission, policy, organizational scope, validation, business rule, dan audit.
 Menyembunyikan menu di frontend bukan mekanisme otorisasi.
+
+Pada penilaian operasional, hanya Sub Division Head yang dapat mengisi nilai
+karyawan pada sub-divisi aktif yang sama. HR dan pimpinan memantau hasil;
+HR/Super Admin dapat membuka kembali hasil selesai dengan alasan yang diaudit.
+Penilaian diri dan pembuatan kalibrasi baru tidak menjadi bagian alur aktif.
 
 ## Teknologi
 

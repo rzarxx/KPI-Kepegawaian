@@ -27,7 +27,16 @@ class EmployeePolicy
 
     public function evaluate(User $user, Employee $employee): bool
     {
-        return $user->can('evaluation.create') && $this->view($user, $employee);
+        $assignment = $employee->currentAssignment;
+
+        return $user->hasRole('Sub Division Head')
+            && $user->can('evaluation.create')
+            && in_array($employee->current_status->value, ['ACTIVE', 'PROBATION'], true)
+            && $assignment !== null
+            && $assignment->sub_division_id !== null
+            && app(OrganizationalScopeResolver::class)->effectiveScopes($user)
+                ->contains(fn ($scope): bool => (int) $scope->sub_division_id === (int) $assignment->sub_division_id)
+            && $this->view($user, $employee);
     }
 
     public function update(User $user, Employee $employee): bool

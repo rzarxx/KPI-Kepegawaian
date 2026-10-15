@@ -1,41 +1,66 @@
-﻿import { test, expect } from './fixtures';
+import { test, expect } from './fixtures';
+import { E2E_PASSWORD } from './environment';
 
-test.describe('Penilaian / Evaluasi', () => {
-    test('halaman konfigurasi menampilkan komponen penilaian', async ({ page }) => {
+test.describe('Penilaian', () => {
+    test('halaman konfigurasi menampilkan komponen dan kriteria default', async ({ page }) => {
         await page.goto('/penilaian/konfigurasi');
-        await expect(page.locator('text=Komponen').or(page.locator('text=Periode')).first()).toBeVisible();
-    });
 
-    test('komponen penilaian default tersedia', async ({ page }) => {
-        await page.goto('/penilaian/konfigurasi');
-        const components = [
-            'Masa Kerja', 'Tanggung Jawab', 'Absensi',
-            'Inisiatif', 'Sikap', 'Komunikasi', 'Kerjasama Tim',
-        ];
-        for (const comp of components) {
-            await expect(page.locator(`text=${comp}`).first()).toBeVisible({ timeout: 5_000 });
+        for (const component of [
+            'Masa Kerja',
+            'Tanggung Jawab',
+            'Absensi',
+            'Inisiatif',
+            'Sikap',
+            'Komunikasi',
+            'Kerjasama Tim',
+        ]) {
+            await expect(page.getByText(component, { exact: true }).first()).toBeVisible();
+        }
+
+        for (const criterion of ['Perlu Perhatian', 'Baik', 'Sangat Baik', 'Istimewa']) {
+            await expect(page.getByText(criterion, { exact: true }).first()).toBeVisible();
         }
     });
 
-    test('kriteria penilaian default tersedia', async ({ page }) => {
-        await page.goto('/penilaian/konfigurasi');
-        const criteria = ['Perlu Perhatian', 'Baik', 'Sangat Baik', 'Istimewa'];
-        for (const c of criteria) {
-            await expect(page.locator(`text=${c}`).first()).toBeVisible({ timeout: 5_000 });
-        }
-    });
+    test('Kasubdiv menyimpan draf lalu menyelesaikan penilaian', async ({ browser }) => {
+        const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
+        const page = await context.newPage();
 
-    test('bisa menilai pejuang dari halaman detail', async ({ page }) => {
-        await page.goto('/pejuang');
-        const employeeLink = page.locator('a[href*="/pejuang/"]').first();
-        if (await employeeLink.isVisible({ timeout: 5_000 })) {
-            const href = await employeeLink.getAttribute('href');
-            if (href) {
-                const employeeId = href.split('/').pop();
-                await page.goto(`/penilaian/${employeeId}`);
-                // Should show evaluation form or redirect
-                await expect(page.locator('body')).toBeVisible();
-            }
+        await page.goto('/login', { waitUntil: 'domcontentloaded' });
+        const email = page.getByLabel('Email');
+        const password = page.locator('input[name="password"]');
+        await email.fill('sub.division.head@kpi.local.test');
+        await password.fill(E2E_PASSWORD);
+        await expect(email).toHaveValue('sub.division.head@kpi.local.test');
+        await expect(password).toHaveValue(E2E_PASSWORD);
+        await page.getByRole('button', { name: 'Masuk' }).click();
+        await page.waitForURL('**/dashboard', { timeout: 60_000, waitUntil: 'domcontentloaded' });
+
+        await page.goto('/penilaian');
+        await expect(page.getByRole('heading', { name: 'Daftar Tugas Kasubdiv' })).toBeVisible();
+        await expect(page.getByText('Periode E2E Aktif', { exact: true })).toBeVisible();
+
+        await page.getByRole('link', { name: 'Mulai Penilaian' }).first().click();
+        await expect(page.getByRole('heading', { name: 'Nilai Kinerja Karyawan' })).toBeVisible();
+
+        for (const input of await page.locator('input[aria-label^="Nilai "]').all()) {
+            await input.fill('80');
         }
+
+        await Promise.all([
+            page.waitForURL((url) => url.pathname === '/penilaian', { waitUntil: 'domcontentloaded' }),
+            page.getByRole('button', { name: 'Simpan Draf' }).click(),
+        ]);
+        await expect(page.getByText('Draf', { exact: true }).first()).toBeVisible();
+
+        await page.getByRole('link', { name: 'Lanjutkan Draf' }).first().click();
+        await page.getByRole('button', { name: 'Selesaikan Penilaian' }).click();
+        await Promise.all([
+            page.waitForURL((url) => url.pathname === '/penilaian', { waitUntil: 'domcontentloaded' }),
+            page.getByRole('button', { name: 'Ya, Selesaikan' }).click(),
+        ]);
+        await expect(page.getByText('Selesai', { exact: true }).first()).toBeVisible();
+
+        await context.close();
     });
 });

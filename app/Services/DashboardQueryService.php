@@ -70,6 +70,7 @@ class DashboardQueryService
     {
         return EmployeeEvaluation::query()
             ->whereIn('employee_evaluations.employee_id', $employeeIds)
+            ->where('employee_evaluations.evaluation_type', EmployeeEvaluation::TYPE_SUPERVISOR)
             ->whereIn('employee_evaluations.status', ['FINALIZED', 'CLOSED'])
             ->when($filters['period_id'] ?? null, fn (Builder $q, $id) => $q->where('employee_evaluations.period_id', $id));
     }

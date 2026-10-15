@@ -59,8 +59,6 @@ class HandleInertiaRequests extends Middleware
                     'employeeView' => $user->can('employee.view'),
                     'incidentView' => $user->can('employee_incident.view'),
                     'evaluationView' => $user->can('evaluation.view'),
-                    'selfAssess' => $user->can('evaluation.self_assess'),
-                    'calibrationView' => $user->can('calibration.view'),
                     'goalView' => $user->can('goal.view'),
                     'reportView' => $user->can('report.view'),
                     'auditView' => $user->hasRole('Super Admin'),

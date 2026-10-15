@@ -6,14 +6,12 @@ import {
     Bell,
     Building2,
     ChevronDown,
-    ClipboardCheck,
     Crosshair,
     FileChartColumn,
     LogOut,
     Menu,
     Network,
     Palette,
-    Scale,
     ScrollText,
     TriangleAlert,
     UserCog,
@@ -61,13 +59,7 @@ export default function AuthenticatedLayout({
             ? [{ label: 'Karyawan Bermasalah', href: route('employees.incidents.overview'), active: route().current('employees.incidents.*'), icon: <TriangleAlert size={18} /> }]
             : []),
         ...(abilities.evaluationView
-            ? [{ label: 'Penilaian', href: route('evaluations.configuration'), active: route().current('evaluations.*') || route().current('evaluation-*'), icon: <UserRound size={18} /> }]
-            : []),
-        ...(abilities.selfAssess
-            ? [{ label: 'Penilaian Diri', href: route('self-assessment.index'), active: route().current('self-assessment.*'), icon: <ClipboardCheck size={18} /> }]
-            : []),
-        ...(abilities.calibrationView
-            ? [{ label: 'Kalibrasi', href: route('calibration.index'), active: route().current('calibration.*'), icon: <Scale size={18} /> }]
+            ? [{ label: 'Penilaian', href: route('evaluations.index'), active: route().current('evaluations.*') || route().current('evaluation-*'), icon: <UserRound size={18} /> }]
             : []),
         ...(abilities.goalView
             ? [{ label: 'Target', href: route('goals.index'), active: route().current('goals.*'), icon: <Crosshair size={18} /> }]

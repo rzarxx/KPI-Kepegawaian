@@ -1,4 +1,17 @@
 import { test, expect } from '@playwright/test';
+import { E2E_PASSWORD } from './environment';
+
+async function loginAsSuperAdmin(page: import('@playwright/test').Page) {
+    await page.goto('/login');
+    const email = page.getByLabel('Email');
+    const password = page.locator('input[name="password"]');
+    await email.fill('super.admin@kpi.local.test');
+    await password.fill(E2E_PASSWORD);
+    await expect(email).toHaveValue('super.admin@kpi.local.test');
+    await expect(password).toHaveValue(E2E_PASSWORD);
+    await page.getByRole('button', { name: 'Masuk' }).click();
+    await page.waitForURL('**/dashboard', { timeout: 30_000, waitUntil: 'domcontentloaded' });
+}
 
 test.describe('Autentikasi', () => {
     test('halaman login bisa diakses', async ({ page }) => {
@@ -18,18 +31,14 @@ test.describe('Autentikasi', () => {
     });
 
     test('login berhasil dengan Super Admin', async ({ page }) => {
-        await page.goto('/login');
-        await page.getByLabel('Email').fill('super.admin@kpi.local.test');
-        await page.locator('input[name="password"]').fill('KpiLokal2026!');
-        await page.getByRole('button', { name: 'Masuk' }).click();
-        await page.waitForURL('**/dashboard');
+        await loginAsSuperAdmin(page);
         await expect(page).toHaveURL(/dashboard/);
     });
 
     test('login ditolak untuk akun nonaktif', async ({ page }) => {
         await page.goto('/login');
         await page.getByLabel('Email').fill('employee@kpi.local.test');
-        await page.locator('input[name="password"]').fill('KpiLokal2026!');
+        await page.locator('input[name="password"]').fill(E2E_PASSWORD);
         await page.getByRole('button', { name: 'Masuk' }).click();
         // Should show error or not redirect to dashboard
         await expect(page).not.toHaveURL(/dashboard/, { timeout: 5_000 });
@@ -58,17 +67,14 @@ test.describe('Autentikasi', () => {
     });
 
     test('logout berhasil', async ({ page }) => {
-        await page.goto('/login');
-        await page.getByLabel('Email').fill('super.admin@kpi.local.test');
-        await page.locator('input[name="password"]').fill('KpiLokal2026!');
-        await page.getByRole('button', { name: 'Masuk' }).click();
-        await page.waitForURL('**/dashboard');
-        // Open account dropdown and click logout
-        await page.locator('text=super.admin').or(page.locator('button:has(svg)')).last().click();
-        const logoutButton = page.locator('text=Keluar');
-        if (await logoutButton.isVisible({ timeout: 3_000 })) {
-            await logoutButton.click();
-            await expect(page).toHaveURL(/login|\//);
-        }
+        await loginAsSuperAdmin(page);
+        await page.getByRole('button', { name: 'Akun Lokal - Super Admin' }).click();
+        const logoutResponse = page.waitForResponse((response) => (
+            response.request().method() === 'POST' && new URL(response.url()).pathname === '/logout'
+        ));
+        await page.getByRole('button', { name: 'Keluar' }).click({ noWaitAfter: true });
+        expect((await logoutResponse).status()).toBeLessThan(400);
+        await page.goto('/dashboard');
+        await expect(page).toHaveURL(/\/login$/);
     });
 });

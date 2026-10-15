@@ -1,133 +1,220 @@
-import { confirmAction } from '@/Utils/confirmation';
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router, useForm } from '@inertiajs/react';
-import { Calculator, CalendarDays, CheckCircle2, ClipboardCheck, LockKeyhole, Send } from 'lucide-react';
+import { confirmAction } from '@/Utils/confirmation';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, Calculator, CalendarDays, CheckCircle2, LockKeyhole, RotateCcw, Save } from 'lucide-react';
 
 type Score = { component_id: number; raw_score: string; note?: string };
 type Component = { id: number; name: string; default_weight: string; is_auto_calculated: boolean };
 type Period = { id: number; name: string; start_date: string; end_date: string };
-type Evaluation = { id: number; status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'FINALIZED' | 'CLOSED'; notes?: string; total_score: string; scores: Score[] };
-type SelfAssessment = { id: number; status: string; total_score: string; notes?: string; scores: Score[] } | null;
-type Abilities = { edit: boolean; submit: boolean; approve: boolean; finalize: boolean; close: boolean };
+type Evaluation = { id: number; status: string; notes?: string; total_score: string; scores: Score[] };
+type Abilities = { edit: boolean; complete: boolean; reopen: boolean };
 
 export default function Form({
     employee,
     period,
     components,
     evaluation,
-    selfAssessment,
     abilities,
 }: {
     employee: { id: number; full_name: string; employee_number: string };
     period: Period | null;
     components: Component[];
     evaluation: Evaluation | null;
-    selfAssessment?: SelfAssessment;
     abilities: Abilities;
 }) {
     const existing = new Map((evaluation?.scores ?? []).map((score) => [score.component_id, score]));
-    const selfScores = new Map((selfAssessment?.scores ?? []).map((score) => [score.component_id, score]));
     const form = useForm({
         period_id: period?.id?.toString() ?? '',
+        intent: 'draft' as 'draft' | 'complete',
         notes: evaluation?.notes ?? '',
-        scores: components.map((component) => existing.get(component.id) ?? { component_id: component.id, raw_score: '', note: '' }),
+        scores: components.map((component) => existing.get(component.id) ?? {
+            component_id: component.id,
+            raw_score: '',
+            note: '',
+        }),
     });
-    const total = form.data.scores.reduce((sum, score, index) => sum + (Number(score.raw_score) || 0) * Number(components[index].default_weight) / 100, 0);
-    const editable = !evaluation || abilities.edit;
-    const transition = transitionFor(evaluation, abilities);
-    const scoreError = (index: number) => Object.entries(form.errors)
-        .find(([field]) => field === 'scores.' + index + '.raw_score')?.[1];
+    const reopen = useForm({ status: 'DRAFT', reason: '' });
+    const editable = abilities.edit && period !== null;
+    const completed = evaluation !== null && ['FINALIZED', 'CLOSED'].includes(evaluation.status);
+    const legacy = evaluation !== null && ['SUBMITTED', 'APPROVED'].includes(evaluation.status);
+    const total = form.data.scores.reduce((sum, score, index) => (
+        sum + (Number(score.raw_score) || 0) * Number(components[index]?.default_weight ?? 0) / 100
+    ), 0);
 
-    const save = () => form.post(route('evaluations.store', employee.id), { preserveScroll: true });
-    const move = async () => {
-        if (!evaluation || !transition) return;
-        if (['FINALIZED', 'CLOSED'].includes(transition.status) && !await confirmAction({ title: transition.label, message: transition.confirmation, confirmLabel: 'Ya, Lanjutkan' })) return;
-        router.post(route('evaluations.transition', evaluation.id), { status: transition.status }, { preserveScroll: true });
+    const submit = async (intent: 'draft' | 'complete') => {
+        if (intent === 'complete') {
+            const confirmed = await confirmAction({
+                title: 'Selesaikan Penilaian',
+                message: 'Setelah selesai, nilai akan dikunci dan langsung masuk laporan. Pastikan seluruh isian sudah benar.',
+                confirmLabel: 'Ya, Selesaikan',
+            });
+            if (!confirmed) return;
+        }
+
+        form.transform((data) => ({ ...data, intent }));
+        form.post(route('evaluations.store', employee.id), {
+            preserveScroll: true,
+        });
     };
 
     return (
-        <AuthenticatedLayout header={<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p className="text-sm text-slate-500">Penilaian</p><h1 className="text-[26px] font-bold text-slate-900">Penilaian Karyawan</h1></div>{evaluation && <span className={'w-fit rounded-full px-3 py-1.5 text-sm font-semibold ' + statusStyles[evaluation.status]}>{statusLabels[evaluation.status]}</span>}</div>}>
-            <Head title="Penilaian Karyawan" />
-            <div className="mx-auto grid max-w-[1200px] gap-6 p-4 sm:p-6 lg:grid-cols-[1fr_280px] lg:p-8">
-                <form className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" onSubmit={(event) => { event.preventDefault(); save(); }}>
-                    <div className="flex flex-col gap-1 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <h2 className="font-semibold text-slate-900">{employee.full_name}</h2>
-                            <p className="mt-0.5 text-sm text-slate-500">{employee.employee_number}</p>
-                        </div>
-                        {period && (
-                            <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                                <CalendarDays size={15} className="shrink-0 text-brand" />
-                                <span className="font-medium">{period.name}</span>
-                                <span className="text-slate-400">·</span>
-                                <span className="text-xs text-slate-500">{period.start_date.slice(0, 10)} s/d {period.end_date.slice(0, 10)}</span>
-                            </div>
-                        )}
+        <AuthenticatedLayout
+            header={(
+                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+                    <div>
+                        <p className="text-sm text-slate-500">Penilaian Kasubdiv</p>
+                        <h1 className="text-[26px] font-bold text-slate-900">Nilai Kinerja Karyawan</h1>
                     </div>
+                    <StatusBadge evaluation={evaluation} />
+                </div>
+            )}
+        >
+            <Head title="Penilaian Karyawan" />
+            <div className="mx-auto max-w-[1120px] p-4 sm:p-6 lg:p-8">
+                <Link className="mb-4 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-brand-dark hover:underline" href={route('evaluations.index', period ? { period_id: period.id } : {})}>
+                    <ArrowLeft size={16} /> Kembali ke daftar penilaian
+                </Link>
 
-                    {!period && (
-                        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                            Periode penilaian tidak ditemukan. Kembali ke halaman karyawan dan pilih periode yang tersedia.
-                        </div>
-                    )}
-
-                    {selfAssessment && selfAssessment.status === 'SUBMITTED' && (
-                        <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-                            <div className="flex items-center gap-2">
-                                <ClipboardCheck size={16} className="shrink-0" />
-                                <span className="font-semibold">Penilaian Diri Tersedia</span>
+                <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+                    <form className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm" onSubmit={(event) => event.preventDefault()}>
+                        <div className="flex flex-col gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h2 className="font-semibold text-slate-900">{employee.full_name}</h2>
+                                <p className="mt-0.5 text-sm text-slate-500">{employee.employee_number}</p>
                             </div>
-                            <p className="mt-1 text-blue-700">
-                                Karyawan telah mengisi penilaian diri dengan total skor{' '}
-                                <span className="font-bold">{Number(selfAssessment.total_score).toFixed(2)}</span>.
-                                Nilai penilaian diri ditampilkan sebagai referensi di setiap komponen.
-                            </p>
-                        </div>
-                    )}
-
-                    {!editable && <div className="mt-5 flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600"><LockKeyhole className="mt-0.5 shrink-0" size={17} /><p>Penilaian ini sudah diajukan dan tidak dapat diubah. Silakan gunakan opsi yang tersedia untuk melanjutkan proses.</p></div>}
-                    <div className="mt-6 space-y-4">{components.map((component, index) => { const selfScore = selfScores.get(component.id); return <div className="grid gap-3 border-b border-slate-100 pb-4 sm:grid-cols-[1fr_150px]" key={component.id}><div><p className="font-medium text-slate-800">{component.name}</p><p className="text-xs text-slate-500">Bobot {component.default_weight}% {component.is_auto_calculated ? '· dihitung otomatis' : ''}</p>{selfScore && <p className="mt-1 flex items-center gap-1.5 text-xs text-blue-600"><ClipboardCheck size={12} />Penilaian diri: <span className="font-semibold">{selfScore.raw_score}</span>{selfScore.note && <span className="text-blue-500">· {selfScore.note}</span>}</p>}</div><input aria-label={'Nilai ' + component.name} className="h-10 rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50 disabled:text-slate-500" disabled={!editable || component.is_auto_calculated} max="100" min="0" onChange={(event) => { const scores = [...form.data.scores]; scores[index] = { ...scores[index], raw_score: event.target.value }; form.setData('scores', scores); }} placeholder={component.is_auto_calculated ? 'Otomatis' : '0-100'} type="number" value={form.data.scores[index].raw_score} />{scoreError(index) && <p className="text-xs text-red-600 sm:col-start-2">{scoreError(index)}</p>}</div>; })}</div>
-                    {form.errors.scores && <p className="mt-3 text-sm text-red-600">{form.errors.scores}</p>}
-                    {form.errors.period_id && <p className="mt-3 text-sm text-red-600">{form.errors.period_id}</p>}
-                    <textarea className="mt-5 min-h-24 w-full rounded-[9px] border-slate-300 text-sm focus:border-brand focus:ring-brand disabled:bg-slate-50" disabled={!editable} onChange={(event) => form.setData('notes', event.target.value)} placeholder="Catatan tambahan (opsional)" value={form.data.notes} />
-                    <div className="mt-5 flex flex-wrap justify-end gap-3">{editable && period && <Button disabled={form.processing} type="submit" variant="secondary">Simpan Draf</Button>}{transition && <Button disabled={form.processing} onClick={move} type="button">{transition.icon}{transition.label}</Button>}</div>
-                </form>
-                <aside className="h-fit rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 className="flex items-center gap-2 font-semibold text-slate-900"><Calculator size={18} />Ringkasan Nilai</h2>
-                    <p className="mt-5 text-sm text-slate-500">{evaluation ? 'Total tersimpan' : 'Perkiraan sementara'}</p>
-                    <p className="mt-1 text-3xl font-bold text-slate-900">{evaluation ? Number(evaluation.total_score).toFixed(2) : total.toFixed(2)}</p>
-                    <p className="mt-4 text-xs leading-5 text-slate-500">Nilai akhir dihitung ulang secara otomatis oleh sistem setiap kali draf disimpan.</p>
-                    {period && (
-                        <div className="mt-4 border-t border-slate-100 pt-4">
-                            <p className="text-xs font-semibold text-slate-500">PERIODE</p>
-                            <p className="mt-1 text-sm font-medium text-slate-800">{period.name}</p>
-                            <p className="text-xs text-slate-500">{period.start_date.slice(0, 10)} s/d {period.end_date.slice(0, 10)}</p>
-                        </div>
-                    )}
-                    {selfAssessment && (
-                        <div className="mt-4 border-t border-slate-100 pt-4">
-                            <p className="text-xs font-semibold text-slate-500">PENILAIAN DIRI</p>
-                            <p className="mt-1 text-2xl font-bold text-blue-600">{Number(selfAssessment.total_score).toFixed(2)}</p>
-                            <p className="mt-1 text-xs text-slate-500">Skor penilaian diri oleh karyawan</p>
-                            {selfAssessment.notes && (
-                                <p className="mt-2 rounded bg-blue-50 p-2 text-xs text-blue-700">{selfAssessment.notes}</p>
+                            {period && (
+                                <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                                    <CalendarDays className="shrink-0 text-brand" size={16} />
+                                    <span className="font-medium">{period.name}</span>
+                                </div>
                             )}
                         </div>
-                    )}
-                </aside>
+
+                        {!period && <Message tone="danger">Tidak ada periode aktif. Hubungi HR untuk mengaktifkan periode penilaian.</Message>}
+                        {completed && <Message tone="success">Penilaian ini sudah selesai dan terkunci.</Message>}
+                        {legacy && <Message tone="warning">Penilaian ini berasal dari workflow lama dan tersedia sebagai riwayat baca.</Message>}
+
+                        <div className="mt-5 space-y-4">
+                            {components.map((component, index) => (
+                                <section className="rounded-xl border border-slate-200 p-4" key={component.id}>
+                                    <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                                        <div>
+                                            <h3 className="font-semibold text-slate-900">{component.name}</h3>
+                                            <p className="text-xs text-slate-500">Bobot {Number(component.default_weight)}%</p>
+                                        </div>
+                                        {component.is_auto_calculated ? (
+                                            <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                                                <Calculator size={13} /> Otomatis
+                                            </span>
+                                        ) : (
+                                            <label className="text-sm font-medium text-slate-700">
+                                                Nilai
+                                                <input
+                                                    aria-label={`Nilai ${component.name}`}
+                                                    className="ml-2 h-10 w-24 rounded-lg border-slate-300 text-right focus:border-brand focus:ring-brand"
+                                                    disabled={!editable || form.processing}
+                                                    max="100"
+                                                    min="0"
+                                                    onChange={(event) => form.setData(`scores.${index}.raw_score`, event.target.value)}
+                                                    required
+                                                    type="number"
+                                                    value={form.data.scores[index].raw_score}
+                                                />
+                                            </label>
+                                        )}
+                                    </div>
+                                    {!component.is_auto_calculated && (
+                                        <textarea
+                                            aria-label={`Catatan ${component.name}`}
+                                            className="mt-3 min-h-20 w-full rounded-lg border-slate-300 text-sm focus:border-brand focus:ring-brand"
+                                            disabled={!editable || form.processing}
+                                            onChange={(event) => form.setData(`scores.${index}.note`, event.target.value)}
+                                            placeholder="Catatan pendukung (opsional)"
+                                            value={form.data.scores[index].note ?? ''}
+                                        />
+                                    )}
+                                    {form.errors[`scores.${index}.raw_score`] && <p className="mt-1 text-xs text-red-600">{form.errors[`scores.${index}.raw_score`]}</p>}
+                                </section>
+                            ))}
+                        </div>
+
+                        <label className="mt-5 block text-sm font-semibold text-slate-700">
+                            Catatan umum
+                            <textarea
+                                className="mt-2 min-h-28 w-full rounded-lg border-slate-300 text-sm focus:border-brand focus:ring-brand"
+                                disabled={!editable || form.processing}
+                                maxLength={5000}
+                                onChange={(event) => form.setData('notes', event.target.value)}
+                                placeholder="Ringkasan hasil penilaian (opsional)"
+                                value={form.data.notes}
+                            />
+                        </label>
+
+                        {Object.values(form.errors).length > 0 && (
+                            <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">Periksa kembali isian penilaian yang belum valid.</p>
+                        )}
+
+                        {editable && (
+                            <div className="mt-6 flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+                                <Button disabled={form.processing} onClick={() => submit('draft')} type="button" variant="secondary">
+                                    <Save size={16} /> Simpan Draf
+                                </Button>
+                                <Button disabled={form.processing || !abilities.complete} onClick={() => submit('complete')} type="button">
+                                    <CheckCircle2 size={16} /> Selesaikan Penilaian
+                                </Button>
+                            </div>
+                        )}
+                    </form>
+
+                    <aside className="space-y-4">
+                        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                            <p className="text-sm text-slate-500">Perkiraan nilai akhir</p>
+                            <p className="mt-1 text-3xl font-bold text-slate-900">{total.toFixed(2)}</p>
+                            <p className="mt-3 text-xs leading-5 text-slate-500">Nilai resmi dihitung kembali oleh server ketika disimpan.</p>
+                        </div>
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+                            <div className="flex items-center gap-2 font-semibold text-slate-800"><LockKeyhole size={16} /> Alur ringkas</div>
+                            <p className="mt-2 leading-6">Simpan sebagai draf jika belum selesai. Pilih Selesaikan agar hasil dikunci dan langsung masuk laporan.</p>
+                        </div>
+                        {abilities.reopen && evaluation && (
+                            <form className="rounded-xl border border-amber-200 bg-amber-50 p-5" onSubmit={(event) => { event.preventDefault(); reopen.post(route('evaluations.transition', evaluation.id), { preserveScroll: true }); }}>
+                                <div className="flex items-center gap-2 font-semibold text-amber-900"><RotateCcw size={16} /> Buka kembali</div>
+                                <p className="mt-2 text-xs leading-5 text-amber-800">Gunakan hanya untuk koreksi. Alasan akan dicatat pada audit.</p>
+                                <textarea
+                                    className="mt-3 min-h-24 w-full rounded-lg border-amber-300 text-sm focus:border-amber-600 focus:ring-amber-600"
+                                    maxLength={1000}
+                                    minLength={10}
+                                    onChange={(event) => reopen.setData('reason', event.target.value)}
+                                    placeholder="Jelaskan alasan pembukaan kembali"
+                                    required
+                                    value={reopen.data.reason}
+                                />
+                                {reopen.errors.reason && <p className="mt-1 text-xs text-red-600">{reopen.errors.reason}</p>}
+                                <Button className="mt-3 w-full" disabled={reopen.processing} type="submit" variant="secondary">Buka sebagai Draf</Button>
+                            </form>
+                        )}
+                    </aside>
+                </div>
             </div>
         </AuthenticatedLayout>
     );
 }
 
-function transitionFor(evaluation: Evaluation | null, abilities: Abilities) {
-    if (!evaluation) return null;
-    if (evaluation.status === 'DRAFT' && abilities.submit) return { status: 'SUBMITTED', label: 'Ajukan Penilaian', confirmation: '', icon: <Send size={16} /> };
-    if (evaluation.status === 'SUBMITTED' && abilities.approve) return { status: 'APPROVED', label: 'Setujui Penilaian', confirmation: '', icon: <CheckCircle2 size={16} /> };
-    if (evaluation.status === 'APPROVED' && abilities.finalize) return { status: 'FINALIZED', label: 'Finalisasi', confirmation: 'Setelah difinalisasi, nilai tidak dapat diubah lagi. Lanjutkan?', icon: <CheckCircle2 size={16} /> };
-    if (evaluation.status === 'FINALIZED' && abilities.close) return { status: 'CLOSED', label: 'Tutup Penilaian', confirmation: 'Penilaian yang ditutup tidak dapat dibuka kembali. Lanjutkan?', icon: <LockKeyhole size={16} /> };
-    return null;
+function StatusBadge({ evaluation }: { evaluation: Evaluation | null }) {
+    const completed = evaluation && ['FINALIZED', 'CLOSED'].includes(evaluation.status);
+    const label = evaluation === null ? 'Belum Dinilai' : evaluation.status === 'DRAFT' ? 'Draf' : completed ? 'Selesai' : 'Riwayat';
+    const style = evaluation === null ? 'bg-slate-100 text-slate-700' : evaluation.status === 'DRAFT' ? 'bg-amber-100 text-amber-800' : completed ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800';
+
+    return <span className={`w-fit rounded-full px-3 py-1.5 text-sm font-semibold ${style}`}>{label}</span>;
 }
-const statusLabels = { DRAFT: 'Draf', SUBMITTED: 'Diajukan', APPROVED: 'Disetujui', FINALIZED: 'Final', CLOSED: 'Ditutup' };
-const statusStyles = { DRAFT: 'bg-slate-100 text-slate-700', SUBMITTED: 'bg-blue-50 text-blue-700', APPROVED: 'bg-amber-50 text-amber-800', FINALIZED: 'bg-brand-subtle text-brand-dark', CLOSED: 'bg-slate-900 text-white' };
+
+function Message({ children, tone }: { children: React.ReactNode; tone: 'danger' | 'success' | 'warning' }) {
+    const styles = {
+        danger: 'border-red-200 bg-red-50 text-red-700',
+        success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+        warning: 'border-amber-200 bg-amber-50 text-amber-800',
+    };
+
+    return <div className={`mt-4 rounded-lg border px-4 py-3 text-sm ${styles[tone]}`}>{children}</div>;
+}

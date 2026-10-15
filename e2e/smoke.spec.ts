@@ -9,23 +9,17 @@ test.describe('Navigasi & Smoke Test Halaman', () => {
 
     test('sidebar menampilkan semua menu Super Admin', async ({ page }) => {
         await page.goto('/dashboard');
-        const sidebar = page.locator('aside').first();
-        await expect(sidebar.locator('text=Beranda')).toBeVisible();
-        await expect(sidebar.locator('text=Pejuang')).toBeVisible();
-        await expect(sidebar.locator('text=Catatan Khusus')).toBeVisible();
-        await expect(sidebar.locator('text=Penilaian')).toBeVisible();
-        await expect(sidebar.locator('text=Laporan')).toBeVisible();
-        await expect(sidebar.locator('text=Riwayat Aktivitas')).toBeVisible();
-        await expect(sidebar.locator('text=Notifikasi')).toBeVisible();
-        await expect(sidebar.locator('text=Organisasi')).toBeVisible();
-        await expect(sidebar.locator('text=Pengguna')).toBeVisible();
-        await expect(sidebar.locator('text=Tampilan')).toBeVisible();
+        const navigation = page.locator('aside').first().locator('nav');
+        for (const label of ['Beranda', 'Karyawan', 'Karyawan Bermasalah', 'Penilaian', 'Target', 'Laporan', 'Riwayat Aktivitas', 'Organisasi', 'Pengguna', 'Tampilan']) {
+            await expect(navigation.getByRole('link', { name: label, exact: true })).toBeVisible();
+        }
+        await expect(navigation.locator('a[href$="/notifikasi"]')).toBeVisible();
     });
 
-    test('halaman pejuang bisa diakses', async ({ page }) => {
-        await page.goto('/pejuang');
+    test('halaman karyawan bisa diakses', async ({ page }) => {
+        await page.goto('/pejuang', { waitUntil: 'domcontentloaded' });
         await expect(page).toHaveURL(/pejuang/);
-        await expect(page.locator('h1, h2').filter({ hasText: /Pejuang/i }).first()).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Karyawan/i }).first()).toBeVisible();
     });
 
     test('halaman tambah pejuang bisa diakses', async ({ page }) => {
@@ -102,7 +96,7 @@ test.describe('Navigasi & Smoke Test Halaman', () => {
         expect(response?.status()).toBe(200);
         const body = await response?.text();
         const manifest = JSON.parse(body!);
-        expect(manifest.name).toBe('KPI Kepegawaian');
+        expect(manifest.name).toBe('Sistem Penilaian Karyawan');
         expect(manifest.icons).toBeDefined();
         expect(manifest.icons.length).toBeGreaterThan(0);
     });

@@ -2,6 +2,44 @@
 
 ## Unreleased
 
+### Hardening Kesiapan Rilis -- 13 Oktober 2026
+
+- Memperbarui `league/commonmark` ke versi aman dan menutup advisory high serta
+  medium pada lockfile Composer.
+- Mengamankan nama file pada header pratinjau dokumen privat dengan builder
+  `Content-Disposition` standar.
+- Mengosongkan password akun UAT pada `.env.example`; seeder tersebut tetap
+  diblokir pada environment selain local/testing.
+- Menambahkan CI untuk test, formatter, TypeScript, lint, production build,
+  audit dependency, serta smoke migration MySQL 8 pada database disposable.
+- Mengamankan Playwright agar default hanya menargetkan localhost; target
+  nonlokal memerlukan izin dan kredensial eksplisit.
+- Menambahkan skenario browser alur Kasubdiv dari Belum Dinilai, Draf, sampai
+  Selesai serta memastikan URL terlarang benar-benar menghasilkan `403`.
+- Membatasi CSP `upgrade-insecure-requests` pada koneksi HTTPS agar login
+  localhost tidak dipaksa menuju HTTPS.
+- Menambahkan seeder disposable khusus E2E dan menjalankan critical path
+  browser di CI setelah migration smoke MySQL.
+- Mencegah reload mendadak saat service worker pertama kali mengambil alih
+  halaman, sehingga input login atau formulir yang sedang diisi tidak hilang.
+
+### Penyederhanaan Penilaian Kasubdiv -- 13 Oktober 2026
+
+- Menerapkan alur penilaian baru `Belum Dinilai → Draf → Selesai`
+  dengan Kasubdiv sebagai satu-satunya pengisi nilai dalam scope Sub Divisinya.
+- Menghapus kebutuhan approval berlapis; HR dan pimpinan cukup
+  memantau progres serta membaca hasil sesuai scope.
+- Menonaktifkan route pembuatan Penilaian Diri dan Kalibrasi baru tanpa
+  menghapus histori yang sudah tersimpan.
+- Menambahkan daftar tugas satu halaman, form dengan Simpan Draf/Selesaikan,
+  pengingat khusus Kasubdiv, serta filter laporan/dashboard yang hanya memakai
+  penilaian supervisor selesai.
+- Menambahkan migration permission untuk instalasi berjalan sehingga role lama
+  beralih ke matriks baru tanpa seeder ulang atau perubahan data penilaian.
+- Menambahkan aturan buka kembali oleh HR/Super Admin dengan alasan dan audit,
+  penanganan karyawan tanpa Sub Divisi melalui daftar **Perlu Penempatan**,
+  urutan implementasi, test wajib, dan exit criteria staging.
+
 ### Perbaikan Menu Pengguna, Pratinjau PDF, dan PWA -- 10 Oktober 2026
 
 - Menu tindakan pada daftar pengguna tidak lagi terpotong oleh container dan

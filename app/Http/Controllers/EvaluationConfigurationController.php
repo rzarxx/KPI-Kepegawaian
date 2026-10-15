@@ -11,6 +11,7 @@ use App\Models\EvaluationComponent;
 use App\Models\EvaluationCriterion;
 use App\Models\PerformancePeriod;
 use App\Services\AuditLogger;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -127,7 +128,7 @@ class EvaluationConfigurationController extends Controller
             $snapshot = $period->toArray();
             $period->delete();
             $audit->log('evaluation.period.delete', request()->user(), $period, $snapshot, null);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return back()->with('error', 'Periode tidak dapat dihapus karena sudah memiliki penilaian terkait.');
         }
 
@@ -142,7 +143,7 @@ class EvaluationConfigurationController extends Controller
             $snapshot = $component->toArray();
             $component->delete();
             $audit->log('evaluation.component.delete', request()->user(), $component, $snapshot, null);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return back()->with('error', 'Komponen tidak dapat dihapus karena sudah digunakan dalam penilaian.');
         }
 
@@ -157,7 +158,7 @@ class EvaluationConfigurationController extends Controller
             $snapshot = $criterion->toArray();
             $criterion->delete();
             $audit->log('evaluation.criterion.delete', request()->user(), $criterion, $snapshot, null);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return back()->with('error', 'Kriteria tidak dapat dihapus karena masih digunakan.');
         }
 

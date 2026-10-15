@@ -20,7 +20,7 @@ test.describe('Kelola Pengguna', () => {
         await page.goto('/pengaturan/pengguna');
         await page.locator('label:has-text("Nama lengkap") input').fill('Test User E2E');
         await page.locator('label:has-text("Alamat email") input').fill(testEmail);
-        await page.locator('label:has-text("Kata sandi") input').fill('short');
+        await page.locator('#create-password').fill('short');
         await page.locator('label:has-text("Peran") select').selectOption('HR Admin');
         await page.getByRole('button', { name: 'Simpan Pengguna' }).click();
         // Should show validation error in Indonesian
@@ -31,7 +31,7 @@ test.describe('Kelola Pengguna', () => {
         await page.goto('/pengaturan/pengguna');
         await page.locator('label:has-text("Nama lengkap") input').fill('Duplicate Test');
         await page.locator('label:has-text("Alamat email") input').fill('super.admin@kpi.local.test');
-        await page.locator('label:has-text("Kata sandi") input').fill('TestPassword123!');
+        await page.locator('#create-password').fill('TestPassword123!');
         await page.locator('label:has-text("Peran") select').selectOption('HR Admin');
         await page.getByRole('button', { name: 'Simpan Pengguna' }).click();
         // Should show email already taken error
@@ -44,7 +44,7 @@ test.describe('Kelola Pengguna', () => {
 
         await page.locator('label:has-text("Nama lengkap") input').fill('E2E Test User');
         await page.locator('label:has-text("Alamat email") input').fill(email);
-        await page.locator('label:has-text("Kata sandi") input').fill('E2eTestPass2026!');
+        await page.locator('#create-password').fill('E2eTestPass2026!');
         await page.locator('label:has-text("Peran") select').selectOption('Auditor');
         await page.getByRole('button', { name: 'Simpan Pengguna' }).click();
 

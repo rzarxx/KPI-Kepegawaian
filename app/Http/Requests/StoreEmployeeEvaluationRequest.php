@@ -8,17 +8,16 @@ class StoreEmployeeEvaluationRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        if (! ($this->user()?->can('evaluation.create') && $this->user()?->can('employee.view'))) {
-            return false;
-        }
+        $employee = $this->route('employee');
 
-        return true;
+        return $employee !== null && (bool) $this->user()?->can('evaluate', $employee);
     }
 
     public function rules(): array
     {
         return [
-            'period_id' => ['nullable', 'integer', 'exists:performance_periods,id'],
+            'period_id' => ['required', 'integer', 'exists:performance_periods,id'],
+            'intent' => ['required', 'in:draft,complete'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'finalize' => ['prohibited'],
             'scores' => ['required', 'array', 'min:1'],

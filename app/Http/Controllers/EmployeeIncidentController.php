@@ -14,6 +14,7 @@ use App\Notifications\EmployeeIncidentResolvedNotification;
 use App\Notifications\SystemNotification;
 use App\Services\AuditLogger;
 use App\Services\EmployeeQueryService;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -115,7 +116,7 @@ class EmployeeIncidentController extends Controller
             $snapshot = $incident->toArray();
             $incident->delete();
             $audit->log('employee.incident.delete', request()->user(), $incident, $snapshot, null);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             return back()->with('error', 'Catatan masalah tidak dapat dihapus karena masih memiliki data terkait.');
         }
 

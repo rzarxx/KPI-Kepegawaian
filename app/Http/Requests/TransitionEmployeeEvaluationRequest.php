@@ -14,6 +14,9 @@ class TransitionEmployeeEvaluationRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['status' => ['required', Rule::in(['SUBMITTED', 'APPROVED', 'FINALIZED', 'CLOSED'])]];
+        return [
+            'status' => ['required', Rule::in(['DRAFT'])],
+            'reason' => ['required', 'string', 'min:10', 'max:1000'],
+        ];
     }
 }

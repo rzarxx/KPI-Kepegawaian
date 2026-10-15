@@ -9,7 +9,9 @@ use App\Models\Employee;
 use App\Models\EvaluationComponent;
 use App\Models\EvaluationCriterion;
 use App\Models\PerformancePeriod;
+use App\Models\SubDivision;
 use App\Models\User;
+use Database\Seeders\AccessControlSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
@@ -37,16 +39,17 @@ class EmployeeScopeAndEvaluationTest extends TestCase
 
     public function test_evaluation_total_and_criteria_are_calculated_on_server(): void
     {
+        $this->seed(AccessControlSeeder::class);
         $actor = User::factory()->create();
         $branch = Branch::query()->create(['code' => 'CBG-A', 'name' => 'Cabang A']);
-        $actor->givePermissionTo(Permission::findOrCreate('employee.view', 'web'), Permission::findOrCreate('evaluation.create', 'web'), Permission::findOrCreate('evaluation.finalize', 'web'));
-        $actor->organizationalScopes()->create(['branch_id' => $branch->id, 'scope_type' => 'branch', 'is_active' => true]);
         $employee = $this->employeeAt($branch);
-        $period = PerformancePeriod::query()->create(['name' => 'Semester 1', 'start_date' => now()->startOfYear(), 'end_date' => now()->endOfYear(), 'status' => 'DRAFT', 'is_active' => true]);
+        $actor->assignRole('Sub Division Head');
+        $actor->organizationalScopes()->create(['branch_id' => $branch->id, 'division_id' => $employee->currentAssignment->division_id, 'sub_division_id' => $employee->currentAssignment->sub_division_id, 'scope_type' => 'sub_division', 'is_active' => true]);
+        $period = PerformancePeriod::query()->create(['name' => 'Semester 1', 'start_date' => now()->startOfYear(), 'end_date' => now()->endOfYear(), 'status' => 'ACTIVE', 'is_active' => true]);
         EvaluationCriterion::query()->create(['name' => 'Baik', 'min_score' => 80, 'max_score' => 100, 'color_semantic' => 'success', 'sort_order' => 1]);
         $component = EvaluationComponent::query()->create(['code' => 'KOM-1', 'name' => 'Kualitas Kerja', 'default_weight' => 100, 'measurement_type' => 'MANUAL', 'scoring_method' => 'PERCENTAGE', 'is_auto_calculated' => false, 'is_active' => true, 'sort_order' => 1]);
 
-        $evaluation = app(SaveEmployeeEvaluationAction::class)->execute($actor, $employee, $period, ['scores' => [['component_id' => $component->id, 'raw_score' => 88, 'note' => 'Konsisten']], 'notes' => 'Catatan']);
+        $evaluation = app(SaveEmployeeEvaluationAction::class)->execute($actor, $employee, $period, ['intent' => 'draft', 'scores' => [['component_id' => $component->id, 'raw_score' => 88, 'note' => 'Konsisten']], 'notes' => 'Catatan']);
 
         $this->assertSame('DRAFT', $evaluation->status);
         $this->assertSame('88.00', $evaluation->total_score);
@@ -56,15 +59,12 @@ class EmployeeScopeAndEvaluationTest extends TestCase
 
     public function test_employee_detail_exposes_active_period_for_authorized_evaluator(): void
     {
+        $this->seed(AccessControlSeeder::class);
         $actor = User::factory()->create();
         $branch = Branch::query()->create(['code' => 'CBG-A', 'name' => 'Cabang A']);
-        $actor->givePermissionTo(
-            Permission::findOrCreate('employee.view', 'web'),
-            Permission::findOrCreate('evaluation.view', 'web'),
-            Permission::findOrCreate('evaluation.create', 'web'),
-        );
-        $actor->organizationalScopes()->create(['branch_id' => $branch->id, 'scope_type' => 'branch', 'is_active' => true]);
         $employee = $this->employeeAt($branch);
+        $actor->assignRole('Sub Division Head');
+        $actor->organizationalScopes()->create(['branch_id' => $branch->id, 'division_id' => $employee->currentAssignment->division_id, 'sub_division_id' => $employee->currentAssignment->sub_division_id, 'scope_type' => 'sub_division', 'is_active' => true]);
         $period = PerformancePeriod::query()->create([
             'name' => 'Semester Aktif',
             'start_date' => now()->startOfYear(),
@@ -86,8 +86,9 @@ class EmployeeScopeAndEvaluationTest extends TestCase
     private function employeeAt(Branch $branch): Employee
     {
         $division = Division::query()->create(['branch_id' => $branch->id, 'code' => 'DIV-'.$branch->id, 'name' => 'Divisi '.$branch->name]);
+        $subDivision = SubDivision::query()->create(['division_id' => $division->id, 'code' => 'SUB-'.$branch->id, 'name' => 'Sub Divisi '.$branch->name]);
         $employee = Employee::query()->create(['employee_number' => 'EMP-'.$branch->id.'-'.Employee::query()->count(), 'full_name' => 'Pejuang '.$branch->name, 'join_date' => now()->subYear(), 'current_status' => 'ACTIVE']);
-        $employee->assignments()->create(['branch_id' => $branch->id, 'division_id' => $division->id, 'start_date' => now()->subYear(), 'status' => 'ACTIVE']);
+        $employee->assignments()->create(['branch_id' => $branch->id, 'division_id' => $division->id, 'sub_division_id' => $subDivision->id, 'start_date' => now()->subYear(), 'status' => 'ACTIVE']);
 
         return $employee;
     }

@@ -47,7 +47,7 @@ class CalibrationController extends Controller
         return Inertia::render('Calibration/Index', [
             'sessions' => $sessions,
             'periods' => $periods,
-            'canManage' => $request->user()->can('calibration.manage'),
+            'canManage' => false,
         ]);
     }
 
@@ -119,8 +119,8 @@ class CalibrationController extends Controller
             ],
             'evaluations' => $evaluations,
             'criteria' => $criteria,
-            'canManage' => $request->user()->can('calibration.manage'),
-            'isEditable' => $session->isEditable(),
+            'canManage' => false,
+            'isEditable' => false,
         ]);
     }
 

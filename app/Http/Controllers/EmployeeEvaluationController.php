@@ -10,116 +10,136 @@ use App\Models\Employee;
 use App\Models\EmployeeEvaluation;
 use App\Models\EvaluationComponent;
 use App\Models\PerformancePeriod;
+use App\Services\EvaluationTaskService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class EmployeeEvaluationController extends Controller
 {
-    public function create(Employee $employee, Request $request)
+    public function index(Request $request, EvaluationTaskService $tasks): Response
+    {
+        abort_unless($request->user()->can('evaluation.view'), 403);
+        $filters = $request->validate([
+            'period_id' => ['nullable', 'integer', 'exists:performance_periods,id'],
+        ]);
+
+        return Inertia::render('Evaluations/Index', [
+            ...$tasks->gather($request->user(), isset($filters['period_id']) ? (int) $filters['period_id'] : null),
+            'filters' => $filters,
+        ]);
+    }
+
+    public function create(Employee $employee, Request $request): Response
     {
         $this->authorize('evaluate', $employee);
+        $periodId = $request->validate([
+            'period_id' => ['required', 'integer', 'exists:performance_periods,id'],
+        ])['period_id'];
+        $period = PerformancePeriod::query()
+            ->where('is_active', true)
+            ->where('status', 'ACTIVE')
+            ->findOrFail($periodId);
+        $this->authorize('view', $period);
 
-        $periodId = $request->query('period_id');
-        $period = $periodId ? PerformancePeriod::findOrFail($periodId) : null;
+        $evaluation = EmployeeEvaluation::query()
+            ->where('employee_id', $employee->id)
+            ->where('period_id', $period->id)
+            ->where('evaluation_type', EmployeeEvaluation::TYPE_SUPERVISOR)
+            ->with('scores')
+            ->first();
 
-        if ($period) {
-            $this->authorize('view', $period);
+        if ($evaluation && $evaluation->evaluator_id !== $request->user()->id) {
+            abort(403);
         }
-
-        // Period is required — redirect to employee page if none provided
-        $lookupAttributes = [
-            'employee_id' => $employee->id,
-            'evaluator_id' => $request->user()->id,
-            'period_id' => $period?->id,
-            'evaluation_type' => EmployeeEvaluation::TYPE_SUPERVISOR,
-        ];
-        $evaluation = EmployeeEvaluation::query()->where($lookupAttributes)->with('scores')->first();
 
         return Inertia::render('Evaluations/Form', $this->formData($request, $employee, $period, $evaluation));
     }
 
-    public function store(Employee $employee, StoreEmployeeEvaluationRequest $request, SaveEmployeeEvaluationAction $action)
-    {
+    public function store(
+        Employee $employee,
+        StoreEmployeeEvaluationRequest $request,
+        SaveEmployeeEvaluationAction $action,
+    ): RedirectResponse {
         $this->authorize('evaluate', $employee);
+        $period = PerformancePeriod::query()
+            ->where('is_active', true)
+            ->where('status', 'ACTIVE')
+            ->findOrFail($request->integer('period_id'));
+        $this->authorize('view', $period);
 
-        $periodId = $request->input('period_id');
-        $period = $periodId ? PerformancePeriod::findOrFail($periodId) : null;
-        if ($period) {
-            $this->authorize('view', $period);
-        }
+        $evaluation = $action->execute($request->user(), $employee, $period, $request->validated());
 
-        $data = $request->validated();
-        $evaluation = $action->execute($request->user(), $employee, $period, $data);
-
-        return redirect()->route('evaluations.show', $evaluation)->with('success', 'Draf penilaian berhasil disimpan.');
+        return redirect()->route('evaluations.index', ['period_id' => $period->id])->with(
+            'success',
+            $evaluation->status === 'FINALIZED'
+                ? 'Penilaian berhasil diselesaikan.'
+                : 'Draf penilaian berhasil disimpan.',
+        );
     }
 
-    public function show(EmployeeEvaluation $evaluation, Request $request)
+    public function show(EmployeeEvaluation $evaluation, Request $request): Response
     {
         $this->authorize('view', $evaluation);
 
-        return Inertia::render('Evaluations/Form', $this->formData($request, $evaluation->employee, $evaluation->period, $evaluation->load('scores')));
+        return Inertia::render('Evaluations/Form', $this->formData(
+            $request,
+            $evaluation->employee,
+            $evaluation->period,
+            $evaluation->load('scores'),
+        ));
     }
 
-    public function transition(TransitionEmployeeEvaluationRequest $request, EmployeeEvaluation $evaluation, TransitionEmployeeEvaluationAction $action)
-    {
-        $action->execute($request->user(), $evaluation, $request->validated('status'));
+    public function transition(
+        TransitionEmployeeEvaluationRequest $request,
+        EmployeeEvaluation $evaluation,
+        TransitionEmployeeEvaluationAction $action,
+    ): RedirectResponse {
+        $action->execute(
+            $request->user(),
+            $evaluation,
+            $request->validated('status'),
+            $request->validated('reason'),
+        );
 
-        return back()->with('success', 'Status penilaian berhasil diperbarui.');
+        return back()->with('success', 'Penilaian berhasil dibuka kembali sebagai draf.');
     }
 
-    private function formData(Request $request, Employee $employee, ?PerformancePeriod $period, ?EmployeeEvaluation $evaluation): array
-    {
-        $periods = PerformancePeriod::query()
-            ->where('is_active', true)
-            ->whereIn('status', ['DRAFT', 'ACTIVE'])
-            ->orderByDesc('start_date')
-            ->get(['id', 'name', 'start_date', 'end_date']);
-
-        // Ambil self-assessment karyawan untuk periode ini (jika sudah diajukan)
-        $selfAssessment = null;
-        if ($period) {
-            $selfEval = EmployeeEvaluation::query()
-                ->where('employee_id', $employee->id)
-                ->where('period_id', $period->id)
-                ->where('evaluation_type', EmployeeEvaluation::TYPE_SELF)
-                ->whereIn('status', ['SUBMITTED', 'DRAFT'])
-                ->with('scores')
-                ->first();
-            if ($selfEval) {
-                $selfAssessment = [
-                    'id' => $selfEval->id,
-                    'status' => $selfEval->status,
-                    'total_score' => $selfEval->total_score,
-                    'notes' => $selfEval->notes,
-                    'scores' => $selfEval->scores->map(fn ($s) => [
-                        'component_id' => $s->component_id,
-                        'raw_score' => (string) $s->raw_score,
-                        'note' => $s->note,
-                    ])->values(),
-                ];
-            }
-        }
-
+    /** @return array<string, mixed> */
+    private function formData(
+        Request $request,
+        Employee $employee,
+        ?PerformancePeriod $period,
+        ?EmployeeEvaluation $evaluation,
+    ): array {
         return [
             'employee' => $employee->only('id', 'full_name', 'employee_number'),
-            'period' => $period ? $period->only('id', 'name', 'start_date', 'end_date') : null,
-            'periods' => $periods->map(fn (PerformancePeriod $p) => $p->only('id', 'name', 'start_date', 'end_date')),
-            'components' => EvaluationComponent::query()->where('is_active', true)->orderBy('sort_order')->get(['id', 'name', 'default_weight', 'is_auto_calculated']),
+            'period' => $period ? [
+                'id' => $period->id,
+                'name' => $period->name,
+                'start_date' => $period->start_date->toDateString(),
+                'end_date' => $period->end_date->toDateString(),
+            ] : null,
+            'components' => EvaluationComponent::query()
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get(['id', 'name', 'default_weight', 'is_auto_calculated']),
             'evaluation' => $evaluation ? [
                 'id' => $evaluation->id,
                 'status' => $evaluation->status,
                 'notes' => $evaluation->notes,
                 'total_score' => $evaluation->total_score,
-                'scores' => $evaluation->scores->map(fn ($score) => ['component_id' => $score->component_id, 'raw_score' => (string) $score->raw_score, 'note' => $score->note])->values(),
+                'scores' => $evaluation->scores->map(fn ($score): array => [
+                    'component_id' => $score->component_id,
+                    'raw_score' => (string) $score->raw_score,
+                    'note' => $score->note,
+                ])->values(),
             ] : null,
-            'selfAssessment' => $selfAssessment,
             'abilities' => [
                 'edit' => ! $evaluation || $request->user()->can('update', $evaluation),
-                'submit' => $evaluation && $request->user()->can('submit', $evaluation),
-                'approve' => $evaluation && $request->user()->can('approve', $evaluation),
-                'finalize' => $evaluation && $request->user()->can('finalize', $evaluation),
-                'close' => $evaluation && $request->user()->can('close', $evaluation),
+                'complete' => ! $evaluation || $request->user()->can('complete', $evaluation),
+                'reopen' => $evaluation && $request->user()->can('reopen', $evaluation),
             ],
         ];
     }

@@ -32,6 +32,7 @@ class SecurityHardeningTest extends TestCase
         $this->assertStringNotContainsString("script-src 'self' 'unsafe-inline'", $policy);
         $this->assertStringNotContainsString('unsafe-eval', $policy);
         $this->assertStringContainsString("frame-ancestors 'none'", $policy);
+        $this->assertStringNotContainsString('upgrade-insecure-requests', $policy);
     }
 
     public function test_login_scripts_receive_the_csp_nonce(): void
@@ -91,8 +92,13 @@ class SecurityHardeningTest extends TestCase
 
     public function test_https_response_enables_hsts(): void
     {
-        $this->get('https://localhost/')
+        $response = $this->get('https://localhost/')
             ->assertHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+
+        $this->assertStringContainsString(
+            'upgrade-insecure-requests',
+            (string) $response->headers->get('Content-Security-Policy'),
+        );
     }
 
     public function test_trusted_reverse_proxy_preserves_https_host_redirect_and_hsts(): void

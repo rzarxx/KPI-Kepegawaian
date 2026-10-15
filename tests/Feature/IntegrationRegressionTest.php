@@ -17,6 +17,8 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia;
 use Spatie\Permission\Models\Permission;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Tests\TestCase;
 
 class IntegrationRegressionTest extends TestCase
@@ -112,10 +114,20 @@ class IntegrationRegressionTest extends TestCase
         $previewResponse
             ->assertOk()
             ->assertHeader('Content-Type', 'application/pdf')
-            ->assertHeader('Content-Disposition', 'inline; filename="kontrak.pdf"')
             ->assertHeader('Cache-Control', 'no-store, private')
             ->assertHeader('X-Frame-Options', 'SAMEORIGIN');
+        $this->assertSame(
+            HeaderUtils::makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE, 'kontrak.pdf', 'kontrak.pdf'),
+            $previewResponse->headers->get('Content-Disposition'),
+        );
         $this->assertStringContainsString("frame-ancestors 'self'", (string) $previewResponse->headers->get('Content-Security-Policy'));
+
+        $document->update(['original_name' => "laporan\"\r\nX-Test: injected.pdf"]);
+        $safePreview = $this->actingAs($owner)->get(route('employees.documents.preview', $document))->assertOk();
+        $safeDisposition = (string) $safePreview->headers->get('Content-Disposition');
+        $this->assertStringNotContainsString("\r", $safeDisposition);
+        $this->assertStringNotContainsString("\n", $safeDisposition);
+        $this->assertFalse($safePreview->headers->has('X-Test'));
 
         $outsider = User::factory()->create();
         $outsider->givePermissionTo(

@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\PerformancePeriod;
+use App\Models\User;
 use App\Notifications\SystemNotification;
 use App\Services\AuditLogger;
 use Illuminate\Bus\Queueable;
@@ -47,7 +48,7 @@ class AutoClosePeriod implements ShouldQueue
         $audit->log('evaluation.period.auto_close', null, $period->fresh(), $before, $period->fresh()->toArray());
 
         // Notifikasi ke HR Admin dan Super Admin
-        $admins = \App\Models\User::query()
+        $admins = User::query()
             ->where('is_active', true)
             ->whereHas('roles', fn ($q) => $q->whereIn('name', ['Super Admin', 'HR Admin', 'HR Manager']))
             ->get();

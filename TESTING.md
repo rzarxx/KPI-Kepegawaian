@@ -53,8 +53,13 @@ Expected:
 - total formula
 - criteria boundary
 - tenure mapping
-- draft update
-- finalized immutability
+- Kasubdiv exact-scope dapat menyimpan draf dan menyelesaikan
+- Kasubdiv lintas sub-divisi serta role lain ditolak
+- tiga status tugas: Belum Dinilai, Draf, Selesai
+- finalized immutability dan buka kembali dengan alasan/audit
+- karyawan tanpa sub-divisi ditandai Perlu Penempatan
+- route mutasi penilaian diri dan kalibrasi baru tidak tersedia
+- laporan hanya memakai penilaian supervisor yang selesai
 
 ## 7. Incident
 
@@ -112,10 +117,18 @@ vendor/bin/pint --test
 npm run lint
 npm run typecheck
 npm run build
+npm run e2e
 ```
 
 If Pest configured:
 use Pest consistently.
+
+### E2E aman
+
+- Target bawaan Playwright adalah `http://127.0.0.1:8765` dan server lokal dijalankan otomatis.
+- Siapkan database disposable, lalu jalankan `php artisan db:seed --class=E2ESeeder` hanya pada environment `local` atau `testing`.
+- Target nonlokal diblokir kecuali `E2E_ALLOW_REMOTE=true` dan `E2E_PASSWORD` diberikan eksplisit.
+- Jangan menjalankan seeder akun lokal maupun E2E pada production.
 
 ## 13. Definition of Done
 

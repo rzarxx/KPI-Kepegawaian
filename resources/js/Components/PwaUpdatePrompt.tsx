@@ -1,12 +1,21 @@
 import { confirmAction } from '@/Utils/confirmation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function PwaUpdatePrompt() {
     const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
     const [dirtyForm, setDirtyForm] = useState(false);
+    const hadController = useRef(Boolean(navigator.serviceWorker?.controller));
 
     useEffect(() => {
-        const onControllerChange = () => window.location.reload();
+        const onControllerChange = () => {
+            if (hadController.current) {
+                window.location.reload();
+
+                return;
+            }
+
+            hadController.current = true;
+        };
         navigator.serviceWorker?.addEventListener('controllerchange', onControllerChange);
         navigator.serviceWorker?.getRegistration().then((registration) => {
             if (!registration) return;

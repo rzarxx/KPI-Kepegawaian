@@ -35,6 +35,7 @@ Schedule::call(function (): void {
         // Auto-close: periode sudah lewat end_date dan diaktifkan
         if ($period->auto_close && $period->isOverdue()) {
             AutoClosePeriod::dispatch($period->id);
+
             continue;
         }
 
@@ -50,4 +51,3 @@ Schedule::call(function (): void {
         }
     }
 })->dailyAt('08:00')->name('evaluations:check-periods')->withoutOverlapping();
-

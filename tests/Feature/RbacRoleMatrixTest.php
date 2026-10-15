@@ -9,6 +9,7 @@ use Database\Seeders\AccessControlSeeder;
 use Database\Seeders\LocalRoleAccountSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -21,13 +22,13 @@ class RbacRoleMatrixTest extends TestCase
         $this->seed(AccessControlSeeder::class);
 
         $expected = [
-            'HR Admin' => ['employee.view', 'employee.create', 'employee.update', 'employee.change_status', 'employee.transfer', 'employee.export', 'employee.manage_track_record', 'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'employee_incident.resolve', 'evaluation.view', 'evaluation.create', 'evaluation.update', 'evaluation.submit', 'employee_document.view', 'employee_document.create', 'employee_document.delete', 'report.view', 'report.export', 'organization.view', 'organization.manage', 'user.view', 'user.create', 'user.update', 'user.disable', 'role.view', 'settings.view', 'goal.view', 'goal.create', 'goal.update', 'calibration.view', 'calibration.manage'],
-            'HR Manager' => ['employee.view', 'employee.export', 'employee.manage_track_record', 'employee_incident.view', 'employee_incident.resolve', 'evaluation.view', 'evaluation.approve', 'evaluation.finalize', 'calibration.view', 'calibration.manage', 'goal.view', 'goal.create', 'goal.update', 'employee_document.view', 'report.view', 'report.export', 'organization.view', 'settings.view'],
-            'Branch Head' => ['employee.view', 'employee.update', 'employee.export', 'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'employee_incident.resolve', 'evaluation.view', 'evaluation.approve', 'goal.view', 'employee_document.view', 'report.view', 'report.export', 'organization.view'],
-            'Division Head' => ['employee.view', 'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'evaluation.view', 'evaluation.create', 'evaluation.update', 'evaluation.submit', 'evaluation.approve', 'goal.view', 'goal.create', 'goal.update', 'employee_document.view', 'report.view', 'organization.view'],
-            'Sub Division Head' => ['employee.view', 'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'evaluation.view', 'evaluation.create', 'evaluation.update', 'evaluation.submit', 'goal.view', 'employee_document.view', 'organization.view'],
+            'HR Admin' => ['employee.view', 'employee.create', 'employee.update', 'employee.change_status', 'employee.transfer', 'employee.export', 'employee.manage_track_record', 'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'employee_incident.resolve', 'evaluation.view', 'evaluation.reopen', 'employee_document.view', 'employee_document.create', 'employee_document.delete', 'report.view', 'report.export', 'organization.view', 'organization.manage', 'user.view', 'user.create', 'user.update', 'user.disable', 'role.view', 'settings.view', 'goal.view', 'goal.create', 'goal.update', 'calibration.view'],
+            'HR Manager' => ['employee.view', 'employee.export', 'employee.manage_track_record', 'employee_incident.view', 'employee_incident.resolve', 'evaluation.view', 'evaluation.reopen', 'calibration.view', 'goal.view', 'goal.create', 'goal.update', 'employee_document.view', 'report.view', 'report.export', 'organization.view', 'settings.view'],
+            'Branch Head' => ['employee.view', 'employee.update', 'employee.export', 'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'employee_incident.resolve', 'evaluation.view', 'goal.view', 'employee_document.view', 'report.view', 'report.export', 'organization.view'],
+            'Division Head' => ['employee.view', 'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'evaluation.view', 'goal.view', 'goal.create', 'goal.update', 'employee_document.view', 'report.view', 'organization.view'],
+            'Sub Division Head' => ['employee.view', 'employee_incident.view', 'employee_incident.create', 'employee_incident.update', 'evaluation.view', 'evaluation.create', 'evaluation.update', 'goal.view', 'employee_document.view', 'organization.view'],
             'Auditor' => ['employee.view', 'employee_incident.view', 'evaluation.view', 'employee_document.view', 'report.view', 'report.export', 'organization.view', 'goal.view', 'calibration.view'],
-            'Employee' => ['evaluation.self_assess', 'goal.view'],
+            'Employee' => ['goal.view'],
         ];
 
         foreach ($expected as $roleName => $permissions) {
@@ -36,6 +37,35 @@ class RbacRoleMatrixTest extends TestCase
         }
 
         $this->assertGreaterThan(count($expected['HR Admin']), Role::findByName('Super Admin')->permissions()->count());
+    }
+
+    public function test_upgrade_migration_converts_existing_roles_to_the_simplified_flow(): void
+    {
+        $this->seed(AccessControlSeeder::class);
+        $legacy = [
+            'HR Admin' => ['evaluation.create', 'evaluation.update', 'evaluation.submit', 'calibration.manage'],
+            'HR Manager' => ['evaluation.approve', 'evaluation.finalize', 'calibration.manage'],
+            'Branch Head' => ['evaluation.approve'],
+            'Division Head' => ['evaluation.create', 'evaluation.update', 'evaluation.submit', 'evaluation.approve'],
+            'Sub Division Head' => ['evaluation.submit'],
+            'Employee' => ['evaluation.self_assess'],
+        ];
+
+        foreach ($legacy as $roleName => $permissions) {
+            Role::findByName($roleName)->givePermissionTo($permissions);
+        }
+
+        $migration = require database_path('migrations/2026_10_13_000000_simplify_evaluation_role_permissions.php');
+        $migration->up();
+
+        foreach ($legacy as $roleName => $permissions) {
+            $role = Role::findByName($roleName)->refresh();
+            foreach ($permissions as $permission) {
+                $this->assertFalse($role->hasPermissionTo(Permission::findByName($permission)), $roleName.' masih memiliki '.$permission);
+            }
+        }
+        $this->assertTrue(Role::findByName('HR Admin')->hasPermissionTo('evaluation.reopen'));
+        $this->assertTrue(Role::findByName('HR Manager')->hasPermissionTo('evaluation.reopen'));
     }
 
     public function test_each_role_is_denied_a_direct_url_outside_its_authority(): void

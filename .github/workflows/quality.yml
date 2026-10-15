@@ -1,0 +1,111 @@
+name: Quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: kpi_ci
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath, curl, dom, fileinfo, gd, intl, mbstring, pdo_mysql, sqlite3, xml, zip
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Prepare test environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Validate Composer metadata
+        run: composer validate --strict
+
+      - name: Check PHP formatting
+        run: php vendor/bin/pint --test
+
+      - name: Run PHP tests
+        run: php artisan test
+
+      - name: Check TypeScript
+        run: npm run typecheck
+
+      - name: Lint frontend
+        run: npm run lint
+
+      - name: Build production assets
+        run: npm run build
+
+      - name: Audit dependencies
+        run: |
+          composer audit --locked --no-interaction
+          npm audit --omit=dev
+
+      - name: Smoke test MySQL migrations
+        env:
+          APP_ENV: testing
+          APP_DEBUG: 'false'
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: kpi_ci
+          DB_USERNAME: root
+          DB_PASSWORD: root
+        run: |
+          php artisan migrate --force --no-interaction
+          php artisan migrate:status
+          php artisan db:seed --class=E2ESeeder --force --no-interaction
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser critical paths
+        env:
+          APP_ENV: testing
+          APP_DEBUG: 'false'
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: kpi_ci
+          DB_USERNAME: root
+          DB_PASSWORD: root
+          SESSION_DRIVER: file
+          SESSION_SECURE_COOKIE: 'false'
+          CACHE_STORE: array
+          QUEUE_CONNECTION: sync
+          LOCAL_ROLE_SEED_PASSWORD: KpiLokal2026!
+          E2E_PASSWORD: KpiLokal2026!
+        run: npm run e2e

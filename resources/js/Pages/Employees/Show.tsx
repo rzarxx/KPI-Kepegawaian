@@ -82,9 +82,6 @@ type EvaluationPeriod = {
     end_date: string;
     evaluation_id?: number | null;
     evaluation_status?: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'FINALIZED' | 'CLOSED' | null;
-    self_assessment_id?: number | null;
-    self_assessment_status?: string | null;
-    self_assessment_score?: string | null;
 };
 
 export default function Show({
@@ -319,10 +316,10 @@ function EvaluationCard({
 }) {
     const evalStatusLabel: Record<string, string> = {
         DRAFT: 'Draf',
-        SUBMITTED: 'Diajukan',
-        APPROVED: 'Disetujui',
-        FINALIZED: 'Final',
-        CLOSED: 'Ditutup',
+        SUBMITTED: 'Riwayat',
+        APPROVED: 'Riwayat',
+        FINALIZED: 'Selesai',
+        CLOSED: 'Selesai',
     };
     const evalStatusStyle: Record<string, string> = {
         DRAFT: 'bg-slate-100 text-slate-600',
@@ -355,25 +352,6 @@ function EvaluationCard({
                                     <p className="mt-1 text-xs text-slate-500">
                                         {period.start_date} s/d {period.end_date}
                                     </p>
-                                    {period.self_assessment_status && (
-                                        <p className="mt-1 flex items-center gap-1.5 text-xs">
-                                            <span className="inline-block size-1.5 rounded-full bg-blue-400" />
-                                            <span className="text-slate-500">
-                                                Penilaian Diri:{' '}
-                                                <span className="font-medium text-blue-700">
-                                                    {evalStatusLabel[period.self_assessment_status] ?? period.self_assessment_status}
-                                                </span>
-                                            </span>
-                                            {period.self_assessment_id && (
-                                                <Link
-                                                    href={route('self-assessment.show', period.self_assessment_id)}
-                                                    className="text-brand underline underline-offset-2 hover:no-underline"
-                                                >
-                                                    Lihat
-                                                </Link>
-                                            )}
-                                        </p>
-                                    )}
                                 </div>
                                 <div className="flex shrink-0 items-center gap-2">
                                     {period.evaluation_status && (
@@ -388,10 +366,12 @@ function EvaluationCard({
                                             href={
                                                 period.evaluation_id
                                                     ? route('evaluations.show', period.evaluation_id)
-                                                    : route('evaluations.create', employeeId) + '?period_id=' + period.id
+                                                    : route('evaluations.create', { employee: employeeId, period_id: period.id })
                                             }
                                         >
-                                            {period.evaluation_id ? 'Buka Penilaian' : 'Mulai Penilaian'}
+                                            {period.evaluation_id
+                                                ? ['FINALIZED', 'CLOSED'].includes(period.evaluation_status ?? '') ? 'Lihat Hasil' : 'Lanjutkan Draf'
+                                                : 'Mulai Penilaian'}
                                         </Link>
                                     </Button>
                                 </div>

@@ -19,26 +19,50 @@ class EmployeeEvaluationPolicy
 
     public function update(User $user, EmployeeEvaluation $evaluation): bool
     {
-        return $user->can('evaluation.update') && $evaluation->status === 'DRAFT' && $this->view($user, $evaluation);
+        return $evaluation->isSupervisorEvaluation()
+            && $user->can('evaluation.update')
+            && $evaluation->evaluator_id === $user->id
+            && $evaluation->status === 'DRAFT'
+            && $user->can('evaluate', $evaluation->employee);
     }
 
-    public function finalize(User $user, EmployeeEvaluation $evaluation): bool
+    public function complete(User $user, EmployeeEvaluation $evaluation): bool
     {
-        return $user->can('evaluation.finalize') && $evaluation->status === 'APPROVED' && $this->view($user, $evaluation);
+        return $this->update($user, $evaluation);
     }
 
+    public function reopen(User $user, EmployeeEvaluation $evaluation): bool
+    {
+        return $evaluation->isSupervisorEvaluation()
+            && $user->can('evaluation.reopen')
+            && $user->hasAnyRole(['Super Admin', 'HR Admin', 'HR Manager'])
+            && in_array($evaluation->status, ['FINALIZED', 'CLOSED'], true)
+            && $evaluation->period?->status === 'ACTIVE'
+            && $evaluation->period?->is_active
+            && $this->view($user, $evaluation);
+    }
+
+    /** @deprecated Workflow persetujuan berlapis tidak digunakan lagi. */
     public function submit(User $user, EmployeeEvaluation $evaluation): bool
     {
-        return $user->can('evaluation.submit') && $evaluation->status === 'DRAFT' && $this->view($user, $evaluation);
+        return false;
     }
 
+    /** @deprecated Workflow persetujuan berlapis tidak digunakan lagi. */
     public function approve(User $user, EmployeeEvaluation $evaluation): bool
     {
-        return $user->can('evaluation.approve') && $evaluation->status === 'SUBMITTED' && $this->view($user, $evaluation);
+        return false;
     }
 
+    /** @deprecated Gunakan complete. */
+    public function finalize(User $user, EmployeeEvaluation $evaluation): bool
+    {
+        return false;
+    }
+
+    /** @deprecated Workflow persetujuan berlapis tidak digunakan lagi. */
     public function close(User $user, EmployeeEvaluation $evaluation): bool
     {
-        return $user->can('evaluation.finalize') && $evaluation->status === 'FINALIZED' && $this->view($user, $evaluation);
+        return false;
     }
 }
