@@ -132,16 +132,16 @@ export default function Show({
                 <div className="flex items-center gap-3">
                     <Button asChild variant="ghost">
                         <Link
-                            aria-label="Kembali ke daftar karyawan"
+                            aria-label="Kembali ke daftar pejuang"
                             href={route("employees.index")}
                         >
                             <ArrowLeft size={18} />
                         </Link>
                     </Button>
                     <div>
-                        <p className="text-sm text-slate-500">Karyawan</p>
+                        <p className="text-sm text-slate-500">Pejuang</p>
                         <h1 className="text-[26px] font-bold text-slate-900">
-                            Detail Karyawan
+                            Detail Pejuang
                         </h1>
                     </div>
                 </div>
@@ -172,7 +172,7 @@ export default function Show({
                                         )}
                                     >
                                         <AlertTriangle size={16} />
-                                        Catatan Masalah
+                                        Catatan Khusus
                                     </Link>
                                 </Button>
                             )}
@@ -221,7 +221,7 @@ export default function Show({
                 {(canTransfer || canChangeStatus || canRehire) && (
                     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <h2 className="text-base font-semibold text-slate-900">
-                            Tindakan Karyawan
+                            Tindakan Pejuang
                         </h2>
                         <p className="mt-1 text-sm text-slate-500">
                             Setiap tindakan menambah riwayat dan tidak menghapus
@@ -332,7 +332,7 @@ function EvaluationCard({
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
                 <ClipboardCheck size={18} />
-                Penilaian Karyawan
+                Penilaian Pejuang
             </h2>
             <p className="mt-1 text-sm text-slate-500">
                 Pilih periode untuk memulai atau melanjutkan penilaian.
@@ -659,7 +659,7 @@ function StatusForm({
             <ConfirmDeleteDialog
                 open={confirming}
                 title="Konfirmasi Perubahan Status"
-                message={`Ubah status karyawan menjadi ${data.status === "ACTIVE" ? "Aktif" : data.status === "RESIGNED" ? "Resign" : data.status === "TERMINATED" ? "Terminasi" : "Tidak Aktif"}?`}
+                message={`Ubah status pejuang menjadi ${data.status === "ACTIVE" ? "Aktif" : data.status === "RESIGNED" ? "Resign" : data.status === "TERMINATED" ? "Terminasi" : "Tidak Aktif"}?`}
                 confirmLabel="Ya, Simpan"
                 processing={processing}
                 processingLabel="Menyimpan..."
@@ -762,10 +762,10 @@ function ActivityTimeline({ activities }: { activities: Activity[] }) {
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="flex items-center gap-2 font-semibold text-slate-900">
                 <History size={18} />
-                Aktivitas Karyawan
+                Aktivitas Pejuang
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-                Rangkaian penempatan, status, penilaian, dan catatan masalah
+                Rangkaian penempatan, status, penilaian, dan catatan khusus
                 sesuai izin Anda.
             </p>
             <div className="relative mt-5 space-y-5 before:absolute before:bottom-2 before:left-[5px] before:top-2 before:w-px before:bg-slate-200">
@@ -856,7 +856,7 @@ function DocumentsCard({
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
                     Dokumen hanya dapat diakses pengguna yang memiliki izin dan
-                    cakupan karyawan ini.
+                    cakupan pejuang ini.
                 </p>
             </div>
             {canUpload && (

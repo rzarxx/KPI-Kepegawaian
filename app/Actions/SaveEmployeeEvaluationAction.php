@@ -25,13 +25,13 @@ class SaveEmployeeEvaluationAction
         }
 
         return DB::transaction(function () use ($actor, $employee, $period, $data) {
-            // Serialisasi penyimpanan per karyawan agar dua akun Kasubdiv tidak
+            // Serialisasi penyimpanan per pejuang agar dua akun Kasubdiv tidak
             // dapat membuat dua penilaian supervisor untuk periode yang sama.
             $employee = Employee::query()->lockForUpdate()->findOrFail($employee->id);
             $employee->load('currentAssignment');
             $assignment = $employee->currentAssignment;
             if (! $assignment) {
-                throw ValidationException::withMessages(['employee' => 'Karyawan tidak memiliki penempatan aktif.']);
+                throw ValidationException::withMessages(['employee' => 'Pejuang tidak memiliki penempatan aktif.']);
             }
             if (! $period || $period->status !== 'ACTIVE' || ! $period->is_active) {
                 throw ValidationException::withMessages(['period_id' => 'Periode penilaian tidak dapat digunakan saat ini.']);

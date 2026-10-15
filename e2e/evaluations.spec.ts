@@ -41,7 +41,7 @@ test.describe('Penilaian', () => {
         await expect(page.getByText('Periode E2E Aktif', { exact: true })).toBeVisible();
 
         await page.getByRole('link', { name: 'Mulai Penilaian' }).first().click();
-        await expect(page.getByRole('heading', { name: 'Nilai Kinerja Karyawan' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Nilai Kinerja Pejuang' })).toBeVisible();
 
         for (const input of await page.locator('input[aria-label^="Nilai "]').all()) {
             await input.fill('80');

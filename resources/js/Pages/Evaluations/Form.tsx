@@ -64,13 +64,13 @@ export default function Form({
                 <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                     <div>
                         <p className="text-sm text-slate-500">Penilaian Kasubdiv</p>
-                        <h1 className="text-[26px] font-bold text-slate-900">Nilai Kinerja Karyawan</h1>
+                        <h1 className="text-[26px] font-bold text-slate-900">Nilai Kinerja Pejuang</h1>
                     </div>
                     <StatusBadge evaluation={evaluation} />
                 </div>
             )}
         >
-            <Head title="Penilaian Karyawan" />
+            <Head title="Penilaian Pejuang" />
             <div className="mx-auto max-w-[1120px] p-4 sm:p-6 lg:p-8">
                 <Link className="mb-4 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-brand-dark hover:underline" href={route('evaluations.index', period ? { period_id: period.id } : {})}>
                     <ArrowLeft size={16} /> Kembali ke daftar penilaian

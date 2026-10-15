@@ -81,10 +81,10 @@ class EmployeeIncidentController extends Controller
         if (in_array($incident->severity, ['HIGH', 'CRITICAL'], true)) {
             User::permission('employee_incident.resolve')->where('is_active', true)->get()
                 ->filter(fn (User $user) => $user->id !== $request->user()->id && $user->can('view', $employee))
-                ->each->notify(new SystemNotification('Karyawan memerlukan perhatian', 'Terdapat catatan masalah prioritas yang perlu ditinjau.', route('employees.incidents.index', $employee), 'warning'));
+                ->each->notify(new SystemNotification('Pejuang memerlukan perhatian', 'Terdapat catatan khusus prioritas yang perlu ditinjau.', route('employees.incidents.index', $employee), 'warning'));
         }
 
-        return back()->with('success', 'Catatan masalah berhasil ditambahkan.');
+        return back()->with('success', 'Catatan khusus berhasil ditambahkan.');
     }
 
     public function update(UpdateEmployeeIncidentRequest $request, EmployeeIncident $incident, AuditLogger $audit)
@@ -93,7 +93,7 @@ class EmployeeIncidentController extends Controller
         $incident->update($request->validated());
         $audit->log('employee.incident.update', $request->user(), $incident, $before, $incident->fresh()->toArray());
 
-        return back()->with('success', 'Catatan masalah berhasil diperbarui.');
+        return back()->with('success', 'Catatan khusus berhasil diperbarui.');
     }
 
     public function resolve(EmployeeIncident $incident, ResolveEmployeeIncidentRequest $request, AuditLogger $audit)
@@ -105,7 +105,7 @@ class EmployeeIncidentController extends Controller
             $incident->reporter?->notify(new EmployeeIncidentResolvedNotification($incident));
         }
 
-        return back()->with('success', 'Catatan masalah berhasil diselesaikan.');
+        return back()->with('success', 'Catatan khusus berhasil diselesaikan.');
     }
 
     public function destroy(EmployeeIncident $incident, AuditLogger $audit)
@@ -117,10 +117,10 @@ class EmployeeIncidentController extends Controller
             $incident->delete();
             $audit->log('employee.incident.delete', request()->user(), $incident, $snapshot, null);
         } catch (QueryException $e) {
-            return back()->with('error', 'Catatan masalah tidak dapat dihapus karena masih memiliki data terkait.');
+            return back()->with('error', 'Catatan khusus tidak dapat dihapus karena masih memiliki data terkait.');
         }
 
-        return back()->with('success', 'Catatan masalah berhasil dihapus.');
+        return back()->with('success', 'Catatan khusus berhasil dihapus.');
     }
 
     public function transition(TransitionEmployeeIncidentRequest $request, EmployeeIncident $incident, AuditLogger $audit)
@@ -129,7 +129,7 @@ class EmployeeIncidentController extends Controller
         $target = $request->validated('status');
         $allowed = ['OPEN' => ['UNDER_REVIEW', 'RESOLVED'], 'UNDER_REVIEW' => ['RESOLVED'], 'RESOLVED' => ['CLOSED']];
         if (! in_array($target, $allowed[$incident->status] ?? [], true)) {
-            throw ValidationException::withMessages(['status' => 'Perubahan status catatan masalah tidak sesuai urutan.']);
+            throw ValidationException::withMessages(['status' => 'Perubahan status catatan khusus tidak sesuai urutan.']);
         }
         $before = $incident->toArray();
         $data = ['status' => $target];
@@ -142,6 +142,6 @@ class EmployeeIncidentController extends Controller
             $incident->reporter?->notify(new EmployeeIncidentResolvedNotification($incident));
         }
 
-        return back()->with('success', 'Status catatan masalah berhasil diperbarui.');
+        return back()->with('success', 'Status catatan khusus berhasil diperbarui.');
     }
 }

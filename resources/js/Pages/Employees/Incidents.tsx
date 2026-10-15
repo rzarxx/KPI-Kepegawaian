@@ -23,7 +23,7 @@ type Incident = {
 };
 
 const schema = z.object({
-    category: z.string().min(1, 'Pilih kategori masalah.'),
+    category: z.string().min(1, 'Pilih kategori catatan.'),
     title: z.string().min(3, 'Judul minimal 3 karakter.').max(255),
     severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
     description: z.string().min(10, 'Uraian minimal 10 karakter.').max(5000),
@@ -47,8 +47,8 @@ export default function Incidents({
     canResolve: boolean;
 }) {
     return (
-        <AuthenticatedLayout header={<div className="flex items-center gap-3"><Button asChild variant="ghost"><Link aria-label="Kembali ke detail karyawan" href={route('employees.show', employee.id)}><ArrowLeft size={18} /></Link></Button><div><p className="text-sm text-slate-500">Karyawan</p><h1 className="text-[26px] font-bold text-slate-900">Catatan Masalah Karyawan</h1></div></div>}>
-            <Head title="Catatan Masalah Karyawan" />
+        <AuthenticatedLayout header={<div className="flex items-center gap-3"><Button asChild variant="ghost"><Link aria-label="Kembali ke detail pejuang" href={route('employees.show', employee.id)}><ArrowLeft size={18} /></Link></Button><div><p className="text-sm text-slate-500">Pejuang</p><h1 className="text-[26px] font-bold text-slate-900">Catatan Khusus Pejuang</h1></div></div>}>
+            <Head title="Catatan Khusus Pejuang" />
             <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6 lg:p-8">
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <p className="font-semibold text-slate-900">{employee.full_name}</p>
@@ -58,7 +58,7 @@ export default function Incidents({
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <h2 className="flex items-center gap-2 font-semibold text-slate-900"><AlertTriangle size={18} />Riwayat Catatan</h2>
                     <div className="mt-4 space-y-3">
-                        {incidents.length ? incidents.map((incident) => <IncidentCard incident={incident} canResolve={canResolve} canUpdate={canUpdate} key={incident.id} />) : <div className="rounded-lg border border-dashed border-slate-200 py-10 text-center"><ShieldCheck className="mx-auto text-brand" size={28} /><p className="mt-3 text-sm font-medium text-slate-700">Belum ada catatan masalah</p><p className="mt-1 text-sm text-slate-500">Riwayat dan tindak lanjut akan tampil di sini.</p></div>}
+                        {incidents.length ? incidents.map((incident) => <IncidentCard incident={incident} canResolve={canResolve} canUpdate={canUpdate} key={incident.id} />) : <div className="rounded-lg border border-dashed border-slate-200 py-10 text-center"><ShieldCheck className="mx-auto text-brand" size={28} /><p className="mt-3 text-sm font-medium text-slate-700">Belum ada catatan khusus</p><p className="mt-1 text-sm text-slate-500">Riwayat dan tindak lanjut akan tampil di sini.</p></div>}
                     </div>
                 </section>
             </div>
@@ -82,10 +82,10 @@ function IncidentForm({ employeeId, categories }: { employeeId: number; categori
         <form className="mt-5 grid gap-4 border-t border-slate-100 pt-5 sm:grid-cols-2" onSubmit={handleSubmit(submit)}>
             <Field label="Kategori" error={errors.category?.message}><select className={input} {...register('category')}><option value="">Pilih kategori</option>{categories.map((category) => <option value={category.code} key={category.code}>{category.name}</option>)}</select></Field>
             <Field label="Tingkat keparahan" error={errors.severity?.message}><select className={input} {...register('severity')}><option value="LOW">Rendah</option><option value="MEDIUM">Sedang</option><option value="HIGH">Tinggi</option><option value="CRITICAL">Kritis</option></select></Field>
-            <Field label="Judul masalah" error={errors.title?.message}><input className={input} {...register('title')} /></Field>
+            <Field label="Judul catatan" error={errors.title?.message}><input className={input} {...register('title')} /></Field>
             <Field label="Tanggal kejadian" error={errors.occurred_at?.message}><input className={input} type="date" {...register('occurred_at')} /></Field>
-            <div className="sm:col-span-2"><Field label="Uraian masalah" error={errors.description?.message}><textarea className={input + ' min-h-24 py-2'} {...register('description')} /></Field></div>
-            <div className="sm:col-span-2"><Button disabled={isSubmitting || categories.length === 0} type="submit"><Plus size={16} />{isSubmitting ? 'Menyimpan...' : 'Tambah Catatan'}</Button>{categories.length === 0 && <p className="mt-2 text-xs text-red-600">Kategori masalah belum tersedia. Hubungi administrator.</p>}</div>
+            <div className="sm:col-span-2"><Field label="Uraian catatan" error={errors.description?.message}><textarea className={input + ' min-h-24 py-2'} {...register('description')} /></Field></div>
+            <div className="sm:col-span-2"><Button disabled={isSubmitting || categories.length === 0} type="submit"><Plus size={16} />{isSubmitting ? 'Menyimpan...' : 'Tambah Catatan'}</Button>{categories.length === 0 && <p className="mt-2 text-xs text-red-600">Kategori catatan belum tersedia. Hubungi administrator.</p>}</div>
         </form>
     );
 }
@@ -95,7 +95,7 @@ function IncidentCard({ incident, canResolve, canUpdate }: { incident: Incident;
     const canDelete = canUpdate && ['OPEN', 'UNDER_REVIEW'].includes(incident.status);
 
     const destroy = async () => {
-        if (!await confirmAction({ title: 'Hapus Catatan Masalah', message: 'Hapus catatan masalah ini? Tindakan ini tidak dapat dibatalkan.', confirmLabel: 'Ya, Hapus', variant: 'danger' })) return;
+        if (!await confirmAction({ title: 'Hapus Catatan Khusus', message: 'Hapus catatan khusus ini? Tindakan ini tidak dapat dibatalkan.', confirmLabel: 'Ya, Hapus', variant: 'danger' })) return;
         router.delete(route('employees.incidents.destroy', incident.id), { preserveScroll: true });
     };
 

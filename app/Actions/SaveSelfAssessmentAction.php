@@ -22,7 +22,7 @@ class SaveSelfAssessmentAction
 
     public function execute(User $actor, Employee $employee, PerformancePeriod $period, array $data): EmployeeEvaluation
     {
-        // Verifikasi: yang menilai adalah karyawan itu sendiri (via user linked to employee)
+        // Verifikasi: yang menilai adalah pejuang itu sendiri (via user linked to employee)
         if (! $actor->can('evaluation.self_assess')) {
             throw new AuthorizationException('Anda tidak memiliki izin untuk melakukan penilaian diri.');
         }
@@ -38,7 +38,7 @@ class SaveSelfAssessmentAction
         return DB::transaction(function () use ($actor, $employee, $period, $data) {
             $assignment = $employee->currentAssignment;
             if (! $assignment) {
-                throw ValidationException::withMessages(['employee' => 'Karyawan tidak memiliki penempatan aktif.']);
+                throw ValidationException::withMessages(['employee' => 'Pejuang tidak memiliki penempatan aktif.']);
             }
 
             $components = EvaluationComponent::query()

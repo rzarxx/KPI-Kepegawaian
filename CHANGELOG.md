@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Penyesuaian Istilah -- 15 Oktober 2026
+
+- Mengganti istilah "Karyawan" menjadi "Pejuang" pada seluruh tampilan, pesan
+  sistem, notifikasi, email reset password, export XLSX, dan manifest PWA.
+- Mengganti menu dan halaman "Karyawan Bermasalah" menjadi "Catatan Khusus";
+  istilah "catatan masalah" ikut diseragamkan menjadi "catatan khusus".
+- URL, nama route, permission, dan struktur database tidak berubah.
+
 ### Hardening Kesiapan Rilis -- 13 Oktober 2026
 
 - Memperbarui `league/commonmark` ke versi aman dan menutup advisory high serta

@@ -47,7 +47,7 @@ class SendPeriodEvaluationReminder implements ShouldQueue
             ->get();
 
         foreach ($evaluators as $evaluator) {
-            // Cek apakah evaluator ini punya karyawan yang belum dinilai
+            // Cek apakah evaluator ini punya pejuang yang belum dinilai
             $pendingCount = collect($tasks->gather($evaluator, $period->id)['tasks'])
                 ->whereIn('status', ['NOT_STARTED', 'DRAFT'])
                 ->where('can_evaluate', true)
@@ -58,7 +58,7 @@ class SendPeriodEvaluationReminder implements ShouldQueue
 
             $evaluator->notify(new SystemNotification(
                 $title,
-                "{$message} ({$pendingCount} karyawan belum dinilai).",
+                "{$message} ({$pendingCount} pejuang belum dinilai).",
                 route('evaluations.index', ['period_id' => $period->id]),
                 $isOverdue ? 'warning' : 'info',
             ));

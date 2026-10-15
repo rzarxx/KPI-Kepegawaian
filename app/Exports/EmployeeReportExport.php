@@ -37,7 +37,7 @@ class EmployeeReportExport implements FromQuery, WithColumnFormatting, WithColum
     {
         return [
             'No',
-            'NIK / ID Karyawan',
+            'NIK / ID Pejuang',
             'Nama',
             'Cabang',
             'Divisi',

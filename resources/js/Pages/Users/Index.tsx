@@ -28,7 +28,7 @@ type CreateForm = AccessForm & { email: string; password: string };
 const emptyScope = (): Scope => ({ branch_id: '', division_id: '', sub_division_id: '' });
 const singleScopeRoles = ['Branch Head', 'Division Head', 'Sub Division Head'];
 const roleLabels: Record<string, string> = {
-    Employee: 'Karyawan',
+    Employee: 'Pejuang',
     'Branch Head': 'Kepala Cabang',
     'Division Head': 'Kepala Divisi',
     'Sub Division Head': 'Kepala Subdivisi',
@@ -165,7 +165,7 @@ export default function Index({
                             />
                         </div>
                         <Select label="Peran" value={create.data.role} error={create.errors.role} onChange={(value) => changeRole(value, create.data.scopes, (scopes) => create.setData('scopes', scopes), (role) => create.setData('role', role))} options={roles.map((role) => ({ id: role, name: roleLabel(role) }))} />
-                        {create.data.role === 'Employee' && <Select label="Data Karyawan" value={create.data.employee_id} error={create.errors.employee_id} onChange={(value) => create.setData('employee_id', value)} options={employees} />}
+                        {create.data.role === 'Employee' && <Select label="Data Pejuang" value={create.data.employee_id} error={create.errors.employee_id} onChange={(value) => create.setData('employee_id', value)} options={employees} />}
                         {create.data.role !== 'Employee' && <ScopeEditor rows={create.data.scopes} single={singleScopeRoles.includes(create.data.role)} errors={create.errors} onChange={(scopes) => create.setData('scopes', scopes)} branches={branches} divisions={divisions} subDivisions={subDivisions} />}
                         <Button className="mt-5 w-full" type="submit" disabled={create.processing}>{create.processing ? 'Menyimpan...' : 'Simpan Pengguna'}</Button>
                     </form>
@@ -256,7 +256,7 @@ function EditAccessDialog({ user, form, close, roles, employees, branches, divis
                 <p className="mt-2 text-sm text-slate-500">Sesuaikan peran dan cakupan organisasi pengguna ini.</p>
                 <Field label="Nama" value={form.data.name} error={form.errors.name} onChange={(value) => form.setData('name', value)} />
                 <Select label="Peran" value={form.data.role} error={form.errors.role} onChange={(value) => changeRole(value, form.data.scopes, (scopes) => form.setData('scopes', scopes), (role) => form.setData('role', role))} options={roles.map((role) => ({ id: role, name: roleLabel(role) }))} />
-                {form.data.role === 'Employee' && <Select label="Data Karyawan" value={form.data.employee_id} error={form.errors.employee_id} onChange={(value) => form.setData('employee_id', value)} options={employees} />}
+                {form.data.role === 'Employee' && <Select label="Data Pejuang" value={form.data.employee_id} error={form.errors.employee_id} onChange={(value) => form.setData('employee_id', value)} options={employees} />}
                 {form.data.role !== 'Employee' && <ScopeEditor rows={form.data.scopes} single={singleScopeRoles.includes(form.data.role)} errors={form.errors} onChange={(scopes) => form.setData('scopes', scopes)} branches={branches} divisions={divisions} subDivisions={subDivisions} />}
                 <div className="mt-6 flex justify-end gap-3"><Button type="button" variant="secondary" onClick={close}>Batal</Button><Button disabled={form.processing} type="submit">{form.processing ? 'Menyimpan...' : 'Simpan Perubahan'}</Button></div>
             </form>
