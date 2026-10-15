@@ -57,17 +57,18 @@ jobs:
       - name: Check PHP formatting
         run: php vendor/bin/pint --test
 
-      - name: Run PHP tests
-        run: php artisan test
-
       - name: Check TypeScript
         run: npm run typecheck
 
       - name: Lint frontend
         run: npm run lint
 
+      # Feature tests render Inertia pages through @vite, which needs public/build/manifest.json.
       - name: Build production assets
         run: npm run build
+
+      - name: Run PHP tests
+        run: php artisan test
 
       - name: Audit dependencies
         run: |
