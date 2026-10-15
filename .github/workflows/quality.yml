@@ -63,6 +63,7 @@ jobs:
       - name: Lint frontend
         run: npm run lint
 
+      # Feature tests render Inertia pages through @vite, which needs public/build/manifest.json.
       - name: Build production assets
         run: npm run build
 
