@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Perbaikan Masa Kerja dan Data Demo -- 16 Oktober 2026
+
+- Memperbaiki penilaian yang gagal disimpan dengan pesan "Aturan masa kerja
+  belum lengkap" ketika masa kerja pejuang berupa pecahan bulan (misalnya 11,5
+  bulan). Masa kerja kini dihitung dalam bulan penuh.
+- Menambahkan `DemoDataSeeder` untuk uji coba: satu cabang sampai sub divisi,
+  11 pejuang, akun kepala, catatan khusus, serta penilaian periode lalu
+  (selesai) dan periode aktif. Di luar local/testing wajib
+  `DEMO_SEED_CONFIRM=DATA-DUMMY-OK` dan `DEMO_SEED_PASSWORD`.
+
 ### Penyesuaian Istilah -- 15 Oktober 2026
 
 - Mengganti istilah "Karyawan" menjadi "Pejuang" pada seluruh tampilan, pesan
