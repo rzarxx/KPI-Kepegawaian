@@ -15,6 +15,14 @@ use Illuminate\Validation\ValidationException;
 
 class ManageGoalAction
 {
+    /** @var array<string, class-string<Branch|Division|Employee>|null> */
+    private const LEVEL_TARGETS = [
+        'COMPANY' => null,
+        'BRANCH' => Branch::class,
+        'DIVISION' => Division::class,
+        'INDIVIDUAL' => Employee::class,
+    ];
+
     public function __construct(
         private readonly AuditLogger $audit,
         private readonly OrganizationalScopeResolver $scopeResolver,
@@ -27,75 +35,70 @@ class ManageGoalAction
             throw new AuthorizationException;
         }
 
-        $this->assertTargetIsAllowed($actor, $data);
+        $target = $this->resolveAllowedTarget($actor, $data);
 
-        // Validasi parent jika ada
         if (! empty($data['parent_id'])) {
             $parent = Goal::findOrFail($data['parent_id']);
-            if (! $actor->can('view', $parent)) {
-                throw new AuthorizationException;
-            }
-            $levelHierarchy = ['COMPANY' => 0, 'BRANCH' => 1, 'DIVISION' => 2, 'INDIVIDUAL' => 3];
-            $parentLevel = $levelHierarchy[$parent->level] ?? 0;
-            $childLevel = $levelHierarchy[$data['level']] ?? 0;
-
-            if ($childLevel <= $parentLevel) {
-                throw ValidationException::withMessages([
-                    'level' => 'Level target harus lebih rendah dari target induk.',
-                ]);
-            }
-
-            // Pastikan sama periode
-            if ((int) $parent->period_id !== (int) $data['period_id']) {
-                throw ValidationException::withMessages([
-                    'period_id' => 'Target harus dalam periode yang sama dengan target induk.',
-                ]);
-            }
+            $this->assertParentIsAllowed($actor, $parent, $target, $data);
         }
 
-        $goal = Goal::create([
-            'parent_id' => $data['parent_id'] ?? null,
-            'period_id' => $data['period_id'],
-            'level' => $data['level'],
-            'goalable_type' => $data['goalable_type'] ?? null,
-            'goalable_id' => $data['goalable_id'] ?? null,
-            'title' => $data['title'],
-            'description' => $data['description'] ?? null,
-            'target_value' => $data['target_value'] ?? null,
-            'target_unit' => $data['target_unit'] ?? null,
-            'status' => 'DRAFT',
-            'created_by' => $actor->id,
-        ]);
+        return DB::transaction(function () use ($actor, $data, $target): Goal {
+            $goal = Goal::create([
+                'parent_id' => $data['parent_id'] ?? null,
+                'period_id' => $data['period_id'],
+                'level' => $data['level'],
+                'goalable_type' => $target?->getMorphClass(),
+                'goalable_id' => $target?->getKey(),
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'target_value' => $data['target_value'] ?? null,
+                'target_unit' => $data['target_unit'] ?? null,
+                'status' => 'DRAFT',
+                'created_by' => $actor->id,
+            ]);
 
-        $this->audit->log('goal.created', $actor, $goal, null, $goal->toArray());
+            $this->audit->log('goal.created', $actor, $goal, null, $goal->toArray());
 
-        return $goal;
+            return $goal;
+        });
     }
 
-    private function assertTargetIsAllowed(User $actor, array $data): void
+    private function resolveAllowedTarget(User $actor, array $data): Branch|Division|Employee|null
     {
-        $levelTargets = [
-            'COMPANY' => null,
-            'BRANCH' => Branch::class,
-            'DIVISION' => Division::class,
-            'INDIVIDUAL' => Employee::class,
-        ];
-        $expectedType = $levelTargets[$data['level']];
-        $actualType = $data['goalable_type'] ?? null;
-
-        if ($actualType !== $expectedType || ($expectedType === null && ! empty($data['goalable_id']))) {
-            throw ValidationException::withMessages(['goalable_type' => 'Target harus sesuai dengan level target.']);
-        }
+        $expectedType = self::LEVEL_TARGETS[$data['level']];
 
         if ($expectedType === null) {
             if ($this->scopeResolver->allowedBranchIds($actor) !== null) {
                 throw new AuthorizationException;
             }
 
-            return;
+            return null;
         }
 
-        $target = $expectedType::query()->findOrFail($data['goalable_id']);
+        $target = $expectedType::query()->find($data['goalable_id'] ?? null);
+        if ($target === null) {
+            throw ValidationException::withMessages([
+                'goalable_id' => 'Sasaran target tidak ditemukan.',
+            ]);
+        }
+
+        if (($target instanceof Branch || $target instanceof Division) && ! $target->is_active) {
+            throw ValidationException::withMessages([
+                'goalable_id' => 'Sasaran target sudah tidak aktif.',
+            ]);
+        }
+
+        if ($target instanceof Employee) {
+            $target->loadMissing('currentAssignment');
+            $status = $target->current_status->value;
+
+            if ($target->currentAssignment === null || ! in_array($status, ['ACTIVE', 'PROBATION'], true)) {
+                throw ValidationException::withMessages([
+                    'goalable_id' => 'Pejuang yang dipilih tidak memiliki penempatan aktif.',
+                ]);
+            }
+        }
+
         $isAllowed = match ($expectedType) {
             Branch::class => $this->scopeResolver->allows($actor, $target->id),
             Division::class => $this->scopeResolver->allows($actor, $target->branch_id, $target->id),
@@ -104,6 +107,53 @@ class ManageGoalAction
 
         if (! $isAllowed) {
             throw new AuthorizationException;
+        }
+
+        return $target;
+    }
+
+    private function assertParentIsAllowed(
+        User $actor,
+        Goal $parent,
+        Branch|Division|Employee|null $target,
+        array $data,
+    ): void {
+        if (! $actor->can('view', $parent)) {
+            throw new AuthorizationException;
+        }
+
+        $levelHierarchy = ['COMPANY' => 0, 'BRANCH' => 1, 'DIVISION' => 2, 'INDIVIDUAL' => 3];
+        $parentLevel = $levelHierarchy[$parent->level] ?? 0;
+        $childLevel = $levelHierarchy[$data['level']] ?? 0;
+
+        if ($childLevel <= $parentLevel) {
+            throw ValidationException::withMessages([
+                'level' => 'Level target harus lebih rendah dari target induk.',
+            ]);
+        }
+
+        if ((int) $parent->period_id !== (int) $data['period_id']) {
+            throw ValidationException::withMessages([
+                'period_id' => 'Target harus dalam periode yang sama dengan target induk.',
+            ]);
+        }
+
+        $matchesTarget = match ($parent->level) {
+            'COMPANY' => $parent->goalable_id === null,
+            'BRANCH' => match (true) {
+                $target instanceof Division => (int) $target->branch_id === (int) $parent->goalable_id,
+                $target instanceof Employee => (int) $target->currentAssignment?->branch_id === (int) $parent->goalable_id,
+                default => false,
+            },
+            'DIVISION' => $target instanceof Employee
+                && (int) $target->currentAssignment?->division_id === (int) $parent->goalable_id,
+            default => false,
+        };
+
+        if (! $matchesTarget) {
+            throw ValidationException::withMessages([
+                'parent_id' => 'Target induk tidak sesuai dengan sasaran organisasi yang dipilih.',
+            ]);
         }
     }
 
