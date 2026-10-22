@@ -2,14 +2,16 @@ import { confirmAction } from '@/Utils/confirmation';
 import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
-import { ArrowDown, CheckCircle2, Crosshair, Pencil, Plus, Target, Trash2, X } from 'lucide-react';
+import { ArrowDown, CheckCircle2, CircleAlert, Crosshair, Pencil, Plus, Target, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
+
+type GoalLevel = 'COMPANY' | 'BRANCH' | 'DIVISION' | 'INDIVIDUAL';
 
 type GoalItem = {
     id: number;
     title: string;
     description: string | null;
-    level: string;
+    level: GoalLevel;
     parent_title: string | null;
     parent_level: string | null;
     period_name: string;
@@ -22,7 +24,19 @@ type GoalItem = {
 };
 
 type Period = { id: number; name: string };
-type ParentGoal = { id: number; title: string; level: string; period_id: number };
+type ParentGoal = { id: number; title: string; level: GoalLevel; period_id: number; target_id: number | null };
+type TargetOption = {
+    id: number;
+    label: string;
+    branch_id?: number;
+    division_id?: number | null;
+};
+type GoalTargetOptions = {
+    allowed_levels: GoalLevel[];
+    branches: TargetOption[];
+    divisions: TargetOption[];
+    employees: TargetOption[];
+};
 
 const levelLabels: Record<string, string> = {
     COMPANY: 'Perusahaan',
@@ -56,6 +70,7 @@ export default function Index({
     goals,
     periods,
     parentGoals,
+    targetOptions,
     filters,
     canCreate,
     canUpdate,
@@ -63,6 +78,7 @@ export default function Index({
     goals: { data: GoalItem[]; links: unknown[] };
     periods: Period[];
     parentGoals: ParentGoal[];
+    targetOptions: GoalTargetOptions;
     filters: { period_id: string | null; level: string | null };
     canCreate: boolean;
     canUpdate: boolean;
@@ -114,11 +130,12 @@ export default function Index({
                 </div>
 
                 {/* Create/Edit Form */}
-                {(showForm || editingGoal) && canCreate && (
+                {((showForm && canCreate) || (editingGoal && canUpdate)) && (
                     <GoalForm
                         initial={editingGoal}
                         periods={periods}
                         parentGoals={parentGoals}
+                        targetOptions={targetOptions}
                         onDone={() => { setShowForm(false); setEditingGoal(null); }}
                     />
                 )}
@@ -255,17 +272,21 @@ function GoalForm({
     initial,
     periods,
     parentGoals,
+    targetOptions,
     onDone,
 }: {
     initial: GoalItem | null;
     periods: Period[];
     parentGoals: ParentGoal[];
+    targetOptions: GoalTargetOptions;
     onDone: () => void;
 }) {
+    const defaultLevel = targetOptions.allowed_levels[0] ?? 'COMPANY';
     const form = useForm({
         parent_id: '',
         period_id: '',
-        level: initial?.level ?? 'COMPANY',
+        level: initial?.level ?? defaultLevel,
+        goalable_id: '',
         title: initial?.title ?? '',
         description: initial?.description ?? '',
         target_value: initial?.target_value ?? '',
@@ -284,9 +305,52 @@ function GoalForm({
         }
     };
 
-    const filteredParents = parentGoals.filter(
-        (p) => !form.data.period_id || p.period_id === Number(form.data.period_id),
-    );
+    const level = form.data.level as GoalLevel;
+    const targetCollections: Record<Exclude<GoalLevel, 'COMPANY'>, TargetOption[]> = {
+        BRANCH: targetOptions.branches,
+        DIVISION: targetOptions.divisions,
+        INDIVIDUAL: targetOptions.employees,
+    };
+    const selectedTarget = level === 'COMPANY'
+        ? null
+        : targetCollections[level].find((option) => option.id === Number(form.data.goalable_id)) ?? null;
+    const levelHierarchy: Record<GoalLevel, number> = {
+        COMPANY: 0,
+        BRANCH: 1,
+        DIVISION: 2,
+        INDIVIDUAL: 3,
+    };
+    const filteredParents = parentGoals.filter((parent) => {
+        if (!form.data.period_id || parent.period_id !== Number(form.data.period_id)) {
+            return false;
+        }
+
+        if (levelHierarchy[parent.level] >= levelHierarchy[level]) {
+            return false;
+        }
+
+        if (parent.level === 'COMPANY') {
+            return true;
+        }
+
+        if (!selectedTarget) {
+            return false;
+        }
+
+        if (parent.level === 'BRANCH') {
+            return selectedTarget.branch_id === parent.target_id;
+        }
+
+        return parent.level === 'DIVISION'
+            && level === 'INDIVIDUAL'
+            && selectedTarget.division_id === parent.target_id;
+    });
+    const targetLabels: Record<Exclude<GoalLevel, 'COMPANY'>, string> = {
+        BRANCH: 'Cabang',
+        DIVISION: 'Divisi',
+        INDIVIDUAL: 'Pejuang',
+    };
+    const visibleErrors = Array.from(new Set(Object.values(form.errors).filter(Boolean)));
 
     return (
         <section className="rounded-xl border border-brand/30 bg-white p-5 shadow-sm">
@@ -306,6 +370,22 @@ function GoalForm({
                 className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
                 onSubmit={(e) => { e.preventDefault(); submit(); }}
             >
+                {visibleErrors.length > 0 && (
+                    <div
+                        aria-live="polite"
+                        className="flex gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 sm:col-span-2 lg:col-span-3"
+                        role="alert"
+                    >
+                        <CircleAlert className="mt-0.5 shrink-0" size={16} />
+                        <div>
+                            <p className="font-semibold">Target belum dapat disimpan.</p>
+                            <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                                {visibleErrors.map((error) => <li key={error}>{error}</li>)}
+                            </ul>
+                        </div>
+                    </div>
+                )}
+
                 <label className="text-sm font-medium text-slate-700">
                     Judul target
                     <input className={inputClass} onChange={(e) => form.setData('title', e.target.value)} required value={form.data.title} />
@@ -316,7 +396,12 @@ function GoalForm({
                     <>
                         <label className="text-sm font-medium text-slate-700">
                             Periode
-                            <select className={inputClass} onChange={(e) => form.setData('period_id', e.target.value)} required value={form.data.period_id}>
+                            <select
+                                className={inputClass}
+                                onChange={(e) => form.setData((data) => ({ ...data, period_id: e.target.value, parent_id: '' }))}
+                                required
+                                value={form.data.period_id}
+                            >
                                 <option value="">Pilih...</option>
                                 {periods.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                             </select>
@@ -325,11 +410,44 @@ function GoalForm({
 
                         <label className="text-sm font-medium text-slate-700">
                             Level
-                            <select className={inputClass} onChange={(e) => form.setData('level', e.target.value)} value={form.data.level}>
-                                {Object.entries(levelLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                            <select
+                                className={inputClass}
+                                onChange={(e) => form.setData((data) => ({
+                                    ...data,
+                                    level: e.target.value as GoalLevel,
+                                    goalable_id: '',
+                                    parent_id: '',
+                                }))}
+                                value={form.data.level}
+                            >
+                                {targetOptions.allowed_levels.map((allowedLevel) => (
+                                    <option key={allowedLevel} value={allowedLevel}>{levelLabels[allowedLevel]}</option>
+                                ))}
                             </select>
                             {form.errors.level && <span className="mt-1 block text-xs text-red-600">{form.errors.level}</span>}
                         </label>
+
+                        {level === 'COMPANY' ? (
+                            <div className="rounded-[9px] border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+                                Target berlaku untuk seluruh perusahaan.
+                            </div>
+                        ) : (
+                            <label className="text-sm font-medium text-slate-700">
+                                {targetLabels[level]}
+                                <select
+                                    className={inputClass}
+                                    onChange={(e) => form.setData((data) => ({ ...data, goalable_id: e.target.value, parent_id: '' }))}
+                                    required
+                                    value={form.data.goalable_id}
+                                >
+                                    <option value="">Pilih {targetLabels[level].toLowerCase()}...</option>
+                                    {targetCollections[level].map((option) => (
+                                        <option key={option.id} value={option.id}>{option.label}</option>
+                                    ))}
+                                </select>
+                                {form.errors.goalable_id && <span className="mt-1 block text-xs text-red-600">{form.errors.goalable_id}</span>}
+                            </label>
+                        )}
 
                         <label className="text-sm font-medium text-slate-700">
                             Target induk (opsional)
@@ -339,6 +457,7 @@ function GoalForm({
                                     <option key={p.id} value={p.id}>[{levelLabels[p.level]}] {p.title}</option>
                                 ))}
                             </select>
+                            {form.errors.parent_id && <span className="mt-1 block text-xs text-red-600">{form.errors.parent_id}</span>}
                         </label>
                     </>
                 )}
@@ -346,17 +465,20 @@ function GoalForm({
                 <label className="text-sm font-medium text-slate-700">
                     Nilai target
                     <input className={inputClass} min="0" onChange={(e) => form.setData('target_value', e.target.value)} placeholder="100" type="number" value={form.data.target_value} />
+                    {form.errors.target_value && <span className="mt-1 block text-xs text-red-600">{form.errors.target_value}</span>}
                 </label>
 
                 <label className="text-sm font-medium text-slate-700">
                     Satuan
                     <input className={inputClass} onChange={(e) => form.setData('target_unit', e.target.value)} placeholder="%, jumlah, Rp..." value={form.data.target_unit} />
+                    {form.errors.target_unit && <span className="mt-1 block text-xs text-red-600">{form.errors.target_unit}</span>}
                 </label>
 
                 {isEditing && (
                     <label className="text-sm font-medium text-slate-700">
                         Nilai aktual
                         <input className={inputClass} min="0" onChange={(e) => form.setData('actual_value', e.target.value)} type="number" value={form.data.actual_value} />
+                        {form.errors.actual_value && <span className="mt-1 block text-xs text-red-600">{form.errors.actual_value}</span>}
                     </label>
                 )}
 
@@ -367,6 +489,7 @@ function GoalForm({
                         onChange={(e) => form.setData('description', e.target.value)}
                         value={form.data.description}
                     />
+                    {form.errors.description && <span className="mt-1 block text-xs text-red-600">{form.errors.description}</span>}
                 </label>
 
                 <div>
