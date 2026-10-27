@@ -14,6 +14,7 @@ use App\Models\User;
 use Database\Seeders\AccessControlSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class EvaluationContributionScoreTest extends TestCase
@@ -62,6 +63,14 @@ class EvaluationContributionScoreTest extends TestCase
             'weighted_score' => 60,
             'source_type' => 'automatic',
         ]);
+
+        $this->actingAs($actor)
+            ->get(route('evaluations.show', $evaluation))
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Evaluations/Form')
+                ->where('evaluation.scores.0.component_id', $manual->id)
+                ->where('evaluation.scores.0.weighted_score', '18.0000')
+                ->missing('evaluation.scores.0.raw_score'));
     }
 
     public function test_request_rejects_contribution_above_component_weight(): void

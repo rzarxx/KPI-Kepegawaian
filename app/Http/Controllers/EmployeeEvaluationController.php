@@ -132,7 +132,10 @@ class EmployeeEvaluationController extends Controller
                 'total_score' => $evaluation->total_score,
                 'scores' => $evaluation->scores->map(fn ($score): array => [
                     'component_id' => $score->component_id,
-                    'raw_score' => (string) $score->raw_score,
+                    // Nilai yang diedit pengguna adalah kontribusi berbobot,
+                    // bukan raw score 0-100. Gunakan snapshot tersimpan agar
+                    // draf lama tidak berubah ketika form dibuka kembali.
+                    'weighted_score' => (string) $score->weighted_score,
                     'note' => $score->note,
                 ])->values(),
             ] : null,

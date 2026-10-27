@@ -11,6 +11,10 @@
 - Mempertahankan komponen otomatis pada skala 0 sampai 100, menambahkan
   validasi lintas-field, serta menolak nilai negatif, berlebih, duplikat,
   nonangka, komponen nonaktif, dan payload `raw_score` lama.
+- Menyesuaikan form Kasubdiv agar input manual dibatasi sesuai bobot, memuat
+  draf dari snapshot `weighted_score`, menampilkan kontribusi serta perkiraan
+  total, dan meneruskan pesan validasi per komponen.
+
 ### Baseline Keamanan PHP -- 26 Oktober 2026
 
 - Menaikkan batas runtime ke PHP `8.3.36+`, `8.4.27+`, atau `8.5.12+` agar
