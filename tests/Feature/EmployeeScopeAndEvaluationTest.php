@@ -49,7 +49,7 @@ class EmployeeScopeAndEvaluationTest extends TestCase
         EvaluationCriterion::query()->create(['name' => 'Baik', 'min_score' => 80, 'max_score' => 100, 'color_semantic' => 'success', 'sort_order' => 1]);
         $component = EvaluationComponent::query()->create(['code' => 'KOM-1', 'name' => 'Kualitas Kerja', 'default_weight' => 100, 'measurement_type' => 'MANUAL', 'scoring_method' => 'PERCENTAGE', 'is_auto_calculated' => false, 'is_active' => true, 'sort_order' => 1]);
 
-        $evaluation = app(SaveEmployeeEvaluationAction::class)->execute($actor, $employee, $period, ['intent' => 'draft', 'scores' => [['component_id' => $component->id, 'raw_score' => 88, 'note' => 'Konsisten']], 'notes' => 'Catatan']);
+        $evaluation = app(SaveEmployeeEvaluationAction::class)->execute($actor, $employee, $period, ['intent' => 'draft', 'scores' => [['component_id' => $component->id, 'contribution_score' => 88, 'note' => 'Konsisten']], 'notes' => 'Catatan']);
 
         $this->assertSame('DRAFT', $evaluation->status);
         $this->assertSame('88.00', $evaluation->total_score);

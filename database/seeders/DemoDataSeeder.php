@@ -227,11 +227,15 @@ class DemoDataSeeder extends Seeder
             ->where('is_auto_calculated', false)
             ->orderBy('sort_order')
             ->get()
-            ->map(fn (EvaluationComponent $component): array => [
-                'component_id' => $component->id,
-                'raw_score' => max(0, min(100, $base + (self::SCORE_OFFSETS[$component->code] ?? 0))),
-                'note' => null,
-            ])
+            ->map(function (EvaluationComponent $component) use ($base): array {
+                $rawScore = max(0, min(100, $base + (self::SCORE_OFFSETS[$component->code] ?? 0)));
+
+                return [
+                    'component_id' => $component->id,
+                    'contribution_score' => round($rawScore * ((float) $component->default_weight / 100), 4),
+                    'note' => null,
+                ];
+            })
             ->all();
 
         $this->saveEvaluation->execute($evaluator, $employee, $period->fresh(), [

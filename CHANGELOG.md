@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Kontribusi Nilai Sesuai Bobot -- 27 Oktober 2026
+
+- Mengubah kontrak penilaian atasan agar nilai manual dikirim sebagai
+  `contribution_score` dengan batas maksimum sesuai bobot komponen.
+- Menyimpan kontribusi manual langsung sebagai `weighted_score` dan tetap
+  menyimpan `raw_score` ternormalisasi untuk kompatibilitas histori.
+- Mempertahankan komponen otomatis pada skala 0 sampai 100, menambahkan
+  validasi lintas-field, serta menolak nilai negatif, berlebih, duplikat,
+  nonangka, komponen nonaktif, dan payload `raw_score` lama.
+
 ### Perbaikan Masa Kerja dan Data Demo -- 16 Oktober 2026
 
 - Memperbaiki penilaian yang gagal disimpan dengan pesan "Aturan masa kerja
@@ -687,4 +697,3 @@ RBAC_MATRIX, dan DATABASE sebelum implementasi dimulai.
 
 ### Changed
 - Public self-registration is disabled; internal user provisioning will be introduced through the authorized user-management flow.
-
