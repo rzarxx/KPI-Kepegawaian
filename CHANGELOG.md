@@ -11,6 +11,17 @@
 - Mempertahankan komponen otomatis pada skala 0 sampai 100, menambahkan
   validasi lintas-field, serta menolak nilai negatif, berlebih, duplikat,
   nonangka, komponen nonaktif, dan payload `raw_score` lama.
+### Baseline Keamanan PHP -- 26 Oktober 2026
+
+- Menaikkan batas runtime ke PHP `8.3.36+`, `8.4.27+`, atau `8.5.12+` agar
+  deployment tidak memakai versi yang terdampak `CVE-2026-109618` dan
+  `CVE-2026-109619`.
+- Mematok CI pada PHP `8.3.36` serta menambahkan pemeriksaan versi dan
+  `composer check-platform-reqs` pada panduan production.
+- Mendokumentasikan penonaktifan session upload progress sebagai hardening
+  PHP-FPM karena fitur tersebut tidak dipakai aplikasi.
+- Memperbarui Zod ke `4.6.7` beserta resolver/form dependency kompatibel untuk
+  menutup advisory high terkait exhaustion saat memvalidasi koleksi besar.
 
 ### Perbaikan Masa Kerja dan Data Demo -- 16 Oktober 2026
 

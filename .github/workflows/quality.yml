@@ -31,7 +31,9 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          # Pin the first PHP 8.3 release containing the October 2026 critical
+          # RCE fixes instead of allowing setup-php to resolve an older patch.
+          php-version: '8.3.36'
           extensions: bcmath, curl, dom, fileinfo, gd, intl, mbstring, pdo_mysql, sqlite3, xml, zip
           coverage: none
 
