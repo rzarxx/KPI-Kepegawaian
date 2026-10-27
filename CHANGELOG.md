@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Kontribusi Nilai Sesuai Bobot -- 27 Oktober 2026
+
+- Mengubah kontrak penilaian atasan agar nilai manual dikirim sebagai
+  `contribution_score` dengan batas maksimum sesuai bobot komponen.
+- Menyimpan kontribusi manual langsung sebagai `weighted_score` dan tetap
+  menyimpan `raw_score` ternormalisasi untuk kompatibilitas histori.
+- Mempertahankan komponen otomatis pada skala 0 sampai 100, menambahkan
+  validasi lintas-field, serta menolak nilai negatif, berlebih, duplikat,
+  nonangka, komponen nonaktif, dan payload `raw_score` lama.
+- Menyesuaikan form Kasubdiv agar input manual dibatasi sesuai bobot, memuat
+  draf dari snapshot `weighted_score`, menampilkan kontribusi serta perkiraan
+  total, dan meneruskan pesan validasi per komponen.
+
 ### Baseline Keamanan PHP -- 26 Oktober 2026
 
 - Menaikkan batas runtime ke PHP `8.3.36+`, `8.4.27+`, atau `8.5.12+` agar

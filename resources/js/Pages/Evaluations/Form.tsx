@@ -2,13 +2,21 @@ import { Button } from '@/Components/ui/button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { confirmAction } from '@/Utils/confirmation';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Calculator, CalendarDays, CheckCircle2, LockKeyhole, RotateCcw, Save } from 'lucide-react';
+import { ArrowLeft, Calculator, CalendarDays, CheckCircle2, LoaderCircle, LockKeyhole, RotateCcw, Save } from 'lucide-react';
+import { useState } from 'react';
 
-type Score = { component_id: number; raw_score: string; note?: string };
+type Score = { component_id: number; contribution_score: string; note: string };
+type StoredScore = { component_id: number; weighted_score: string; note?: string };
 type Component = { id: number; name: string; default_weight: string; is_auto_calculated: boolean };
 type Period = { id: number; name: string; start_date: string; end_date: string };
-type Evaluation = { id: number; status: string; notes?: string; total_score: string; scores: Score[] };
+type Evaluation = { id: number; status: string; notes?: string; total_score: string; scores: StoredScore[] };
 type Abilities = { edit: boolean; complete: boolean; reopen: boolean };
+type EvaluationFormData = {
+    period_id: string;
+    intent: 'draft' | 'complete';
+    notes: string;
+    scores: Score[];
+};
 
 export default function Form({
     employee,
@@ -24,25 +32,49 @@ export default function Form({
     abilities: Abilities;
 }) {
     const existing = new Map((evaluation?.scores ?? []).map((score) => [score.component_id, score]));
-    const form = useForm({
+    const form = useForm<EvaluationFormData>({
         period_id: period?.id?.toString() ?? '',
         intent: 'draft' as 'draft' | 'complete',
         notes: evaluation?.notes ?? '',
-        scores: components.map((component) => existing.get(component.id) ?? {
-            component_id: component.id,
-            raw_score: '',
-            note: '',
+        scores: components.map((component) => {
+            const stored = existing.get(component.id);
+
+            return {
+                component_id: component.id,
+                contribution_score: component.is_auto_calculated ? '' : (stored?.weighted_score ?? ''),
+                note: stored?.note ?? '',
+            };
         }),
     });
+    const [clientErrors, setClientErrors] = useState<Record<number, string>>({});
     const reopen = useForm({ status: 'DRAFT', reason: '' });
     const editable = abilities.edit && period !== null;
     const completed = evaluation !== null && ['FINALIZED', 'CLOSED'].includes(evaluation.status);
     const legacy = evaluation !== null && ['SUBMITTED', 'APPROVED'].includes(evaluation.status);
-    const total = form.data.scores.reduce((sum, score, index) => (
-        sum + (Number(score.raw_score) || 0) * Number(components[index]?.default_weight ?? 0) / 100
-    ), 0);
+    const total = components.reduce((sum, component, index) => {
+        if (component.is_auto_calculated) {
+            return sum + (Number(existing.get(component.id)?.weighted_score) || 0);
+        }
+
+        return sum + (Number(form.data.scores[index]?.contribution_score) || 0);
+    }, 0);
+    const maximumTotal = components.reduce((sum, component) => sum + Number(component.default_weight), 0);
 
     const submit = async (intent: 'draft' | 'complete') => {
+        const invalid: Record<number, string> = {};
+        components.forEach((component, index) => {
+            if (component.is_auto_calculated) return;
+
+            const rawValue = form.data.scores[index]?.contribution_score ?? '';
+            const value = Number(rawValue);
+            const maximum = Number(component.default_weight);
+            if (rawValue === '' || !Number.isFinite(value) || value < 0 || value > maximum) {
+                invalid[index] = `Nilai ${component.name} harus berada pada rentang 0 sampai ${formatNumber(maximum)}.`;
+            }
+        });
+        setClientErrors(invalid);
+        if (Object.keys(invalid).length > 0) return;
+
         if (intent === 'complete') {
             const confirmed = await confirmAction({
                 title: 'Selesaikan Penilaian',
@@ -104,23 +136,44 @@ export default function Form({
                                             <p className="text-xs text-slate-500">Bobot {Number(component.default_weight)}%</p>
                                         </div>
                                         {component.is_auto_calculated ? (
-                                            <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                                                <Calculator size={13} /> Otomatis
-                                            </span>
+                                            <div className="text-right">
+                                                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                                                    <Calculator size={13} /> Otomatis
+                                                </span>
+                                                <p className="mt-1 text-xs text-slate-500">
+                                                    {existing.get(component.id)
+                                                        ? `Kontribusi ${formatNumber(Number(existing.get(component.id)?.weighted_score))} dari ${formatNumber(Number(component.default_weight))}`
+                                                        : 'Dihitung oleh sistem saat disimpan'}
+                                                </p>
+                                            </div>
                                         ) : (
-                                            <label className="text-sm font-medium text-slate-700">
-                                                Nilai
+                                            <label className="text-right text-sm font-medium text-slate-700">
+                                                <span className="block">Nilai {component.name} maksimal {formatNumber(Number(component.default_weight))}</span>
                                                 <input
                                                     aria-label={`Nilai ${component.name}`}
-                                                    className="ml-2 h-10 w-24 rounded-lg border-slate-300 text-right focus:border-brand focus:ring-brand"
+                                                    aria-describedby={`kontribusi-${component.id}`}
+                                                    className="mt-1 h-10 w-28 rounded-lg border-slate-300 text-right focus:border-brand focus:ring-brand"
                                                     disabled={!editable || form.processing}
-                                                    max="100"
+                                                    inputMode="decimal"
+                                                    max={component.default_weight}
                                                     min="0"
-                                                    onChange={(event) => form.setData(`scores.${index}.raw_score`, event.target.value)}
+                                                    onChange={(event) => {
+                                                        form.setData(`scores.${index}.contribution_score`, event.target.value);
+                                                        setClientErrors((errors) => {
+                                                            const next = { ...errors };
+                                                            delete next[index];
+
+                                                            return next;
+                                                        });
+                                                    }}
                                                     required
+                                                    step="0.01"
                                                     type="number"
-                                                    value={form.data.scores[index].raw_score}
+                                                    value={form.data.scores[index].contribution_score}
                                                 />
+                                                <span className="mt-1 block text-xs font-normal text-slate-500" id={`kontribusi-${component.id}`}>
+                                                    Kontribusi {formatNumber(Number(form.data.scores[index].contribution_score) || 0)} dari {formatNumber(Number(component.default_weight))}
+                                                </span>
                                             </label>
                                         )}
                                     </div>
@@ -134,7 +187,9 @@ export default function Form({
                                             value={form.data.scores[index].note ?? ''}
                                         />
                                     )}
-                                    {form.errors[`scores.${index}.raw_score`] && <p className="mt-1 text-xs text-red-600">{form.errors[`scores.${index}.raw_score`]}</p>}
+                                    {(clientErrors[index] || form.errors[`scores.${index}.contribution_score`]) && (
+                                        <p className="mt-1 text-xs text-red-600">{clientErrors[index] || form.errors[`scores.${index}.contribution_score`]}</p>
+                                    )}
                                 </section>
                             ))}
                         </div>
@@ -158,10 +213,12 @@ export default function Form({
                         {editable && (
                             <div className="mt-6 flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
                                 <Button disabled={form.processing} onClick={() => submit('draft')} type="button" variant="secondary">
-                                    <Save size={16} /> Simpan Draf
+                                    {form.processing ? <LoaderCircle className="animate-spin" size={16} /> : <Save size={16} />}
+                                    {form.processing ? 'Menyimpan...' : 'Simpan Draf'}
                                 </Button>
                                 <Button disabled={form.processing || !abilities.complete} onClick={() => submit('complete')} type="button">
-                                    <CheckCircle2 size={16} /> Selesaikan Penilaian
+                                    {form.processing ? <LoaderCircle className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
+                                    {form.processing ? 'Menyimpan...' : 'Selesaikan Penilaian'}
                                 </Button>
                             </div>
                         )}
@@ -171,6 +228,7 @@ export default function Form({
                         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                             <p className="text-sm text-slate-500">Perkiraan nilai akhir</p>
                             <p className="mt-1 text-3xl font-bold text-slate-900">{total.toFixed(2)}</p>
+                            <p className="mt-1 text-xs font-medium text-slate-600">Maksimal {formatNumber(maximumTotal)}</p>
                             <p className="mt-3 text-xs leading-5 text-slate-500">Nilai resmi dihitung kembali oleh server ketika disimpan.</p>
                         </div>
                         <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
@@ -199,6 +257,10 @@ export default function Form({
             </div>
         </AuthenticatedLayout>
     );
+}
+
+function formatNumber(value: number): string {
+    return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
 }
 
 function StatusBadge({ evaluation }: { evaluation: Evaluation | null }) {

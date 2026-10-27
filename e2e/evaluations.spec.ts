@@ -43,9 +43,17 @@ test.describe('Penilaian', () => {
         await page.getByRole('link', { name: 'Mulai Penilaian' }).first().click();
         await expect(page.getByRole('heading', { name: 'Nilai Kinerja Pejuang' })).toBeVisible();
 
-        for (const input of await page.locator('input[aria-label^="Nilai "]').all()) {
-            await input.fill('80');
+        const scoreInputs = await page.locator('input[aria-label^="Nilai "]').all();
+        const firstMaximum = Number(await scoreInputs[0].getAttribute('max'));
+        await scoreInputs[0].fill(String(firstMaximum + 1));
+        await page.getByRole('button', { name: 'Simpan Draf' }).click();
+        await expect(page.getByText(/harus berada pada rentang 0 sampai/).first()).toBeVisible();
+
+        for (const input of scoreInputs) {
+            const maximum = Number(await input.getAttribute('max'));
+            await input.fill(String(maximum * 0.8));
         }
+        await expect(page.getByText('Maksimal 100')).toBeVisible();
 
         await Promise.all([
             page.waitForURL((url) => url.pathname === '/penilaian', { waitUntil: 'domcontentloaded' }),

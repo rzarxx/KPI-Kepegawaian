@@ -46,7 +46,7 @@ class SaveEmployeeEvaluationAction
             }
             $hasBlankManualScore = $components
                 ->where('is_auto_calculated', false)
-                ->contains(fn (EvaluationComponent $component): bool => ! is_numeric($submitted[$component->id]['raw_score'] ?? null));
+                ->contains(fn (EvaluationComponent $component): bool => ! is_numeric($submitted[$component->id]['contribution_score'] ?? null));
             if ($hasBlankManualScore) {
                 throw ValidationException::withMessages(['scores' => 'Nilai setiap komponen manual wajib diisi.']);
             }
@@ -57,11 +57,33 @@ class SaveEmployeeEvaluationAction
             $referenceDate = $period->end_date;
             $scores = $components->map(function (EvaluationComponent $component) use ($submitted, $employee, $referenceDate): array {
                 $isAutomatic = $component->is_auto_calculated;
-                $rawScore = $isAutomatic ? $this->tenureScores->resolve($employee, $component, $referenceDate) : (float) $submitted[$component->id]['raw_score'];
+                $weight = (float) $component->default_weight;
 
-                return ['component_id' => $component->id, 'raw_score' => $rawScore, 'weight' => (float) $component->default_weight, 'weighted_score' => round($rawScore * ((float) $component->default_weight / 100), 4), 'note' => $isAutomatic ? null : ($submitted[$component->id]['note'] ?? null), 'source_type' => $isAutomatic ? 'automatic' : 'manual'];
+                if ($isAutomatic) {
+                    $rawScore = $this->tenureScores->resolve($employee, $component, $referenceDate);
+                    if ($rawScore < 0 || $rawScore > 100) {
+                        throw ValidationException::withMessages([
+                            'scores' => "Nilai otomatis {$component->name} harus berada pada rentang 0 sampai 100.",
+                        ]);
+                    }
+                    $weightedScore = round($rawScore * ($weight / 100), 4);
+                } else {
+                    $contribution = (float) $submitted[$component->id]['contribution_score'];
+                    if ($contribution < 0 || $contribution > $weight) {
+                        throw ValidationException::withMessages([
+                            'scores' => "Nilai {$component->name} harus berada pada rentang 0 sampai {$weight}.",
+                        ]);
+                    }
+                    $rawScore = $weight > 0 ? round(($contribution / $weight) * 100, 2) : 0.0;
+                    $weightedScore = round($contribution, 4);
+                }
+
+                return ['component_id' => $component->id, 'raw_score' => $rawScore, 'weight' => $weight, 'weighted_score' => $weightedScore, 'note' => $isAutomatic ? null : ($submitted[$component->id]['note'] ?? null), 'source_type' => $isAutomatic ? 'automatic' : 'manual'];
             });
             $calculated = $this->calculator->calculate($scores);
+            if ($calculated['total_score'] > 100) {
+                throw ValidationException::withMessages(['scores' => 'Jumlah kontribusi penilaian tidak boleh melebihi 100.']);
+            }
             $lookupAttributes = ['employee_id' => $employee->id, 'period_id' => $period->id, 'evaluation_type' => EmployeeEvaluation::TYPE_SUPERVISOR];
             $evaluation = EmployeeEvaluation::query()
                 ->where($lookupAttributes)

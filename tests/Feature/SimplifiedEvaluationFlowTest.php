@@ -242,7 +242,7 @@ class SimplifiedEvaluationFlowTest extends TestCase
         return [
             'period_id' => $period->id,
             'intent' => $intent,
-            'scores' => [['component_id' => $component->id, 'raw_score' => 82, 'note' => 'Baik']],
+            'scores' => [['component_id' => $component->id, 'contribution_score' => 82, 'note' => 'Baik']],
             'notes' => 'Catatan Kasubdiv',
         ];
     }
