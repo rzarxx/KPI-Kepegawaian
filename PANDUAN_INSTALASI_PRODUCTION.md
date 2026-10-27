@@ -20,7 +20,7 @@ Ganti seluruh nilai contoh sesuai server sebenarnya.
 Pasang melalui aaPanel:
 
 - Nginx
-- PHP 8.3 atau lebih baru
+- PHP `8.3.36+`, `8.4.27+`, atau `8.5.12+` pada minor version yang didukung
 - MySQL 8
 - Supervisor Manager
 - Cron
@@ -48,6 +48,24 @@ Periksa runtime:
 
 ```bash
 /www/server/php/83/bin/php -v
+```
+
+Hasil untuk PHP 8.3 wajib menunjukkan minimal `8.3.36`. PHP `8.3.29` dan patch
+lama lain tidak boleh dipakai karena belum memuat perbaikan
+`CVE-2026-109618` dan `CVE-2026-109619` (RCE tanpa autentikasi). Untuk PHP 8.4
+gunakan minimal `8.4.27`; untuk PHP 8.5 gunakan minimal `8.5.12`.
+
+Aplikasi tidak memakai fitur native session upload progress. Nonaktifkan fitur
+tersebut pada konfigurasi PHP-FPM sebagai hardening tambahan:
+
+```ini
+session.upload_progress.enabled = 0
+```
+
+Restart PHP-FPM setelah mengubah `php.ini`, lalu pastikan konfigurasi aktif:
+
+```bash
+/www/server/php/83/bin/php -i | grep 'session.upload_progress.enabled'
 ```
 
 ```bash
@@ -116,6 +134,13 @@ Pasang dependency PHP production:
 
 ```bash
 /www/server/php/83/bin/php /usr/bin/composer install --no-dev --optimize-autoloader --no-interaction
+```
+
+Composer akan menolak runtime PHP yang berada di bawah patch keamanan minimum.
+Verifikasi kembali platform production:
+
+```bash
+/www/server/php/83/bin/php /usr/bin/composer check-platform-reqs --no-dev
 ```
 
 Pasang dependency frontend sesuai lockfile:
@@ -625,6 +650,8 @@ dipahami atau release sebelumnya dipulihkan.
 - [ ] HTTPS valid dan redirect HTTP aktif.
 - [ ] `APP_ENV=production`.
 - [ ] `APP_DEBUG=false`.
+- [ ] PHP memenuhi baseline aman (`8.3.36+`, `8.4.27+`, atau `8.5.12+`).
+- [ ] `session.upload_progress.enabled=0` pada PHP-FPM.
 - [ ] `APP_KEY` tersimpan aman dan tidak berubah saat update.
 - [ ] `TRUSTED_PROXIES` hanya berisi proxy tepercaya.
 - [ ] Port MySQL tidak terbuka ke publik.

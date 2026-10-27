@@ -2,18 +2,6 @@
 
 ## Unreleased
 
-### Perbaikan Pembuatan Target -- 22 Oktober 2026
-
-- Menambahkan pilihan Cabang, Divisi, atau Pejuang sesuai cakupan organisasi
-  pengguna saat membuat target.
-- Menentukan tipe sasaran target di backend agar request tidak perlu dan tidak
-  boleh mengirim nama class model PHP.
-- Menampilkan pesan validasi yang jelas pada formulir ketika target gagal
-  disimpan, termasuk sasaran yang belum dipilih.
-- Memastikan target induk berasal dari periode dan jalur organisasi yang sama,
-  serta menolak request langsung ke sasaran di luar scope dengan status `403`.
-- Menambahkan feature test untuk pilihan sasaran, pembuatan target, validasi,
-  scope organisasi, audit log, dan hubungan target induk.
 
 ### Perbaikan Masa Kerja dan Data Demo -- 16 Oktober 2026
 
