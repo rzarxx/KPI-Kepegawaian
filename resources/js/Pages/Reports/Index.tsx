@@ -15,6 +15,17 @@ type ExportItem = { id: number; status: string; row_count?: number; created_at: 
 type Paginated<T> = { data: T[]; links: { url?: string; label: string; active: boolean }[]; from?: number; to?: number; total: number };
 type FilterOptions = { branches: Option[]; divisions: Option[]; subDivisions: Option[]; criteria: Option[] };
 
+const filterKeys = [
+    'start_date',
+    'end_date',
+    'branch_id',
+    'division_id',
+    'sub_division_id',
+    'status',
+    'criteria_id',
+    'problem_status',
+] as const;
+
 const filterSchema = z.object({
     start_date: z.string().optional(),
     end_date: z.string().optional(),
@@ -47,7 +58,7 @@ export default function Index({
     const [exporting, setExporting] = useState(false);
     const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<FilterValues>({
         resolver: zodResolver(filterSchema),
-        defaultValues: Object.fromEntries(Object.keys(filterSchema._def.schema.shape).map((key) => [key, String(filters[key as keyof FilterValues] ?? '')])) as FilterValues,
+        defaultValues: Object.fromEntries(filterKeys.map((key) => [key, String(filters[key] ?? '')])) as FilterValues,
     });
     const branchId = useWatch({ control, name: 'branch_id' });
     const divisionId = useWatch({ control, name: 'division_id' });
