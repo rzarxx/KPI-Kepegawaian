@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateGoalRequest;
 use App\Models\Goal;
 use App\Models\PerformancePeriod;
 use App\Services\AuditLogger;
+use App\Services\GoalTargetOptionsService;
 use App\Services\OrganizationalScopeResolver;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -16,13 +17,17 @@ use Inertia\Inertia;
 class GoalController extends Controller
 {
     /** Halaman daftar target/goal */
-    public function index(Request $request, OrganizationalScopeResolver $scopeResolver)
-    {
+    public function index(
+        Request $request,
+        OrganizationalScopeResolver $scopeResolver,
+        GoalTargetOptionsService $targetOptions,
+    ) {
         $this->authorize('viewAny', Goal::class);
 
         $user = $request->user();
         $periodId = $request->query('period_id');
         $level = $request->query('level');
+        $availableTargets = $targetOptions->for($user);
 
         $query = Goal::query()
             ->with(['parent:id,title,level', 'period:id,name', 'children'])
@@ -66,17 +71,26 @@ class GoalController extends Controller
             ->orderBy('level')
             ->orderBy('title');
         $scopeResolver->scopeGoals($user, $parentGoalsQuery);
-        $parentGoals = $parentGoalsQuery->get(['id', 'title', 'level', 'period_id']);
+        $parentGoals = $parentGoalsQuery
+            ->get(['id', 'title', 'level', 'period_id', 'goalable_id'])
+            ->map(fn (Goal $goal): array => [
+                'id' => $goal->id,
+                'title' => $goal->title,
+                'level' => $goal->level,
+                'period_id' => $goal->period_id,
+                'target_id' => $goal->goalable_id,
+            ]);
 
         return Inertia::render('Goals/Index', [
             'goals' => $goals,
             'periods' => $periods,
             'parentGoals' => $parentGoals,
+            'targetOptions' => $availableTargets,
             'filters' => [
                 'period_id' => $periodId,
                 'level' => $level,
             ],
-            'canCreate' => $request->user()->can('goal.create'),
+            'canCreate' => $request->user()->can('goal.create') && $availableTargets['allowed_levels'] !== [],
             'canUpdate' => $request->user()->can('goal.update'),
         ]);
     }
