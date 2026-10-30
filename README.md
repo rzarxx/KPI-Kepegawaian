@@ -241,11 +241,8 @@ tests/                Unit dan feature test
 | --- | --- |
 | [`PANDUAN_INSTALASI_PRODUCTION.md`](PANDUAN_INSTALASI_PRODUCTION.md) | Panduan instalasi production langkah demi langkah |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Arsitektur aplikasi |
-| [`DATABASE.md`](DATABASE.md) | Struktur dan relasi data |
-| [`BUSINESS_RULES.md`](BUSINESS_RULES.md) | Aturan bisnis |
-| [`RBAC_MATRIX.md`](RBAC_MATRIX.md) | Matriks role, permission, dan scope |
-| [`SECURITY.md`](SECURITY.md) | Baseline keamanan |
-| [`SCORING_RULES.md`](SCORING_RULES.md) | Aturan perhitungan penilaian |
+| [`PERMISSIONS.md`](PERMISSIONS.md) | Role, permission, dan scope organisasi |
+| [`CODE_STANDARDS.md`](CODE_STANDARDS.md) | Standar penulisan kode |
 | [`REPORTING.md`](REPORTING.md) | Laporan dan export |
 | [`PWA.md`](PWA.md) | Strategi PWA dan cache |
 | [`TESTING.md`](TESTING.md) | Strategi dan perintah pengujian |
